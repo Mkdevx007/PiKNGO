@@ -1,2 +1,2 @@
-# -PikNGo
+# PikNGo
 Backend
