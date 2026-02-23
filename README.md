@@ -94,7 +94,19 @@ CREATE TABLE otp_verifications (
 
 ---
 
-## 👥 Current Task Assignments (Team of 5)
+## � Getting Started for the Team (Next Steps)
+
+If you are one of the **5 developers** joining this project, please follow these steps to start your work:
+
+1.  **Clone the Repo**: `git clone https://github.com/Mkdevx006/PikNGo.git`
+2.  **Stay Updated**: Run `git pull origin main` frequently to get the latest base changes.
+3.  **Local Setup**: Follow the [Database Setup](#database-setup) steps to ensure the app runs on your machine.
+4.  **Pick your Task**: Check the [Task Assignments](#-current-task-assignments-team-of-5) table below.
+5.  **Create a Branch**: Always work on a separate branch, e.g., `feature/dev3-registration-fields`.
+
+---
+
+## �👥 Current Task Assignments (Team of 5)
 
 To ensure we don't overlap, each developer is assigned a specific module. Please check your name/role below:
 
