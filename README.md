@@ -119,19 +119,19 @@ Each developer should focus on these specific layers/folders:
     2.  Implement JWT generation logic in `utils/JwtUtils.java`.
     3.  Update `UserController.verifyOtp` to return a JWT token in the response instead of just a success message.
 
-### 🔌 Developer 2: External Integrations
+### 🔌 Developer 2: External Integrations (Login Flow)
 *   **Primary Folders**: `service/impl/`, `utils/`, `resources/`
 *   **What to do**:
-    1.  Integrate a real SMS provider (e.g., Twilio) in `AuthServiceImpl.java`.
+    1.  **Mobile + OTP Login**: Integrate a real SMS provider (e.g., Twilio) in `AuthServiceImpl.java` to send 6-digit OTPs.
     2.  Move dummy hardcoded values (API keys) to `application.properties`.
     3.  Create an `EmailService` if notification via email is also required.
 
-### 📝 Developer 3: Profile Management
+### 📝 Developer 3: User Registration & Profile
 *   **Primary Folders**: `entity/`, `dto/`, `controller/`, `service/`
 *   **What to do**:
-    1.  Add new fields to the `User` entity (e.g., profile picture URL, date of birth).
-    2.  Create `ProfileUpdateRequest` DTO.
-    3.  Add `PATCH /api/v1/users/profile` endpoint in `UserController` and implement business logic in `UserServiceImpl`.
+    1.  **Registration Fields**: Ensure the `User` entity and `UserRegistrationRequest` capture: **First Name, Last Name, Address, Phone Number, Email**. Add any other useful metadata fields.
+    2.  Create `ProfileUpdateRequest` DTO for editing these fields later.
+    3.  Add `PATCH /api/v1/users/profile` endpoint in `UserController`.
 
 ### 🛡️ Developer 4: Observability & Robustness
 *   **Primary Folders**: `exception/`, `config/`
