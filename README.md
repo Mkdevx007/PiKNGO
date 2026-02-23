@@ -16,7 +16,7 @@ This project is being developed by a team of **5 developers**. To ensure smooth 
 The `user-service` handles all user-related operations including registration, login, and profile management.
 
 ### Tech Stack
-- **Java 21**
+- **Java 17** (LTS)
 - **Spring Boot 3.4.x** (Parent 4.0.3)
 - **PostgreSQL**
 - **Spring Data JPA**
@@ -57,6 +57,9 @@ This structure is chosen for several professional reasons:
     spring.datasource.username=your_username
     spring.datasource.password=your_password
     ```
+
+> [!TIP]
+> If the application fails to start with a "Connection Refused" error, please ensure your PostgreSQL service is running and the database `pikngo_user_db` has been created.
 
 ### How to Run
 1.  Navigate to `user-service` directory.
