@@ -125,38 +125,53 @@ To ensure we don't overlap, each developer is assigned a specific module. Please
 
 ## 🏗️ Developer Implementation Details
 
-Each developer should focus on these specific layers/folders:
+Each developer should focus on these specific layers/folders. I have created **starter stubs** for you to begin your work.
 
 ### 👤 Developer 1: Security & Auth
-*   **Primary Folders**: `config/`, `utils/`, `controller/`
+*   **Primary Files**: 
+    - [SecurityConfig.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/config/SecurityConfig.java) (Implement FilterChain)
+    - [JwtUtils.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/utils/JwtUtils.java) (Implement Token Logic)
 *   **What to do**:
-    1.  Create `SecurityConfig.java` in `config/` to secure all `/api/v1/users/**` endpoints.
-    2.  Implement JWT generation logic in `utils/JwtUtils.java`.
-    3.  Update `UserController.verifyOtp` to return a JWT token in the response instead of just a success message.
+    1.  Update `SecurityConfig` to protect `/api/v1/users/**` as needed.
+    2.  Implement JWT generation in `JwtUtils`.
+    3.  Update `UserController.verifyOtp` to return a JWT token on success.
 
 ### 🔌 Developer 2: External Integrations (Login Flow)
-*   **Primary Folders**: `service/impl/`, `utils/`, `resources/`
+*   **Primary Files**: 
+    - [AuthServiceImpl.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/service/impl/AuthServiceImpl.java) (Integrate SMS)
+    - [EmailService.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/service/EmailService.java) (Implement Interface)
 *   **What to do**:
-    1.  **Mobile + OTP Login**: Integrate a real SMS provider (e.g., Twilio) in `AuthServiceImpl.java` to send 6-digit OTPs.
-    2.  Move dummy hardcoded values (API keys) to `application.properties`.
-    3.  Create an `EmailService` if notification via email is also required.
+    1.  Integrate a real SMS provider (e.g., Twilio) in `AuthServiceImpl`.
+    2.  Implement the `EmailService` for transactional emails.
 
 ### 📝 Developer 3: User Registration & Profile
-*   **Primary Folders**: `entity/`, `dto/`, `controller/`, `service/`
+*   **Primary Files**: 
+    - [ProfileUpdateRequest.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/dto/ProfileUpdateRequest.java) (Add fields)
+    - [UserController.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/controller/UserController.java) (Add profile endpoint)
 *   **What to do**:
-    1.  **Registration Fields**: Ensure the `User` entity and `UserRegistrationRequest` capture: **First Name, Last Name, Address, Phone Number, Email**. Add any other useful metadata fields.
-    2.  Create `ProfileUpdateRequest` DTO for editing these fields later.
-    3.  Add `PATCH /api/v1/users/profile` endpoint in `UserController`.
+    1.  Add fields to `ProfileUpdateRequest`.
+    2.  Add `PATCH /api/v1/users/profile` in `UserController` and implement in `UserService`.
 
 ### 🛡️ Developer 4: Observability & Robustness
-*   **Primary Folders**: `exception/`, `config/`
+*   **Primary Files**: 
+    - [GlobalExceptionHandler.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/exception/GlobalExceptionHandler.java) (Add error handlers)
 *   **What to do**:
-    1.  Implement `GlobalExceptionHandler.java` in `exception/` to handle all errors (validation error, not found error, etc.) and return a consistent JSON response.
-    2.  Enable JPA Auditing in `config/` to track who created/updated records.
+    1.  Add specific handlers for validation and business errors.
+    2.  Enable Auditing in a new `AuditConfig.java` (create this in `config/`).
 
 ### 🧪 Developer 5: QA & DevOps
-*   **Primary Folders**: `src/test/java/...`, Root folder
+*   **Primary Files**: 
+    - [Dockerfile](file:///e:/intership/PikNGo/user-service/Dockerfile) (Refine for prod)
+    - `src/test/java/...`
 *   **What to do**:
-    1.  Write Integration Tests for the Registration and OTP flow in `src/test/java`.
-    2.  Create a `Dockerfile` in the module root to containerize the service.
-    3.  Setup a GitHub Actions workflow `.github/workflows/maven.yml` for automated builds.
+    1.  Write Integration Tests for OTP flow.
+    2.  Setup GitHub Actions for CI/CD.
+
+---
+
+## 🛠️ Getting Started (Step-by-Step for New Devs)
+
+1. **Check Out**: `git checkout -b feature/your-name-task`
+2. **Setup DB**: Create `pikngo_user_db` in Postgres.
+3. **Build**: Run `./mvnw clean install` to ensure all stubs compile.
+4. **Code**: Open your assigned "Primary Files" and start implementing!
