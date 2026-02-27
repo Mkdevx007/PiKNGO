@@ -3,6 +3,7 @@ package com.pikngo.user_service.service.impl;
 import com.pikngo.user_service.dto.UserRegistrationRequest;
 import com.pikngo.user_service.entity.User;
 import com.pikngo.user_service.exception.UserAlreadyExistsException;
+import com.pikngo.user_service.exception.UserNotFoundException;
 import com.pikngo.user_service.repository.UserRepository;
 import com.pikngo.user_service.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -40,12 +41,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with phone number " + phoneNumber + " not found"));
     }
 
     @Override
     public User getUserById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
     }
 }

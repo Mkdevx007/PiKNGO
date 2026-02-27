@@ -3,6 +3,8 @@ package com.pikngo.user_service.service.impl;
 import com.pikngo.user_service.dto.OtpRequest;
 import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.entity.OtpVerification;
+import com.pikngo.user_service.exception.InvalidOtpException;
+import com.pikngo.user_service.exception.OtpExpiredException;
 import com.pikngo.user_service.repository.OtpVerificationRepository;
 import com.pikngo.user_service.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -38,16 +40,21 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean verifyOtp(OtpVerificationRequest request) {
-        return otpRepository.findTopByPhoneNumberAndIsUsedOrderByCreatedAtDesc(request.getPhoneNumber(), false)
-                .map(otp -> {
-                    if (otp.getOtpCode().equals(request.getOtpCode()) &&
-                            otp.getExpiryTime().isAfter(LocalDateTime.now())) {
-                        otp.setUsed(true);
-                        otpRepository.save(otp);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
+        OtpVerification otp = otpRepository.findTopByPhoneNumberAndIsUsedOrderByCreatedAtDesc(request.getPhoneNumber(), false)
+                .orElseThrow(() -> new InvalidOtpException("No active OTP found for this phone number"));
+
+        if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
+            throw new OtpExpiredException("OTP has expired. Please request a new one.");
+        }
+
+        if (!otp.getOtpCode().equals(request.getOtpCode())) {
+            throw new InvalidOtpException("OTP code is incorrect");
+        }
+
+        otp.setUsed(true);
+        otpRepository.save(otp);
+        log.info("OTP verified successfully for phone number: {}", request.getPhoneNumber());
+        
+        return true;
     }
 }
