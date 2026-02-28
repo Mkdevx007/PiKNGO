@@ -59,7 +59,9 @@ public class UserControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(regRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.phoneNumber").value(PHONE_NUMBER));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("User registration successful"))
+                .andExpect(jsonPath("$.data.phoneNumber").value(PHONE_NUMBER));
 
         // 2. Send OTP
         mockMvc.perform(post("/api/v1/users/login/send-otp")

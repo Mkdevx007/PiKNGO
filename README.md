@@ -12,6 +12,17 @@ This project is being developed by a team of **5 developers**. To ensure smooth 
 
 ---
 
+## 🌟 Current Project Status
+
+The essential foundational core of the **user-service** is now **fully complete**.
+All initial tasks covering Authentication, Observability, CI/CD, Profile Management, and QA have been thoroughly implemented by the team and merged into the main implementation. New features include:
+- **Authentication:** Firebase SMS OTP verification with a flexible Backend Fallback and JWT-based Stateless Session Management.
+- **Observability:** Centralized `AuditInterceptor` for execution time logging, Custom Exceptions (`InvalidOtpException`, `UserNotFoundException`, etc.), and JPA Auditing.
+- **CI/CD & Testing:** Automated GitHub Actions workflows, provided a production-ready `Dockerfile`, and Integration Test suites covering Controllers and Services.
+- **Data Transfer Objects:** Introduction of `ApiResponse` DTO to standardize frontend-backend JSON communication.
+
+---
+
 ## 🛠️ User Service (Module)
 The `user-service` handles all user-related operations including registration, login, and profile management.
 
@@ -147,10 +158,12 @@ Each developer should focus on these specific layers/folders. I have created **s
 ### 🛡️ Developer 4: Observability & Robustness (Anand)
 - [x] Implemented **Global Exception Handler** with specific error mapping.
 - [x] Enabled **JPA Auditing** to track record modifications.
+- [x] Created `AuditInterceptor` for detailed request logging and performance tracking.
+- [x] Implemented `ApiResponse` wrapper for standardized JSON responses.
 
 ### 🧪 Developer 5: QA & DevOps (Sudhran)
-- [x] Wrote Integration Tests for OTP flow and registration.
-- [x] Setup GitHub Actions for CI/CD.
+- [x] Wrote Integration Tests using Test containers/MockMvc and externalized Test Configurations.
+- [x] Created production-ready `Dockerfile` and configured GitHub Actions for CI/CD.
 
 ---
 

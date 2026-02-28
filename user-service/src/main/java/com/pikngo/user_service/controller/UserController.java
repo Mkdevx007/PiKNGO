@@ -26,9 +26,12 @@ public class UserController {
     private final UserRepository userRepository;
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@Valid @RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<com.pikngo.user_service.dto.ApiResponse<User>> registerUser(
+            @Valid @RequestBody UserRegistrationRequest request) {
         User user = userService.registerUser(request);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                com.pikngo.user_service.dto.ApiResponse.success("User registration successful", user),
+                HttpStatus.CREATED);
     }
 
     @PostMapping("/login/send-otp")
