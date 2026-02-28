@@ -49,4 +49,27 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
     }
+
+    @Override
+    public User updateUserProfile(String phoneNumber, com.pikngo.user_service.dto.ProfileUpdateRequest request) {
+        User user = getUserByPhoneNumber(phoneNumber);
+
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
+        }
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new UserAlreadyExistsException("Email already in use by another user");
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        return userRepository.save(user);
+    }
 }

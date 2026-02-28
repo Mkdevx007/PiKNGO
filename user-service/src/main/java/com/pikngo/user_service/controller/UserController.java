@@ -1,11 +1,14 @@
 package com.pikngo.user_service.controller;
 
-import com.pikngo.user_service.dto.OtpRequest;
+import com.pikngo.user_service.dto.JwtResponse;
 import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.dto.UserRegistrationRequest;
 import com.pikngo.user_service.entity.User;
 import com.pikngo.user_service.service.AuthService;
 import com.pikngo.user_service.service.UserService;
+import com.pikngo.user_service.utils.JwtUtils;
+import com.pikngo.user_service.exception.UserNotFoundException;
+import com.pikngo.user_service.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,8 @@ public class UserController {
 
     private final UserService userService;
     private final AuthService authService;
+    private final JwtUtils jwtUtils;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@Valid @RequestBody UserRegistrationRequest request) {
@@ -27,19 +32,39 @@ public class UserController {
     }
 
     @PostMapping("/login/send-otp")
-    public ResponseEntity<String> sendOtp(@Valid @RequestBody OtpRequest request) {
-        authService.sendOtp(request);
-        return ResponseEntity.ok("OTP sent successfully to " + request.getPhoneNumber());
+    public ResponseEntity<Void> sendOtp(@RequestParam String phoneNumber) {
+        authService.sendOtp(phoneNumber);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login/verify-otp")
-    public ResponseEntity<String> verifyOtp(@Valid @RequestBody OtpVerificationRequest request) {
+    public ResponseEntity<JwtResponse> verifyOtp(@Valid @RequestBody OtpVerificationRequest request) {
+        // 1. Verify Token (Firebase or Local)
         boolean isValid = authService.verifyOtp(request);
-        if (isValid) {
-            // In a real scenario, generate and return a JWT token here
-            return ResponseEntity.ok("Login successful");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired OTP");
+        if (!isValid) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        // 2. Check if user exists in database
+        if (!userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new UserNotFoundException(
+                    "User not registered with phone number: " + request.getPhoneNumber());
+        }
+
+        // 3. Generate JWT
+        String token = jwtUtils.generateToken(request.getPhoneNumber());
+        return ResponseEntity.ok(JwtResponse.builder()
+                .token(token)
+                .phoneNumber(request.getPhoneNumber())
+                .build());
+    }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<User> updateProfile(
+            @Valid @RequestBody com.pikngo.user_service.dto.ProfileUpdateRequest request,
+            java.security.Principal principal) {
+        String phoneNumber = principal.getName();
+        User updatedUser = userService.updateUserProfile(phoneNumber, request);
+        return ResponseEntity.ok(updatedUser);
     }
 }

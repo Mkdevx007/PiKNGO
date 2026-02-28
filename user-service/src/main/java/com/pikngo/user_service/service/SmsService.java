@@ -1,0 +1,5 @@
+package com.pikngo.user_service.service;
+
+public interface SmsService {
+    void sendSms(String phoneNumber, String message);
+}
