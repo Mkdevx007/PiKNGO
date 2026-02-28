@@ -17,15 +17,18 @@ The `user-service` handles all user-related operations including registration, l
 
 ### Tech Stack
 - **Java 17** (LTS)
-- **Spring Boot 3.4.x** (Parent 4.0.3)
+- **Spring Boot 3.4.3** (Stable)
 - **PostgreSQL**
 - **Spring Data JPA**
 - **Spring Security**
 - **Lombok**
+- **Firebase Admin SDK**
 
 ### Key Features
 - **User Registration**: Captures Name, Email, Phone, Address, etc.
-- **OTP Login**: Mobile number based authentication with 6-digit OTP.
+- **Dual OTP Login**: Supports both **Firebase Phone Auth** and a **Backend-driven Local OTP fallback**.
+- **JPA Auditing**: Automatic tracking of `created_by` and `last_modified_by` for all managed entities.
+- **Automated CI/CD**: GitHub Actions workflow for automated builds and testing.
 
 ### Folder Structure
 ```text
@@ -110,13 +113,13 @@ If you are one of the **5 developers** joining this project, please follow these
 
 To ensure we don't overlap, each developer is assigned a specific module. Please check your name/role below:
 
-| Developer | Module / Responsibility | Key Tasks |
+| Developer | Role | Status |
 | :--- | :--- | :--- |
-| **Developer 1** | **Security & Auth** | Implement JWT tokens, Spring Security Filter, and secure endpoints. |
-| **Developer 2** | **External Integrations**| Integrate real SMS Gateway (Twilio/AWS) into `AuthServiceImpl`. |
-| **Developer 3** | **Profile Management** | Create endpoints for User Profile updates and Image/ID uploads. |
-| **Developer 4** | **Observability** | Setup Global Exception Handler and API request/response logging (Auditing). |
-| **Developer 5** | **QA & DevOps** | Write Unit/Integration tests and setup Docker/CI-CD pipeline. |
+| **Developer 1 (mangal)** | **Security & Auth** | ✅ **COMPLETED** |
+| **Developer 2 (javeed)** | **External Integrations**| ✅ **COMPLETED** |
+| **Developer 3 (Abhishek)** | **Profile Management** | ✅ **COMPLETED** |
+| **Developer 4 (Anand)** | **Observability** | ✅ **COMPLETED** |
+| **Developer 5 (Sudhran)** | **QA & DevOps** | ✅ **COMPLETED** |
 
 > [!NOTE]
 > Please create a separate branch for your task: `feature/dev-N-task-name`.
@@ -127,45 +130,27 @@ To ensure we don't overlap, each developer is assigned a specific module. Please
 
 Each developer should focus on these specific layers/folders. I have created **starter stubs** for you to begin your work.
 
-### 👤 Developer 1: Security & Auth(mangal)
-*   **Primary Files**: 
-    - [SecurityConfig.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/config/SecurityConfig.java) (Implement FilterChain)
-    - [JwtUtils.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/utils/JwtUtils.java) (Implement Token Logic)
-*   **What to do**:
-    1.  Update `SecurityConfig` to protect `/api/v1/users/**` as needed.
-    2.  Implement JWT generation in `JwtUtils`.
-    3.  Update `UserController.verifyOtp` to return a JWT token on success.
+### 👤 Developer 1: Security & Auth (mangal)
+- [x] Implemented **JWT Token** generation and validation.
+- [x] Configured **Spring Security** for stateless authentication.
+- [x] Created `JwtRequestFilter` for token verification on protected routes.
 
-### 🔌 Developer 2: External Integrations (Login Flow)(javeed)
-*   **Primary Files**: 
-    - [AuthServiceImpl.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/service/impl/AuthServiceImpl.java) (Integrate SMS)
-    - [EmailService.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/service/EmailService.java) (Implement Interface)
-*   **What to do**:
-    1.  Integrate a real SMS provider (e.g., Twilio) in `AuthServiceImpl`.
-    2.  Implement the `EmailService` for transactional emails.
+### 🔌 Developer 2: External Integrations (javeed)
+- [x] Integrate a real SMS provider (Firebase/SmsService) in `AuthServiceImpl`.
+- [x] Implement the `EmailService` for transactional emails.
+- [x] Added **Backend OTP Fallback** system.
 
 ### 📝 Developer 3: User Registration & Profile (Abhishek)
-*   **Primary Files**: 
-    - [ProfileUpdateRequest.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/dto/ProfileUpdateRequest.java) (Add fields)
-    - [UserController.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/controller/UserController.java) (Add profile endpoint)
-*   **What to do**:
-    1.  Add fields to `ProfileUpdateRequest`.
-    2.  Add `PATCH /api/v1/users/profile` in `UserController` and implement in `UserService`.
+- [x] Added `PATCH /api/v1/users/profile` in `UserController`.
+- [x] Implemented user profile update logic.
 
 ### 🛡️ Developer 4: Observability & Robustness (Anand)
-*   **Primary Files**: 
-    - [GlobalExceptionHandler.java](file:///e:/intership/PikNGo/user-service/src/main/java/com/pikngo/user_service/exception/GlobalExceptionHandler.java) (Add error handlers)
-*   **What to do**:
-    1.  Add specific handlers for validation and business errors.
-    2.  Enable Auditing in a new `AuditConfig.java` (create this in `config/`).
+- [x] Implemented **Global Exception Handler** with specific error mapping.
+- [x] Enabled **JPA Auditing** to track record modifications.
 
 ### 🧪 Developer 5: QA & DevOps (Sudhran)
-*   **Primary Files**: 
-    - [Dockerfile](file:///e:/intership/PikNGo/user-service/Dockerfile) (Refine for prod)
-    - `src/test/java/...`
-*   **What to do**:
-    1.  Write Integration Tests for OTP flow.
-    2.  Setup GitHub Actions for CI/CD.
+- [x] Wrote Integration Tests for OTP flow and registration.
+- [x] Setup GitHub Actions for CI/CD.
 
 ---
 
