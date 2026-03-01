@@ -167,6 +167,42 @@ Each developer should focus on these specific layers/folders. I have created **s
 
 ---
 
+---
+
+## 📅 Week 2 Tasks: Address Management, Login & Profile Enhancements
+
+The focus for **Week 2** is to expand the `user-service` by adding robust address management capabilities, enhancing user profiles with soft/hard delete functionality, and introducing a standard login mechanism using email/phone and password combinations.
+
+### 👤 Developer 1: Database Schema & Entities
+- [ ] Add `is_deleted` and `user_password` columns to the `User` entity.
+- [ ] Remove `address` column from the `User` entity.
+- [ ] Create `Address` entity with mapping to `User` (_id, address_line_1, address_line_2, city, state, pincode, created_ts, modified_ts, is_deleted).
+- [ ] Establish `OneToMany` relationship from `User` to `Address`.
+
+### 🔌 Developer 2: Login API Implementation
+- [ ] Create `POST /api/v1/users/login` endpoint.
+- [ ] Support login via `email` OR `phone_number` and `password`.
+- [ ] Integrate BCrypt for secure password hashing and verification.
+- [ ] Issue JWT token upon successful authentication.
+
+### 📝 Developer 3: Update Profile API
+- [ ] Update `PATCH /api/v1/users/profile` endpoint.
+- [ ] Allow users to update their personal details (email, phone, name).
+- [ ] Handle password update requests securely.
+
+### 🛡️ Developer 4: Address Management APIs
+- [ ] Create `AddressRepository` and `AddressService`.
+- [ ] Implement APIs to add, update, and remove addresses for a user (`/api/v1/users/{userId}/addresses`).
+- [ ] Ensure cascaded saves from `User` updates handle address lists correctly.
+
+### 🧪 Developer 5: Delete Profile API
+- [ ] Create `DELETE /api/v1/users/delete` endpoint.
+- [ ] Accept `softDelete=true/false` query parameter.
+- [ ] Implement soft delete (set `is_deleted = true` for User and associated Addresses).
+- [ ] Implement hard delete (permanently remove records from DB).
+
+---
+
 ## 🛠️ Getting Started (Step-by-Step for New Devs)
 
 1. **Check Out**: `git checkout -b feature/your-name-task`
