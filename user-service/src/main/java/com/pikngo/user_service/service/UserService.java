@@ -14,4 +14,6 @@ public interface UserService {
     User getUserById(UUID id);
 
     User updateUserProfile(String phoneNumber, ProfileUpdateRequest request);
+
+    void deleteUser(UUID userId, boolean softDelete);
 }

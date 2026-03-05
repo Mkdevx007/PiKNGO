@@ -1,0 +1,189 @@
+.about-page {
+    min-height: 100vh;
+    padding-top: 70px;
+    background: var(--bg-deep);
+}
+
+.about-hero {
+    background: linear-gradient(rgba(2, 6, 23, 0.7), rgba(2, 6, 23, 0.7)),
+        url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop') center/cover;
+    padding: 8rem 0;
+    text-align: center;
+    border-radius: 0 0 60px 60px;
+    margin-bottom: 4rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.about-hero h1 {
+    font-size: 4.5rem;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    letter-spacing: -3px;
+}
+
+.about-hero .subtitle {
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: 500;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 4rem;
+    align-items: center;
+    margin-bottom: 6rem;
+}
+
+.about-text h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+}
+
+.about-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.about-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 3rem;
+    border-radius: 32px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-item h3 {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent-orange);
+    margin-bottom: 0.2rem;
+}
+
+.stat-item p {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 4rem;
+    letter-spacing: -1px;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+    margin-bottom: 8rem;
+}
+
+.feature-item {
+    padding: 3rem 2rem;
+    border-radius: 32px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.feature-item:hover {
+    transform: translateY(-15px);
+    border-color: var(--accent-orange);
+}
+
+.feature-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.feature-item h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.feature-item p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+@media (max-width: 992px) {
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-hero h1 {
+        font-size: 3rem;
+    }
+}
+
+/* Light mode overrides for About Page - Sunset Highway */
+body:not(.dark-theme) .about-hero {
+    background-image:
+        linear-gradient(to bottom, rgba(255, 248, 240, 0.4), rgba(255, 248, 240, 0.95)),
+        url('https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&q=80&w=2070');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-bottom: 1px solid rgba(230, 74, 25, 0.1);
+}
+
+body:not(.dark-theme) .about-hero h1 {
+    color: #1a1614;
+    /* For contrast with gradient-text clip if it doesn't pop enough */
+}
+
+body:not(.dark-theme) .about-hero .subtitle {
+    color: #4a3e35;
+}
+
+body:not(.dark-theme) .about-text h2 {
+    color: #1a1614;
+}
+
+body:not(.dark-theme) .about-text p {
+    color: #4a3e35;
+}
+
+body:not(.dark-theme) .stat-item p {
+    color: #4a3e35;
+}
+
+body:not(.dark-theme) .section-title {
+    color: #1a1614;
+}
+
+body:not(.dark-theme) .feature-item {
+    background: #fffdfb;
+    border: 1px solid rgba(230, 74, 25, 0.08);
+    box-shadow: 0 8px 32px rgba(230, 74, 25, 0.04), 0 2px 8px rgba(45, 36, 30, 0.04);
+}
+
+body:not(.dark-theme) .feature-item h3 {
+    color: #1a1614;
+}
+
+body:not(.dark-theme) .feature-item p {
+    color: #4a3e35;
+}

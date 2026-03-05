@@ -13,5 +13,5 @@ public class ProfileUpdateRequest {
     private String firstName;
     private String lastName;
     private String email;
-    private String address;
+    private String password;
 }

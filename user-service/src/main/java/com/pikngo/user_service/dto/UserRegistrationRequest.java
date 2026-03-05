@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
 public class UserRegistrationRequest {
@@ -19,6 +20,11 @@ public class UserRegistrationRequest {
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number")
     private String phoneNumber;
+
+    @NotBlank(message = "Password is required")
+    private String password;
+
+    private LocalDate dob;
 
     private String address;
 }

@@ -2,14 +2,17 @@ package com.pikngo.user_service.service.impl;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
+import com.pikngo.user_service.dto.LoginRequest;
 import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.entity.OtpVerification;
 import com.pikngo.user_service.exception.InvalidOtpException;
 import com.pikngo.user_service.repository.OtpVerificationRepository;
+import com.pikngo.user_service.repository.UserRepository;
 import com.pikngo.user_service.service.AuthService;
 import com.pikngo.user_service.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,7 +24,36 @@ import java.util.Random;
 public class AuthServiceImpl implements AuthService {
 
     private final OtpVerificationRepository otpRepository;
+    private final UserRepository userRepository;
     private final SmsService smsService;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public boolean loginWithPassword(LoginRequest request) {
+        log.info("Attempting login for identifier: {}", request.getIdentifier());
+        return userRepository.findByPhoneNumber(request.getIdentifier())
+                .or(() -> {
+                    log.info("Phone number not found, checking email for: {}", request.getIdentifier());
+                    return userRepository.findByEmail(request.getIdentifier());
+                })
+                .map(user -> {
+                    if (user.getUserPassword() == null) {
+                        log.warn("User {} has no password set", user.getPhoneNumber());
+                        return false;
+                    }
+                    boolean matches = passwordEncoder.matches(request.getPassword(), user.getUserPassword());
+                    if (!matches) {
+                        log.warn("Password mismatch for user {}", user.getPhoneNumber());
+                    } else {
+                        log.info("Login successful for user {}", user.getPhoneNumber());
+                    }
+                    return matches;
+                })
+                .orElseGet(() -> {
+                    log.warn("User not found for identifier: {}", request.getIdentifier());
+                    return false;
+                });
+    }
 
     @Override
     public boolean verifyOtp(OtpVerificationRequest request) {

@@ -1,14 +1,18 @@
 package com.pikngo.user_service.service.impl;
 
 import com.pikngo.user_service.dto.UserRegistrationRequest;
+import com.pikngo.user_service.dto.ProfileUpdateRequest;
+import com.pikngo.user_service.entity.Address;
 import com.pikngo.user_service.entity.User;
 import com.pikngo.user_service.exception.UserAlreadyExistsException;
 import com.pikngo.user_service.exception.UserNotFoundException;
 import com.pikngo.user_service.repository.UserRepository;
 import com.pikngo.user_service.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.UUID;
 
 @Service
@@ -16,6 +20,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User registerUser(UserRegistrationRequest request) {
@@ -31,9 +36,21 @@ public class UserServiceImpl implements UserService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
-                .address(request.getAddress())
+                .userPassword(passwordEncoder.encode(request.getPassword()))
+                .dob(request.getDob())
                 .isActive(true)
                 .build();
+
+        if (request.getAddress() != null && !request.getAddress().isBlank()) {
+            Address address = Address.builder()
+                    .addressLine1(request.getAddress())
+                    .city("TBD")
+                    .state("TBD")
+                    .pincode("000000")
+                    .user(user)
+                    .build();
+            user.setAddresses(Collections.singletonList(address));
+        }
 
         return userRepository.save(user);
     }
@@ -41,17 +58,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new UserNotFoundException("User with phone number " + phoneNumber + " not found"));
+                .filter(user -> !user.isDeleted())
+                .orElseThrow(() -> new UserNotFoundException(
+                        "User with phone number " + phoneNumber + " not found or deleted"));
     }
 
     @Override
     public User getUserById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found"));
+                .filter(user -> !user.isDeleted())
+                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found or deleted"));
     }
 
     @Override
-    public User updateUserProfile(String phoneNumber, com.pikngo.user_service.dto.ProfileUpdateRequest request) {
+    public User updateUserProfile(String phoneNumber, ProfileUpdateRequest request) {
         User user = getUserByPhoneNumber(phoneNumber);
 
         if (request.getFirstName() != null) {
@@ -60,9 +80,7 @@ public class UserServiceImpl implements UserService {
         if (request.getLastName() != null) {
             user.setLastName(request.getLastName());
         }
-        if (request.getAddress() != null) {
-            user.setAddress(request.getAddress());
-        }
+
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
                 throw new UserAlreadyExistsException("Email already in use by another user");
@@ -70,6 +88,24 @@ public class UserServiceImpl implements UserService {
             user.setEmail(request.getEmail());
         }
 
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setUserPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
         return userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUser(UUID userId, boolean softDelete) {
+        User user = getUserById(userId);
+        if (softDelete) {
+            user.setDeleted(true);
+            if (user.getAddresses() != null) {
+                user.getAddresses().forEach(addr -> addr.setDeleted(true));
+            }
+            userRepository.save(user);
+        } else {
+            userRepository.delete(user);
+        }
     }
 }

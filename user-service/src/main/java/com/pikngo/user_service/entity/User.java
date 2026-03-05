@@ -11,7 +11,10 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -45,12 +48,23 @@ public class User {
     @Column(name = "phone_number", unique = true, nullable = false, length = 15)
     private String phoneNumber;
 
-    @Column(columnDefinition = "TEXT")
-    private String address;
+    @Column(name = "user_password")
+    private String userPassword;
+
+    @Column(name = "dob")
+    private LocalDate dob;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
 
     @Builder.Default
     @Column(name = "is_active")
     private boolean isActive = true;
+
+    @Builder.Default
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

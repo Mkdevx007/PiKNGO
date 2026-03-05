@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class JwtResponse {
     private String token;
     private String phoneNumber;
+    private java.util.UUID userId;
 }
