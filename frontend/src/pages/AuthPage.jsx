@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
-import { Phone, Lock, ArrowRight, ShieldCheck, Mail, User, Calendar, MapPin, LogIn, Star, Shield, Github, Apple as AppleIcon, ChevronLeft } from 'lucide-react';
+import { Phone, Lock, ArrowRight, ShieldCheck, Mail, User, Calendar, MapPin, LogIn, Star, Shield, Github, Apple as AppleIcon, ChevronLeft, Key } from 'lucide-react';
 import { authApi } from '../services/api';
 import Logo from '../components/Logo/Logo.jsx';
 import './Auth.css';
@@ -43,6 +43,9 @@ const AuthPage = ({ onLogin }) => {
     const [loginOtpCode, setLoginOtpCode] = useState('');
     const [loginStep, setLoginStep] = useState(1);
     const [forgotEmail, setForgotEmail] = useState('');
+    const [showReset, setShowReset] = useState(false);
+    const [resetToken, setResetToken] = useState('');
+    const [newPassword, setNewPassword] = useState('');
 
     // Register States
     const [registerData, setRegisterData] = useState({
@@ -109,10 +112,31 @@ const AuthPage = ({ onLogin }) => {
         setLoading(true);
         setError('');
         try {
-            setSuccess('Reset link sent to your email!');
-            setTimeout(() => setShowForgot(false), 2000);
+            await authApi.forgotPassword(forgotEmail);
+            setSuccess('Reset token sent to your email! (Check backend logs)');
+            setTimeout(() => {
+                setSuccess('');
+                setShowReset(true);
+            }, 2000);
         } catch (err) {
-            setError('Failed to send reset link.');
+            setError(err.response?.data?.message || 'Failed to send reset link.');
+        } finally { setLoading(false); }
+    };
+
+    const handleResetSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+            await authApi.resetPassword(resetToken, newPassword);
+            setSuccess('Password reset successful! You can now login.');
+            setTimeout(() => {
+                setShowReset(false);
+                setShowForgot(false);
+                setSuccess('');
+            }, 3000);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to reset password.');
         } finally { setLoading(false); }
     };
 
@@ -223,23 +247,66 @@ const AuthPage = ({ onLogin }) => {
                             <div className="auth-card-content">
                                 {showForgot ? (
                                     <>
-                                        <h2 className="auth-title">Reset Password</h2>
-                                        <p className="auth-subtitle">Enter email to receive reset link</p>
-                                        {error && <div className="error-message">{error}</div>}
-                                        {success && <div className="success-message">{success}</div>}
-                                        <form className="auth-form" onSubmit={handleForgotSubmit}>
-                                            <div className="form-group">
-                                                <label>Email Address</label>
-                                                <div className="input-wrapper">
-                                                    <Mail size={18} className="input-icon" />
-                                                    <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required />
+                                        <div className="auth-back">
+                                            <div className="auth-card">
+                                                <div className="auth-header">
+                                                    <h2 className="auth-title">{showReset ? 'Set New Password' : 'Forgot Password?'}</h2>
+                                                    <p className="auth-subtitle">
+                                                        {showReset
+                                                            ? 'Enter the token from your email and your new password.'
+                                                            : 'Enter your email and we\'ll send you a link to reset your password.'}
+                                                    </p>
+                                                    {error && <div className="error-message">{error}</div>}
+                                                    {success && <div className="success-message">{success}</div>}
                                                 </div>
+
+                                                {!showReset ? (
+                                                    <form className="auth-form" onSubmit={handleForgotSubmit}>
+                                                        <div className="form-group" style={{ animationDelay: '0.1s' }}>
+                                                            <label>Email Address</label>
+                                                            <div className="input-wrapper">
+                                                                <Mail size={18} className="input-icon" />
+                                                                <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="name@example.com" required />
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="submit" className="btn-primary w-full" disabled={loading} style={{ animationDelay: '0.2s' }}>
+                                                            {loading ? <div className="loader"></div> : 'Send Reset Link'}
+                                                        </button>
+
+                                                        <button type="button" className="btn-secondary w-full" onClick={() => setShowForgot(false)} style={{ animationDelay: '0.3s' }}>
+                                                            Back to Login
+                                                        </button>
+                                                    </form>
+                                                ) : (
+                                                    <form className="auth-form" onSubmit={handleResetSubmit}>
+                                                        <div className="form-group" style={{ animationDelay: '0.1s' }}>
+                                                            <label>Reset Token</label>
+                                                            <div className="input-wrapper">
+                                                                <Key size={18} className="input-icon" />
+                                                                <input type="text" value={resetToken} onChange={(e) => setResetToken(e.target.value)} placeholder="Paste token here" required />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="form-group" style={{ animationDelay: '0.2s' }}>
+                                                            <label>New Password</label>
+                                                            <div className="input-wrapper">
+                                                                <Lock size={18} className="input-icon" />
+                                                                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Min. 8 characters" required />
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="submit" className="btn-primary w-full" disabled={loading} style={{ animationDelay: '0.3s' }}>
+                                                            {loading ? <div className="loader"></div> : 'Reset Password'}
+                                                        </button>
+
+                                                        <button type="button" className="btn-secondary w-full" onClick={() => setShowReset(false)} style={{ animationDelay: '0.4s' }}>
+                                                            Back
+                                                        </button>
+                                                    </form>
+                                                )}
                                             </div>
-                                            <button type="submit" className="btn-primary w-full" disabled={loading}>
-                                                {loading ? 'Sending...' : 'Send Reset Link'}
-                                            </button>
-                                            <button type="button" className="btn-text w-full mt-4" onClick={() => setShowForgot(false)}>Back to Login</button>
-                                        </form>
+                                        </div>
                                     </>
                                 ) : (
                                     <>
@@ -247,8 +314,8 @@ const AuthPage = ({ onLogin }) => {
                                         {loginStep === 2 && <p className="auth-subtitle">{`Code sent to ${loginIdentifier}`}</p>}
                                         {loginStep === 1 && (
                                             <div className="method-toggle">
-                                                <button className={loginMethod === 'otp' ? 'active' : ''} onClick={() => setLoginMethod('otp')}>OTP</button>
-                                                <button className={loginMethod === 'password' ? 'active' : ''} onClick={() => setLoginMethod('password')}>Password</button>
+                                                <button className={loginMethod === 'otp' ? 'active' : ''} onClick={() => { setLoginMethod('otp'); setLoginIdentifier(''); setError(''); }}>OTP</button>
+                                                <button className={loginMethod === 'password' ? 'active' : ''} onClick={() => { setLoginMethod('password'); setLoginIdentifier(''); setError(''); }}>Password</button>
                                             </div>
                                         )}
                                         {error && !isFlipped && <div className="error-message">{error}</div>}
@@ -259,7 +326,22 @@ const AuthPage = ({ onLogin }) => {
                                                         <label>{loginMethod === 'otp' ? 'Phone' : 'Email/Phone'}</label>
                                                         <div className="input-wrapper">
                                                             {loginMethod === 'otp' ? <Phone size={18} className="input-icon" /> : <Mail size={18} className="input-icon" />}
-                                                            <input type="text" value={loginIdentifier} onChange={(e) => setLoginIdentifier(e.target.value)} required />
+                                                            {loginMethod === 'otp' ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={loginIdentifier}
+                                                                    onChange={(e) => setLoginIdentifier(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                                                    placeholder="10 digit number"
+                                                                    required
+                                                                />
+                                                            ) : (
+                                                                <input
+                                                                    type="text"
+                                                                    value={loginIdentifier}
+                                                                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                                                                    required
+                                                                />
+                                                            )}
                                                         </div>
                                                     </div>
                                                     {loginMethod === 'password' && (
@@ -337,7 +419,13 @@ const AuthPage = ({ onLogin }) => {
                                         <label>Mobile Number</label>
                                         <div className="input-wrapper">
                                             <Phone size={18} className="input-icon" />
-                                            <input type="tel" value={registerData.phoneNumber} onChange={(e) => setRegisterData({ ...registerData, phoneNumber: e.target.value })} required />
+                                            <input
+                                                type="tel"
+                                                value={registerData.phoneNumber}
+                                                onChange={(e) => setRegisterData({ ...registerData, phoneNumber: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                                                placeholder="10 digit mobile number"
+                                                required
+                                            />
                                         </div>
                                     </div>
                                     <div className="form-group" style={{ animationDelay: '0.3s' }}>

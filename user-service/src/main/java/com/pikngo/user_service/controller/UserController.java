@@ -130,10 +130,16 @@ public class UserController {
         return ResponseEntity.ok(addressService.updateAddress(userId, addressId, address));
     }
 
-    @DeleteMapping("/{userId}/addresses/{addressId}")
-    public ResponseEntity<Void> deleteAddress(@PathVariable java.util.UUID userId,
-            @PathVariable java.util.UUID addressId) {
-        addressService.deleteAddress(userId, addressId);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/forgot-password")
+    public ResponseEntity<com.pikngo.user_service.dto.ApiResponse<String>> forgotPassword(@RequestParam String email) {
+        authService.processForgotPassword(email);
+        return ResponseEntity.ok(com.pikngo.user_service.dto.ApiResponse.success("Reset link sent to " + email, null));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<com.pikngo.user_service.dto.ApiResponse<String>> resetPassword(@RequestParam String token,
+            @RequestParam String newPassword) {
+        authService.resetPassword(token, newPassword);
+        return ResponseEntity.ok(com.pikngo.user_service.dto.ApiResponse.success("Password successfully reset", null));
     }
 }

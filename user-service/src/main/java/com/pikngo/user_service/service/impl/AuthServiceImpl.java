@@ -5,18 +5,25 @@ import com.google.firebase.auth.FirebaseToken;
 import com.pikngo.user_service.dto.LoginRequest;
 import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.entity.OtpVerification;
+import com.pikngo.user_service.entity.User;
+import com.pikngo.user_service.entity.PasswordResetToken;
 import com.pikngo.user_service.exception.InvalidOtpException;
+import com.pikngo.user_service.exception.UserNotFoundException;
 import com.pikngo.user_service.repository.OtpVerificationRepository;
 import com.pikngo.user_service.repository.UserRepository;
+import com.pikngo.user_service.repository.PasswordResetTokenRepository;
 import com.pikngo.user_service.service.AuthService;
+import com.pikngo.user_service.service.EmailService;
 import com.pikngo.user_service.service.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +34,8 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final SmsService smsService;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetTokenRepository tokenRepository;
+    private final EmailService emailService;
 
     @Override
     public boolean loginWithPassword(LoginRequest request) {
@@ -120,5 +129,47 @@ public class AuthServiceImpl implements AuthService {
             log.error("Firebase token verification failed for {}: {}", phoneNumber, e.getMessage());
             throw new InvalidOtpException("Invalid Firebase token: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void processForgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "No account found with this email"));
+
+        // Delete existing token if any
+        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = PasswordResetToken
+                .builder()
+                .token(token)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusHours(24))
+                .build();
+
+        tokenRepository.save(resetToken);
+
+        log.info("Password reset token generated for {}: {}", email, token);
+        emailService.sendEmail(email, "Password Reset", "Your reset token is: " + token);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
+
+        if (resetToken.isExpired()) {
+            tokenRepository.delete(resetToken);
+            throw new RuntimeException("Token has expired");
+        }
+
+        User user = resetToken.getUser();
+        user.setUserPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        tokenRepository.delete(resetToken);
+        log.info("Password successfully reset for user: {}", user.getEmail());
     }
 }

@@ -11,4 +11,8 @@ public interface AuthService {
     boolean verifyLocalOtp(String phoneNumber, String code);
 
     boolean loginWithPassword(LoginRequest request);
+
+    void processForgotPassword(String email);
+
+    void resetPassword(String token, String newPassword);
 }

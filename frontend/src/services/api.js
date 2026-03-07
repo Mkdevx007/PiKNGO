@@ -23,6 +23,8 @@ export const authApi = {
     loginWithPassword: (credentials) => api.post('/users/login/password', credentials),
     sendOtp: (phoneNumber) => api.post(`/users/login/send-otp?phoneNumber=${phoneNumber}`),
     verifyOtp: (otpData) => api.post('/users/login/verify-otp', otpData),
+    forgotPassword: (email) => api.post(`/users/forgot-password?email=${email}`),
+    resetPassword: (token, newPassword) => api.post(`/users/reset-password?token=${token}&newPassword=${newPassword}`),
     getProfile: () => api.get('/users/profile'),
     updateProfile: (profileData) => api.patch('/users/profile', profileData),
     deleteProfile: (softDelete = true) => api.delete(`/users/delete?softDelete=${softDelete}`),
@@ -30,6 +32,7 @@ export const authApi = {
     addAddress: (userId, addressData) => api.post(`/users/${userId}/addresses`, addressData),
     updateAddress: (userId, addressId, addressData) => api.put(`/users/${userId}/addresses/${addressId}`, addressData),
     deleteAddress: (userId, addressId) => api.delete(`/users/${userId}/addresses/${addressId}`),
+    forgotPassword: (email) => api.post(`/users/forgot-password?email=${email}`),
 };
 
 export default api;
