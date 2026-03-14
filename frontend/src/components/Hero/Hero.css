@@ -7,6 +7,7 @@
     padding: 120px 2rem 80px;
     overflow: hidden;
     background: var(--bg-deep);
+    will-change: transform; /* Hint for smoother scrolling */
 }
 
 /* Light mode hero — Sunset Highway radial wash */
@@ -148,7 +149,7 @@ body:not(.dark-theme) .hero-overlay-gradient {
     margin-bottom: 2rem;
     letter-spacing: 2px;
     text-transform: uppercase;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-premium);
 }
 
 .hero-title {
@@ -158,6 +159,7 @@ body:not(.dark-theme) .hero-overlay-gradient {
     color: var(--text-primary);
     margin-bottom: 2.5rem;
     letter-spacing: -5px;
+    transition: color var(--transition-speed);
 }
 
 body:not(.dark-theme) .hero-title {

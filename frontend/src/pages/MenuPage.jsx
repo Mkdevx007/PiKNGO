@@ -13,31 +13,42 @@ import {
 import './MenuPage.css';
 
 const restaurantData = {
-    'royal-cuisines': {
-        name: 'Royal Cuisines',
-        rating: 4.9,
-        deliveryTime: '25-30 min',
-        category: 'Gourmet • Continental',
+    'highway-king---jaipur': {
+        name: 'Highway King - Jaipur',
+        rating: 4.8,
+        deliveryTime: '20-25 min',
+        category: 'North Indian • Mughlai',
         banner: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop',
         menu: [
-            { id: 101, name: 'Truffle Glazed Burger', price: 450, desc: 'Premium wagyu beef with black truffle aioli and aged cheddar.', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000', category: 'Main' },
-            { id: 102, name: 'Lobster Bisque', price: 320, desc: 'Creamy Atlantic lobster soup with a hint of cognac.', image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=1000', category: 'Starters' },
-            { id: 103, name: 'Saffron Risotto', price: 480, desc: 'Italian arborio rice cooked with premium Kashmiri saffron.', image: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?q=80&w=1000', category: 'Main' },
+            { id: 101, name: 'Dal Makhani Elite', price: 320, desc: 'Premium black lentils slow-cooked overnight.', image: 'https://images.unsplash.com/photo-1546833998-877b37c2e5c6?q=80&w=1000', category: 'Main' },
+            { id: 102, name: 'Paneer Lababdar', price: 350, desc: 'Creamy cottage cheese in tomato gravy.', image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?q=80&w=1000', category: 'Main' },
+            { id: 103, name: 'Garlic Naan', price: 60, desc: 'Tandoori bread with garlic and butter.', image: 'https://images.unsplash.com/photo-1601050638917-3f80fc014923?q=80&w=1000', category: 'Breads' },
         ]
     },
-    'highway-spice': {
-        name: 'Highway Spice',
-        rating: 4.7,
+    'haldiram---gurgaon': {
+        name: 'Haldiram - Gurgaon',
+        rating: 4.6,
         deliveryTime: '15-20 min',
-        category: 'Indian • Tandoor',
+        category: 'Indian Snacks • Sweets',
         banner: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=2072&auto=format&fit=crop',
         menu: [
-            { id: 201, name: 'Paneer Tikka Platter', price: 280, desc: 'Fresh cottage cheese cubes marinated in spicy yogurt and grilled.', image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?q=80&w=1000', category: 'Starters' },
-            { id: 202, name: 'Butter Chicken Elite', price: 420, desc: 'Classic murgh makhani with a creamy, velvety tomato gravy.', image: 'https://images.unsplash.com/photo-1603894584373-5ac82b245004?q=80&w=1000', category: 'Main' },
-            { id: 203, name: 'Garlic Butter Naan', price: 60, desc: 'Leavened clay oven bread topped with fresh garlic and butter.', image: 'https://images.unsplash.com/photo-1601050638917-3f80fc014923?q=80&w=1000', category: 'Breads' },
+            { id: 201, name: 'Chole Bhature', price: 180, desc: 'Classic spiced chickpeas with fluffy fried bread.', image: 'https://images.unsplash.com/photo-1626132646529-5006375bc85a?q=80&w=1000', category: 'Main' },
+            { id: 202, name: 'Raj Kachori', price: 120, desc: 'The king of chaats with yogurt and chutneys.', image: 'https://images.unsplash.com/photo-1601050638917-3f80fc014923?q=80&w=1000', category: 'Starters' },
+        ]
+    },
+    'mcd---behror': {
+        name: 'McD - Behror',
+        rating: 4.5,
+        deliveryTime: '10-15 min',
+        category: 'Fast Food • Burgers',
+        banner: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=2070&auto=format&fit=crop',
+        menu: [
+            { id: 301, name: 'McVeggie Burger', price: 120, desc: 'Classic veg patty with lettuce and mayo.', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000', category: 'Main' },
+            { id: 302, name: 'French Fries (L)', price: 95, desc: 'Golden crispy potato fries.', image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=1000', category: 'Snacks' },
         ]
     }
 };
+
 
 const MenuPage = () => {
     const { restaurantId } = useParams();
@@ -47,7 +58,8 @@ const MenuPage = () => {
 
     useEffect(() => {
         // Find restaurant by ID or name slug
-        const data = restaurantData[restaurantId] || restaurantData['royal-cuisines'];
+        const data = restaurantData[restaurantId] || restaurantData['highway-king---jaipur'];
+
         setRestaurant(data);
         window.scrollTo(0, 0);
     }, [restaurantId]);

@@ -22,10 +22,14 @@ public class OtpVerification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "_id")
     private UUID id;
 
-    @Column(name = "phone_number", nullable = false, length = 15)
+    @Column(name = "phone_number", nullable = true, length = 15)
     private String phoneNumber;
+
+    @Column(name = "email", nullable = true, length = 100)
+    private String email;
 
     @Column(name = "otp_code", nullable = false, length = 6)
     private String otpCode;
@@ -38,7 +42,7 @@ public class OtpVerification {
     private boolean isUsed = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_ts", updatable = false)
     private LocalDateTime createdAt;
 
     @CreatedBy

@@ -35,14 +35,20 @@ const Navbar = ({ isLoggedIn, userName, onLogout }) => {
     return (
         <nav className={`navbar ${isNavbarScrolled ? 'scrolled glass' : 'transparent'}`}>
             <div className="navbar-container">
-                <NavLink to="/" className="logo-link">
-                    <Logo size={28} />
+                <NavLink to={isLoggedIn ? "/dashboard" : "/"} className="logo-link">
+                    <Logo width={240} height={48} />
                 </NavLink>
 
                 <div className={`nav-links ${isOpen ? 'active' : ''}`}>
-                    <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setIsOpen(false)}>Home</NavLink>
-                    <NavLink to="/trending" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setIsOpen(false)}>Food</NavLink>
-                    <NavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setIsOpen(false)}>About</NavLink>
+                    {!isLoggedIn && (
+                        <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Home</NavLink>
+                    )}
+                    {isLoggedIn && (
+                        <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Dashboard</NavLink>
+                    )}
+                    <NavLink to="/trending" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Food</NavLink>
+
+                    <NavLink to="/about" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>About</NavLink>
                 </div>
 
                 <div className="nav-actions-group">

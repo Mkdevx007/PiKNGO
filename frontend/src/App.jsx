@@ -4,10 +4,14 @@ import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar/Navbar';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
-import ProfileScreen from './pages/ProfileScreen';
 import AboutPage from './pages/AboutPage';
+import ProfileScreen from './pages/ProfileScreen';
+import Dashboard from './pages/Dashboard';
+import TrendingPage from './pages/TrendingPage';
 import MenuPage from './pages/MenuPage';
 import './App.css';
+
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,14 +21,17 @@ function App() {
   const handleLogin = (data) => {
     setIsLoggedIn(true);
     setUserName(data.phoneNumber);
-    localStorage.setItem('token', data.token);
     localStorage.setItem('phone', data.phoneNumber);
     localStorage.setItem('userId', data.userId);
   };
 
   // Logout logic
-  const handleLogout = () => {
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (err) {
+      console.error("Logout failed on server", err);
+    }
     localStorage.removeItem('phone');
     localStorage.removeItem('userId');
     setIsLoggedIn(false);
@@ -32,12 +39,17 @@ function App() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const phone = localStorage.getItem('phone');
-    if (token) {
-      setIsLoggedIn(true);
-      setUserName(phone || 'User');
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await authApi.getProfile();
+        setIsLoggedIn(true);
+        setUserName(response.data.phoneNumber);
+      } catch (err) {
+        setIsLoggedIn(false);
+        setUserName('');
+      }
+    };
+    checkAuth();
   }, []);
 
   return (
@@ -47,12 +59,18 @@ function App() {
           <Navbar isLoggedIn={isLoggedIn} userName={userName} onLogout={handleLogout} />
           <main>
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <LandingPage isLoggedIn={isLoggedIn} />} />
+              <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />} />
               <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
+
               <Route path="/register" element={<AuthPage onLogin={handleLogin} />} />
               <Route path="/profile" element={isLoggedIn ? <ProfileScreen /> : <Navigate to="/login" />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/trending" element={<TrendingPage />} />
               <Route path="/menu/:restaurantId" element={<MenuPage />} />
+              <Route path="*" element={<Navigate to="/" />} />
+
+
             </Routes>
           </main>
         </div>

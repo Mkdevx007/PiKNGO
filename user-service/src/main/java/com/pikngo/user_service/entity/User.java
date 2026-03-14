@@ -11,10 +11,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -28,7 +25,8 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "_id")
     private UUID id;
 
     @NotBlank(message = "First name is required")
@@ -51,12 +49,22 @@ public class User {
     @Column(name = "user_password")
     private String userPassword;
 
-    @Column(name = "dob")
-    private LocalDate dob;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> addresses = new ArrayList<>();
+
+    @Column(name = "address_line_1")
+    private String addressLine1;
+
+    @Column(name = "address_line_2")
+    private String addressLine2;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "pincode")
+    private String pincode;
 
     @Builder.Default
     @Column(name = "is_active")
@@ -67,11 +75,11 @@ public class User {
     private boolean isDeleted = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_ts", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "modified_ts")
     private LocalDateTime updatedAt;
 
     @CreatedBy

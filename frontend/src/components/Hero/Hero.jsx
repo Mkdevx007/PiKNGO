@@ -3,8 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Navigation, ArrowRight } from 'lucide-react';
 import './Hero.css';
 
-const Hero = () => {
+const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
     const navigate = useNavigate();
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSearch(e);
+    };
+
     return (
         <section className="hero">
             {/* Floating Decorative Elements */}
@@ -46,13 +52,18 @@ const Hero = () => {
                     order ahead and enjoy a seamless pickup on your route.
                 </p>
 
-                <div className="search-wrapper glass animate-fade-in">
+                <form className="search-wrapper glass animate-fade-in" onSubmit={handleSubmit}>
                     <div className="search-pill">
                         <div className="search-input-group">
                             <MapPin size={18} className="search-icon" />
                             <div className="input-box">
                                 <label>Starting From</label>
-                                <input type="text" placeholder="Entry City" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Entry City" 
+                                    value={source}
+                                    onChange={(e) => setSource(e.target.value)}
+                                />
                             </div>
                         </div>
                         <div className="search-divider"></div>
@@ -60,15 +71,20 @@ const Hero = () => {
                             <Navigation size={18} className="search-icon" />
                             <div className="input-box">
                                 <label>Heading To</label>
-                                <input type="text" placeholder="Destination" />
+                                <input 
+                                    type="text" 
+                                    placeholder="Destination" 
+                                    value={destination}
+                                    onChange={(e) => setDestination(e.target.value)}
+                                />
                             </div>
                         </div>
-                        <button className="search-action-btn">
+                        <button type="submit" className="search-action-btn">
                             <Search size={20} />
                             <span>Explore Meals</span>
                         </button>
                     </div>
-                </div>
+                </form>
 
                 <div className="hero-features animate-fade-in">
                     <div className="feature-pill">

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
 :root {
   /* Premium Light Mode — Sunset Highway Theme */
   --bg-deep: #fff8f0;
@@ -22,6 +24,7 @@
 
   /* Fonts */
   --font-main: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Playfair Display', "Merriweather", "Georgia", serif;
 
   --transition-speed: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -81,8 +84,9 @@ h1,
 h2,
 h3,
 h4 {
+  font-family: var(--font-heading);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .gradient-text {
@@ -142,4 +146,81 @@ h4 {
 
 .animate-fade-in {
   animation: fadeIn 0.8s ease forwards;
+}
+
+/* ======================================================
+   Footer: Always Dark — Override light-mode variables
+   ====================================================== */
+.footer-premium,
+.footer-premium * {
+  --bg-deep: #020617;
+}
+
+/* Footer logo always white — footer is always dark */
+.footer-premium .footer-logo img {
+  filter: brightness(0) invert(1) drop-shadow(0 4px 15px rgba(255, 107, 0, 0.5)) !important;
+}
+
+.footer-premium .social-btn {
+  background: #0f172a !important;
+  color: #94a3b8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  flex-shrink: 0 !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  align-self: auto !important;
+}
+
+.footer-premium .social-btn:hover {
+  background: rgba(255, 93, 61, 0.12) !important;
+  color: #ff5d3d !important;
+  border-color: rgba(255, 93, 61, 0.3) !important;
+  transform: translateY(-4px) !important;
+}
+
+.footer-premium .footer-brand p {
+  color: rgba(148, 163, 184, 0.7) !important;
+}
+
+.footer-premium .link-col a {
+  color: rgba(148, 163, 184, 0.6) !important;
+}
+
+.footer-premium .link-col a:hover {
+  color: #f8fafc !important;
+}
+
+.footer-premium .footer-bottom p {
+  color: rgba(148, 163, 184, 0.5) !important;
+}
+
+.footer-premium .legal-links a {
+  color: rgba(148, 163, 184, 0.5) !important;
+}
+
+.footer-premium .legal-links a:hover {
+  color: #f8fafc !important;
+}
+
+/* Force footer to always look dark regardless of theme */
+.footer-premium {
+  background: #020617 !important;
+  color: #f8fafc !important;
+}
+
+.footer-premium .link-col h4 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.footer-premium .footer-bottom {
+  border-top-color: rgba(255, 255, 255, 0.06) !important;
 }

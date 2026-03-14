@@ -53,6 +53,7 @@ public class UserControllerIntegrationTest {
         regRequest.setLastName("Doe");
         regRequest.setEmail("john.doe@example.com");
         regRequest.setPhoneNumber(PHONE_NUMBER);
+        regRequest.setPassword("password123");
 
         mockMvc.perform(post("/api/v1/users/register")
                 .contentType(MediaType.APPLICATION_JSON)

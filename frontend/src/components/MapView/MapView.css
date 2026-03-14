@@ -1,0 +1,116 @@
+.map-view-container {
+    height: 100%;
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    background: #f1f1f1;
+}
+
+.premium-popup .leaflet-popup-content-wrapper {
+    background: rgba(15, 15, 15, 0.85) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    color: white;
+    padding: 10px;
+}
+
+.premium-popup .leaflet-popup-tip {
+    background: rgba(15, 15, 15, 0.85);
+}
+
+.map-popup h4 {
+    margin: 0 0 8px 0;
+    color: #ff6b00;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.map-popup p {
+    margin: 0 0 12px 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.4;
+}
+
+.popup-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.book-btn {
+    background: #ff6b00;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.book-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
+}
+
+/* Fix for Leaflet controls on dark mode if needed */
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-bar a {
+    background-color: white;
+}
+
+/* Custom Div Icon Styles */
+.custom-div-icon {
+    background: transparent;
+    border: none;
+}
+
+.marker-pin {
+    width: 24px;
+    height: 24px;
+    border-radius: 50% 50% 50% 0;
+    background: #ff6b00;
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -15px 0 0 -15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    border: 2px solid white;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.marker-pin::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    margin: 5px 0 0 5px;
+    background: white;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.custom-div-icon.marker-hovered .marker-pin {
+    background: #fff;
+    border-color: #ff6b00;
+    transform: rotate(-45deg) scale(1.4);
+    box-shadow: 0 0 20px #ff6b00, 0 0 40px #ff6b00;
+    z-index: 1000 !important;
+}
+
+.custom-div-icon.marker-hovered .marker-pin::after {
+    background: #ff6b00;
+}

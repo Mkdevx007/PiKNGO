@@ -1,35 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck } from 'lucide-react';
-import { authApi } from '../services/api';
+import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X } from 'lucide-react';
+import { authApi, addressApi } from '../services/api';
 import './Profile.css';
 
 const ProfileScreen = () => {
     const [user, setUser] = useState(null);
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({ 
+        firstName: '', lastName: '', email: '', 
+        addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' 
+    });
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [newAddress, setNewAddress] = useState({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const fetchProfile = async () => {
         try {
             const response = await authApi.getProfile();
             setUser(response.data);
-            fetchAddresses(response.data.id);
+            setEditData({
+                firstName: response.data.firstName || '',
+                lastName: response.data.lastName || '',
+                email: response.data.email || '',
+                addressLine1: response.data.addressLine1 || '',
+                addressLine2: response.data.addressLine2 || '',
+                city: response.data.city || '',
+                state: response.data.state || '',
+                pincode: response.data.pincode || '',
+            });
+            fetchAddresses();
         } catch (err) {
+            console.error('Profile fetch error:', err);
             setError('Failed to load profile');
-        } finally {
             setLoading(false);
         }
     };
 
-    const fetchAddresses = async (userId) => {
+    const fetchAddresses = async () => {
         try {
-            const response = await authApi.getAddresses(userId);
+            const response = await addressApi.getAll();
             setAddresses(response.data);
         } catch (err) {
-            console.error('Failed to fetch addresses', err);
+            console.error('Failed to fetch addresses:', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -37,24 +54,45 @@ const ProfileScreen = () => {
         fetchProfile();
     }, []);
 
-    const handleAddAddress = async (e) => {
+    const handleUpdateProfile = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccess('');
         try {
-            await authApi.addAddress(user.id, newAddress);
-            setSuccess('Address added successfully!');
-            setShowAddressForm(false);
-            setNewAddress({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
-            fetchAddresses(user.id);
+            const response = await authApi.updateProfile(editData);
+            setUser(response.data);
+            fetchAddresses(); // Refresh saved addresses list to sync with profile change
+            setSuccess('Profile updated successfully!');
+            setIsEditing(false);
         } catch (err) {
-            setError('Failed to add address');
+            setError(err.response?.data?.message || 'Failed to update profile');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleDeleteAddress = async (addressId) => {
-        if (!window.confirm('Are you sure you want to delete this address?')) return;
+    const handleAddAddress = async (e) => {
+        e.preventDefault();
+        setLoading(true);
         try {
-            await authApi.deleteAddress(user.id, addressId);
-            fetchAddresses(user.id);
+            await addressApi.create(newAddress);
+            setSuccess('Address added successfully!');
+            setShowAddressForm(false);
+            setNewAddress({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
+            fetchAddresses();
+        } catch (err) {
+            setError('Failed to add address');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteAddress = async (id) => {
+        if (!window.confirm('Delete this address?')) return;
+        try {
+            await addressApi.delete(id);
+            fetchAddresses();
         } catch (err) {
             setError('Failed to delete address');
         }
@@ -72,7 +110,7 @@ const ProfileScreen = () => {
         }
     };
 
-    if (loading) return (
+    if (loading && !user) return (
         <div className="loading-container">
             <div className="loader"></div>
             <p>Loading your elite profile...</p>
@@ -95,7 +133,12 @@ const ProfileScreen = () => {
                             <p className="user-membership">💎 Elite Member</p>
                         </div>
                         <div className="profile-header-actions">
-                            <button className="btn-primary-slim"><Edit2 size={16} /> Edit Profile</button>
+                            <button
+                                className={`btn-primary-slim ${isEditing ? 'active' : ''}`}
+                                onClick={() => setIsEditing(!isEditing)}
+                            >
+                                <Edit2 size={16} /> {isEditing ? 'Cancel Editing' : 'Edit Profile'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -126,11 +169,133 @@ const ProfileScreen = () => {
                                     <p>{user?.phoneNumber}</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="profile-card glass animate-fade-in-up span-full">
+                        <div className="card-header flex justify-between items-center w-full">
+                            <div className="flex items-center gap-2">
+                                <MapPin size={20} />
+                                <h3>Saved Addresses</h3>
+                            </div>
+                            <button className="btn-text flex items-center gap-1" onClick={() => setShowAddressForm(!showAddressForm)}>
+                                {showAddressForm ? <><X size={16} /> Cancel</> : <><Plus size={16} /> Add New</>}
+                            </button>
+                        </div>
+
+                        {showAddressForm && (
+                            <form onSubmit={handleAddAddress} className="address-form glass mb-4 p-4 animate-slide-in">
+                                <div className="grid-2">
+                                    <div className="form-group">
+                                        <label>Address Line 1</label>
+                                        <input type="text" value={newAddress.addressLine1} onChange={e => setNewAddress({ ...newAddress, addressLine1: e.target.value })} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Address Line 2 (Optional)</label>
+                                        <input type="text" value={newAddress.addressLine2} onChange={e => setNewAddress({ ...newAddress, addressLine2: e.target.value })} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>City</label>
+                                        <input type="text" value={newAddress.city} onChange={e => setNewAddress({ ...newAddress, city: e.target.value })} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>State</label>
+                                        <input type="text" value={newAddress.state} onChange={e => setNewAddress({ ...newAddress, state: e.target.value })} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Pincode</label>
+                                        <input type="text" value={newAddress.pincode} onChange={e => setNewAddress({ ...newAddress, pincode: e.target.value })} required />
+                                    </div>
+                                </div>
+                                <button type="submit" className="btn-primary w-full mt-4" disabled={loading}>
+                                    {loading ? 'Adding...' : 'Save New Address'}
+                                </button>
+                            </form>
+                        )}
+
+                        <div className="address-list grid-2 mt-4">
+                            {addresses.length > 0 ? (
+                                addresses.map((addr) => (
+                                    <div key={addr._id || addr.id} className="address-item glass animate-fade-in">
+                                        <div className="address-content">
+                                            <p className="font-bold">{addr.addressLine1}</p>
+                                            {addr.addressLine2 && <p className="text-sm opacity-80">{addr.addressLine2}</p>}
+                                            <p className="text-sm opacity-80">{addr.city}, {addr.state} - {addr.pincode}</p>
+                                        </div>
+                                        <div className="address-actions">
+                                            <button className="delete-btn" onClick={() => handleDeleteAddress(addr._id || addr.id)}>
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-center opacity-60 py-4 span-full">No saved addresses yet.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {isEditing && (
+                        <div className="profile-card glass animate-fade-in-up span-full">
+                            <div className="card-header">
+                                <Edit2 size={20} />
+                                <h3>Update Profile Information</h3>
+                            </div>
+                            <form onSubmit={handleUpdateProfile} className="edit-profile-form">
+                                <div className="grid-2">
+                                    <div className="form-group">
+                                        <label>First Name</label>
+                                        <input type="text" value={editData.firstName} onChange={e => setEditData({ ...editData, firstName: e.target.value })} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Last Name</label>
+                                        <input type="text" value={editData.lastName} onChange={e => setEditData({ ...editData, lastName: e.target.value })} required />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label>Email</label>
+                                    <input type="email" value={editData.email} onChange={e => setEditData({ ...editData, email: e.target.value })} required />
+                                </div>
+                                <div className="grid-2">
+                                    <div className="form-group">
+                                        <label>Address Line 1</label>
+                                        <input type="text" value={editData.addressLine1} onChange={e => setEditData({ ...editData, addressLine1: e.target.value })} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Address Line 2</label>
+                                        <input type="text" value={editData.addressLine2} onChange={e => setEditData({ ...editData, addressLine2: e.target.value })} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>City</label>
+                                        <input type="text" value={editData.city} onChange={e => setEditData({ ...editData, city: e.target.value })} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>State</label>
+                                        <input type="text" value={editData.state} onChange={e => setEditData({ ...editData, state: e.target.value })} />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Pincode</label>
+                                        <input type="text" value={editData.pincode} onChange={e => setEditData({ ...editData, pincode: e.target.value })} />
+                                    </div>
+                                </div>
+                                <button type="submit" className="btn-primary w-full mt-4" disabled={loading}>
+                                    {loading ? 'Saving Changes...' : 'Save Profile Changes'}
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    <div className="profile-card glass animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                        <div className="card-header">
+                            <MapPin size={20} />
+                            <h3>Primary Location</h3>
+                        </div>
+                        <div className="info-list">
                             <div className="info-row">
-                                <Calendar size={16} />
+                                <MapPin size={16} />
                                 <div className="info-details">
-                                    <label>Date of Birth</label>
-                                    <p>{user?.dob}</p>
+                                    <label>Home Address</label>
+                                    <p>{user?.addressLine1 ? `${user.addressLine1}, ${user.city}, ${user.state}` : <span className="text-gray-500 italic">Not set</span>}</p>
                                 </div>
                             </div>
                         </div>
@@ -158,42 +323,6 @@ const ProfileScreen = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="profile-card glass animate-fade-in-up span-full" style={{ animationDelay: '0.3s' }}>
-                        <div className="card-header">
-                            <MapPin size={20} />
-                            <h3>Saved Addresses</h3>
-                        </div>
-                        <div className="address-list">
-                            {addresses.length > 0 ? addresses.map(addr => (
-                                <div key={addr.id} className="address-box mb-3 flex justify-between items-center">
-                                    <div>
-                                        <p className="font-semibold">{addr.addressLine1}</p>
-                                        <p className="text-sm text-gray-400">{addr.city}, {addr.state} - {addr.pincode}</p>
-                                    </div>
-                                    <button onClick={() => handleDeleteAddress(addr.id)} className="text-red-500 hover:text-red-700">
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            )) : <p className="text-gray-500 italic">No addresses saved yet.</p>}
-                        </div>
-
-                        {showAddressForm ? (
-                            <form onSubmit={handleAddAddress} className="mt-4 grid grid-cols-2 gap-3 glass p-4 rounded-xl">
-                                <input className="span-2 bg-transparent border-b border-gray-600 p-2" placeholder="Address Line 1" value={newAddress.addressLine1} onChange={e => setNewAddress({ ...newAddress, addressLine1: e.target.value })} required />
-                                <input className="span-2 bg-transparent border-b border-gray-600 p-2" placeholder="Address Line 2 (Optional)" value={newAddress.addressLine2} onChange={e => setNewAddress({ ...newAddress, addressLine2: e.target.value })} />
-                                <input className="bg-transparent border-b border-gray-600 p-2" placeholder="City" value={newAddress.city} onChange={e => setNewAddress({ ...newAddress, city: e.target.value })} required />
-                                <input className="bg-transparent border-b border-gray-600 p-2" placeholder="State" value={newAddress.state} onChange={e => setNewAddress({ ...newAddress, state: e.target.value })} required />
-                                <input className="bg-transparent border-b border-gray-600 p-2" placeholder="Pincode" value={newAddress.pincode} onChange={e => setNewAddress({ ...newAddress, pincode: e.target.value })} required />
-                                <div className="span-2 flex gap-2">
-                                    <button type="submit" className="btn-primary-slim">Save</button>
-                                    <button type="button" onClick={() => setShowAddressForm(false)} className="btn-secondary-slim">Cancel</button>
-                                </div>
-                            </form>
-                        ) : (
-                            <button onClick={() => setShowAddressForm(true)} className="btn-secondary-slim" style={{ marginTop: '1.5rem' }}>+ Add New Address</button>
-                        )}
                     </div>
 
                     <div className="profile-card danger-card animate-fade-in-up span-full" style={{ animationDelay: '0.4s' }}>

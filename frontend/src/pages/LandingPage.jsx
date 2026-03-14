@@ -1,16 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero/Hero';
 import FoodCard from '../components/FoodCard/FoodCard';
-import { Truck, Clock, ShieldCheck, Map } from 'lucide-react';
+import { Truck, Clock, ShieldCheck, Map, MapPin, Loader2, Twitter, Instagram, Linkedin } from 'lucide-react';
 import Logo from '../components/Logo/Logo';
+import { restaurantApi } from '../services/api';
+import { getCoordsForCity } from '../utils/geoUtils';
 import './LandingPage.css';
-
-const trendingFoods = [
-    { id: 1, name: 'Gourmet Truffle Burger', restaurant: 'Royal Cuisines', price: 450, rating: 4.9, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1500&auto=format&fit=crop' },
-    { id: 2, name: 'Avocado Zen Bowl', restaurant: 'Green Bliss', price: 380, rating: 4.7, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1500&auto=format&fit=crop' },
-    { id: 3, name: 'Premium Mutton Biryani', restaurant: 'Legacy Flavors', price: 520, rating: 4.8, image: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?q=80&w=1500&auto=format&fit=crop' },
-    { id: 4, name: 'Classic Paneer Tikka', restaurant: 'Highway Spice', price: 280, rating: 4.7, image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?q=80&w=1500&auto=format&fit=crop' },
-];
 
 const steps = [
     { id: 1, title: 'Search Route', desc: 'Enter your starting point and destination to find top-rated rest stops.', icon: <Map size={32} /> },
@@ -18,14 +13,162 @@ const steps = [
     { id: 3, title: 'Seamless Pickup', desc: 'Arrive at the stop, skip the queue, and grab your fresh meal.', icon: <Truck size={32} /> },
 ];
 
-const LandingPage = () => {
+const partners = [
+    { name: 'Haldiram', logo: 'https://www.logo.wine/a/logo/Haldiram\'s/Haldiram\'s-Logo.wine.svg' },
+    { name: 'McDonalds', logo: 'https://www.logo.wine/a/logo/McDonald%27s/McDonald%27s-Logo.wine.svg' },
+    { name: 'Burger King', logo: 'https://www.logo.wine/a/logo/Burger_King/Burger_King-Logo.wine.svg' },
+    { name: 'KFC', logo: 'https://www.logo.wine/a/logo/KFC/KFC-Logo.wine.svg' },
+    { name: 'Starbucks', logo: 'https://www.logo.wine/a/logo/Starbucks/Starbucks-Logo.wine.svg' },
+    { name: 'Costa Coffee', logo: 'https://www.logo.wine/a/logo/Costa_Coffee/Costa_Coffee-Logo.wine.svg' },
+];
+
+const LandingPage = ({ isLoggedIn }) => {
+    const [restaurants, setRestaurants] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [locationStatus, setLocationStatus] = useState('Checking location...');
+    const [searchQuery, setSearchQuery] = useState({ source: '', destination: '' });
+
+    useEffect(() => {
+        const getLocation = () => {
+            if (!navigator.geolocation) {
+                setLocationStatus('Geolocation not supported');
+                fetchAllRestaurants();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocationStatus('Showing restaurants near you');
+                    fetchNearbyRestaurants(latitude, longitude);
+                },
+                (error) => {
+                    console.log("Geolocation error, falling back to all restaurants", error);
+                    setLocationStatus('All Premium Stops');
+                    fetchAllRestaurants();
+                },
+                { timeout: 5000, enableHighAccuracy: false }
+            );
+        };
+
+        getLocation();
+    }, []);
+
+    const fetchAllRestaurants = async () => {
+        setLoading(true);
+        console.log("Fetching all restaurants...");
+        try {
+            const response = await restaurantApi.getAll();
+            console.log("Response:", response.data);
+            setRestaurants(response.data);
+            setLocationStatus('All Premium Stops');
+        } catch (err) {
+            console.error("Fetch All Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchNearbyRestaurants = async (lat, lon) => {
+        setLoading(true);
+        console.log(`Fetching nearby restaurants for ${lat}, ${lon}...`);
+        try {
+            const response = await restaurantApi.getNearby(lat, lon);
+            console.log("Nearby Response:", response.data);
+            setRestaurants(response.data);
+        } catch (err) {
+            console.error("Nearby Fetch Error:", err);
+            fetchAllRestaurants();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRouteSearch = async (e) => {
+        if (e) e.preventDefault();
+        
+        const src = searchQuery.source.toLowerCase().trim();
+        const dest = searchQuery.destination.toLowerCase().trim();
+
+        console.log(`Searching route: ${src} to ${dest}...`);
+        if (!src || !dest) {
+            alert("Please enter both a Starting City and a Destination to explore meals.");
+            return;
+        }
+
+        setLoading(true);
+        
+        // Scroll to results section, slight delay ensures UI paint before scroll
+        setTimeout(() => {
+            const resultsSection = document.getElementById('restaurant-results');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 50);
+
+        try {
+            // Get coordinates from our demo mapping
+            const srcCoord = getCoordsForCity(searchQuery.source);
+            const destCoord = getCoordsForCity(searchQuery.destination);
+
+            console.log(`Using coords: SRC(${srcCoord.lat}, ${srcCoord.lon}), DEST(${destCoord.lat}, ${destCoord.lon})`);
+
+            const response = await restaurantApi.searchByRoute(
+                srcCoord.lat, srcCoord.lon, 
+                destCoord.lat, destCoord.lon,
+                100 // Increased radius to 100km to ensure it catches demo data points
+            );
+            
+            console.log("Search Response:", response.data);
+            setRestaurants(response.data);
+            setLocationStatus(`Route: ${searchQuery.source} ➔ ${searchQuery.destination}`);
+            
+            if (response.data.length === 0) {
+                console.warn("No restaurants found along this route.");
+            }
+        } catch (err) {
+            console.error("Route Search Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const restaurantImages = [
+        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1470&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1374&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1470&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1470&auto=format&fit=crop"
+    ];
+
     return (
         <div className="landing-page auth-page-global-bg">
-            {/* Premium Interactive Background */}
             <div className="bg-mesh"></div>
             <div className="bg-vignette"></div>
 
-            <Hero />
+            <Hero 
+                isLoggedIn={isLoggedIn}
+                source={searchQuery.source}
+                destination={searchQuery.destination}
+                setSource={(val) => setSearchQuery(prev => ({ ...prev, source: val }))}
+                setDestination={(val) => setSearchQuery(prev => ({ ...prev, destination: val }))}
+                onSearch={handleRouteSearch}
+            />
+
+            <section className="partner-ticker">
+                <div className="ticker-wrapper">
+                    <div className="ticker-track">
+                        {[...partners, ...partners].map((partner, i) => (
+                            <div key={i} className="partner-logo">
+                                <img src={partner.logo} alt={partner.name} title={partner.name} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+
+
 
             <section className="how-it-works container animate-fade-in">
                 <div className="section-header">
@@ -46,25 +189,52 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            <section className="trending-section animate-fade-in">
+            {/* Removed Stats and Showcase for professional look */}
+
+            <section id="restaurant-results" className="trending-section animate-fade-in">
                 <div className="container">
                     <div className="section-header flex-row">
                         <div>
-                            <span className="section-badge gold-text">Trending Now</span>
-                            <h2 className="section-title">Most Ordered <span className="gradient-text">Delicacies</span></h2>
+                            <span className="section-badge gold-text">{locationStatus}</span>
+                            <h2 className="section-title">Premium <span className="gradient-text">Discovery</span></h2>
                         </div>
-                        <button className="landing-btn-secondary glass-button">
-                            View Full Menu
+                        <button className="landing-btn-secondary glass-button" onClick={fetchAllRestaurants}>
+                            View All
                         </button>
                     </div>
 
-                    <div className="food-grid">
-                        {trendingFoods.map(food => (
-                            <FoodCard key={food.id} {...food} />
-                        ))}
-                    </div>
+                    {loading ? (
+                        <div className="loading-state">
+                            <Loader2 className="spinner" size={48} />
+                            <p>Searching for premium spots...</p>
+                        </div>
+                    ) : (
+                        <div className="food-grid">
+                            {restaurants.length > 0 ? (
+                                restaurants.map((res, index) => (
+                                    <FoodCard 
+                                        key={res._id || res.id} 
+                                        name={res.resturantName || res.restaurantName} 
+                                        restaurant={res.resturantName || res.restaurantName} 
+                                        address={res.address}
+                                        price="$$" 
+                                        rating={4.5} 
+                                        image={restaurantImages[index % restaurantImages.length]}
+                                    />
+
+                                ))
+                            ) : (
+                                <div className="no-results glass-card">
+                                    <h3>No spots found</h3>
+                                    <p>Try exploring all available restaurants.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </section>
+
+
 
             <section className="cta-section container">
                 <div className="cta-card glass">
@@ -82,21 +252,21 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            <footer className="footer-premium">
-                <div className="container footer-grid">
-                    <div className="footer-brand">
-                        <Logo size={36} className="logo-large" />
-                        <p>
-                            Your ultimate companion for highway food discovery.
-                            Pre-order meals from the best rest stops along your route.
-                        </p>
-                        <div className="footer-socials">
-                            <a href="#" className="social-icon" aria-label="Twitter">𝕏</a>
-                            <a href="#" className="social-icon" aria-label="Instagram">📸</a>
-                            <a href="#" className="social-icon" aria-label="LinkedIn">in</a>
+        <footer className="footer-premium">
+                <div className="container">
+                    <div className="footer-grid">
+                        <div className="footer-brand">
+                            <Logo size={64} className="logo-large footer-logo" />
+                            <p>
+                                Your ultimate companion for highway food discovery.
+                                Pre-order meals from the best rest stops along your route.
+                            </p>
+                            <div className="footer-socials">
+                                <a href="#" className="social-btn" aria-label="Twitter"><Twitter size={18} /></a>
+                                <a href="#" className="social-btn" aria-label="Instagram"><Instagram size={18} /></a>
+                                <a href="#" className="social-btn" aria-label="LinkedIn"><Linkedin size={18} /></a>
+                            </div>
                         </div>
-                    </div>
-                    <div className="footer-links-group">
                         <div className="link-col">
                             <h4>Company</h4>
                             <a href="/about">About Us</a>
@@ -112,14 +282,13 @@ const LandingPage = () => {
                             <a href="#">Partners</a>
                         </div>
                     </div>
-                </div>
-                <div className="footer-divider"></div>
-                <div className="footer-bottom">
-                    <p>&copy; 2026 PikNGo Inc. All rights reserved.</p>
-                    <div className="legal-links">
-                        <a href="#">Privacy</a>
-                        <a href="#">Terms</a>
-                        <a href="#">Cookies</a>
+                    <div className="footer-bottom">
+                        <p>&copy; 2026 PikNGo Inc. All rights reserved.</p>
+                        <div className="legal-links">
+                            <a href="#">Privacy</a>
+                            <a href="#">Terms</a>
+                            <a href="#">Cookies</a>
+                        </div>
                     </div>
                 </div>
             </footer>

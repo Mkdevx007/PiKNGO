@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import java.time.LocalDate;
 
 @Data
 public class UserRegistrationRequest {
@@ -24,7 +23,11 @@ public class UserRegistrationRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-    private LocalDate dob;
 
-    private String address;
+
+    private String addressLine1;
+    private String addressLine2;
+    private String city;
+    private String state;
+    private String pincode;
 }

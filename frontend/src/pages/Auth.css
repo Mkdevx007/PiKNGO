@@ -5,10 +5,13 @@
     align-items: center;
     background: transparent;
     padding: 60px 2rem 40px;
-    /* Significantly reduced to give card more vertical space */
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+.auth-page.theme-aurora {
+    background: #020617;
 }
 
 .back-home-btn {
@@ -67,9 +70,9 @@ body:not(.dark-theme) .back-home-btn:hover {
     display: flex;
     width: 100%;
     max-width: 1080px;
-    min-height: 620px;
-    /* Reduced from 660px for strict one-page fit */
-    background: rgba(15, 23, 42, 0.75);
+    min-height: 680px;
+    /* Sufficient for multi-step segmented form */
+    background: rgba(15, 23, 42, 0.9);
     /* Enhanced Transparency */
     backdrop-filter: blur(25px);
     border-radius: 40px;
@@ -78,11 +81,19 @@ body:not(.dark-theme) .back-home-btn:hover {
         0 40px 100px rgba(0, 0, 0, 0.5),
         inset 0 0 80px rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    z-index: 10;
     transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     /* Performance & Sharpness */
     transform: translateZ(0);
+    position: relative;
+    z-index: 10;
+}
+
+body:not(.dark-theme) .auth-split-container {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(230, 74, 25, 0.12);
+    box-shadow: 
+        0 40px 100px rgba(45, 36, 30, 0.12),
+        0 10px 30px rgba(230, 74, 25, 0.05);
 }
 
 .auth-split-container::before {
@@ -135,10 +146,19 @@ body:not(.dark-theme) .back-home-btn:hover {
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg,
-            rgba(2, 6, 23, 0.3) 0%,
-            rgba(2, 6, 23, 0.8) 60%,
-            var(--bg-deep) 100%);
+            rgba(0, 0, 0, 0.4) 0%,
+            rgba(0, 0, 0, 0.7) 60%,
+            rgba(0, 0, 0, 0.9) 100%);
+    backdrop-filter: brightness(0.9);
     z-index: 2;
+}
+
+body:not(.dark-theme) .auth-visual-overlay {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(230, 74, 25, 0.15) 60%,
+            rgba(255, 255, 255, 0.3) 100%);
+    backdrop-filter: none;
 }
 
 .auth-brand-content {
@@ -196,10 +216,14 @@ body:not(.dark-theme) .back-home-btn:hover {
     border-left: 1px solid var(--glass-border);
 }
 
+body:not(.dark-theme) .auth-form-side {
+    background: #fffcf9;
+}
+
 .auth-flip-inner {
     position: relative;
     width: 100%;
-    min-height: 620px;
+    min-height: 680px;
     /* Matched with container */
     transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     transform-style: preserve-3d;
@@ -220,11 +244,48 @@ body:not(.dark-theme) .back-home-btn:hover {
     width: 100%;
     min-height: 100%;
     backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 2.5rem;
-    /* Tighter vertical padding */
+    padding: 2.5rem 3rem;
+    overflow: hidden;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    transition: opacity 0.3s ease;
+}
+
+body:not(.dark-theme) .auth-card-front,
+body:not(.dark-theme) .auth-card-back {
+    background: #fffcf9;
+}
+
+/* Fix for Hit-Testing / Clicks on hidden faces */
+.auth-split-container:not(.flipped) .auth-card-back,
+.auth-split-container.flipped .auth-card-front {
+    pointer-events: none;
+    visibility: hidden;
+    /* Fallback for older browsers */
+}
+
+/* Ensure active face gets events */
+.auth-split-container.flipped .auth-card-back,
+.auth-split-container:not(.flipped) .auth-card-front {
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.auth-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+body:not(.dark-theme) .auth-subtitle {
+    color: var(--text-secondary);
+    opacity: 0.9;
 }
 
 .auth-card-back {
@@ -235,8 +296,7 @@ body:not(.dark-theme) .back-home-btn:hover {
     width: 100%;
     max-width: 480px;
     animation: contentReveal 0.8s ease backwards;
-    /* Fix Blurring */
-    transform: translateZ(0);
+    /* Removed translateZ(1px) as it breaks input hit-testing / clicking in 3D space */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -274,15 +334,13 @@ body:not(.dark-theme) .back-home-btn:hover {
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    /* Tighter gap */
+    gap: 1.2rem;
 }
 
 .auth-form.grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.8rem;
-    /* Reduced from 1.2rem */
+    gap: 1.2rem;
 }
 
 .form-group {
@@ -330,8 +388,7 @@ body:not(.dark-theme) .back-home-btn:hover {
 
 .input-wrapper input {
     width: 100%;
-    padding: 0.8rem 1.2rem 0.8rem 3.4rem;
-    /* Compressed vertical padding */
+    padding: 0.7rem 1.2rem 0.7rem 3.4rem;
     background: var(--bg-deep);
     border: 1.5px solid var(--glass-border);
     border-radius: 16px;
@@ -350,6 +407,103 @@ body:not(.dark-theme) .back-home-btn:hover {
     box-shadow:
         0 10px 25px var(--accent-orange-glow),
         0 0 0 4px var(--accent-orange-glow);
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+    z-index: 10;
+}
+
+.auth-logo-badge {
+    width: auto;
+    min-height: 80px;
+    height: auto;
+    padding: 0 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure Logo text isn't squeezed */
+.auth-logo-badge .logo-wrapper {
+    gap: 12px !important;
+}
+
+.elite-badge {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+}
+
+.elite-badge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+    z-index: 1;
+}
+
+.badge-glow {
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+    opacity: 0.15;
+    filter: blur(20px);
+    animation: rotate-glow 10s linear infinite;
+    z-index: 0;
+}
+
+@keyframes rotate-glow {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.auth-logo-badge:hover {
+    transform: translateY(-5px) scale(1.05);
+    border-color: var(--primary-color);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 126, 95, 0.2);
+}
+
+.password-toggle-btn:hover {
+    color: var(--accent-orange);
+}
+
+.progress-container {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+    box-shadow: 0 0 15px rgba(255, 126, 95, 0.4);
 }
 
 .dark-theme .input-wrapper input:focus {
@@ -394,6 +548,39 @@ body:not(.dark-theme) .back-home-btn:hover {
 .dark-theme .method-toggle button.active {
     background: var(--bg-navy);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Sub-method Toggle (Phone vs Email) */
+.sub-method-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    animation: fieldReveal 0.6s ease backwards;
+}
+
+.sub-method-toggle button {
+    padding: 0.5rem 1.2rem;
+    border-radius: 100px;
+    border: 1.5px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sub-method-toggle button.active {
+    background: var(--accent-orange);
+    border-color: var(--accent-orange);
+    color: white;
+    box-shadow: 0 5px 15px var(--accent-orange-glow);
+}
+
+.sub-method-toggle button:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-muted);
 }
 
 /* Button Upgrades */
@@ -740,6 +927,7 @@ body:not(.dark-theme) .bg-particles {
     filter: blur(100px);
     opacity: 0.8;
     pointer-events: none;
+    display: block !important;
 }
 
 .blob {
@@ -747,6 +935,7 @@ body:not(.dark-theme) .bg-particles {
     border-radius: 50%;
     mix-blend-mode: screen;
     animation: float 20s infinite alternate ease-in-out;
+    z-index: 1;
 }
 
 .blob-1 {
@@ -881,6 +1070,81 @@ body:not(.dark-theme) .blob-3 {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+
+.form-actions.multi-step {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.5rem;
+    background: var(--glass-bg);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.security-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.security-notice svg {
+    color: #10b981;
+    /* Success Green */
+}
+
+.animate-slide-in {
+    animation: slideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-2 {
+    flex: 2;
 }
 
 /* Mobile Responsiveness */

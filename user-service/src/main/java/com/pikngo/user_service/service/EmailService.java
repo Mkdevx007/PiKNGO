@@ -7,4 +7,6 @@ package com.pikngo.user_service.service;
  */
 public interface EmailService {
     void sendEmail(String to, String subject, String body);
+
+    void sendOtpEmail(String email, String otp);
 }

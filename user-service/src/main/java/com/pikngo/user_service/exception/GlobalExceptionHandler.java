@@ -91,6 +91,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle HttpMessageNotReadableException - when JSON parsing fails
+     */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex, WebRequest request) {
+        log.warn("HttpMessageNotReadableException: {}", ex.getMessage());
+        
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bad Request");
+        body.put("message", "Malformed JSON request or missing body");
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handle validation errors from @Valid annotations
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)

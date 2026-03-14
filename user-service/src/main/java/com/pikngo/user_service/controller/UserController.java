@@ -7,8 +7,7 @@ import com.pikngo.user_service.dto.UserRegistrationRequest;
 import com.pikngo.user_service.entity.User;
 import com.pikngo.user_service.service.AuthService;
 import com.pikngo.user_service.service.UserService;
-import com.pikngo.user_service.service.AddressService;
-import com.pikngo.user_service.entity.Address;
+
 import com.pikngo.user_service.utils.JwtUtils;
 import com.pikngo.user_service.exception.UserNotFoundException;
 import com.pikngo.user_service.repository.UserRepository;
@@ -27,7 +26,6 @@ public class UserController {
     private final AuthService authService;
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
-    private final AddressService addressService;
 
     @PostMapping("/register")
     public ResponseEntity<com.pikngo.user_service.dto.ApiResponse<User>> registerUser(
@@ -39,7 +37,8 @@ public class UserController {
     }
 
     @PostMapping("/login/password")
-    public ResponseEntity<JwtResponse> loginWithPassword(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<JwtResponse> loginWithPassword(@Valid @RequestBody LoginRequest request,
+            jakarta.servlet.http.HttpServletResponse response) {
         boolean isValid = authService.loginWithPassword(request);
         if (!isValid) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -51,9 +50,24 @@ public class UserController {
                 .or(() -> userRepository.findByEmail(identifier))
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
+        // Restore soft-deleted account on successful login
+        if (user.isDeleted()) {
+            user.setDeleted(false);
+            user.setActive(true);
+            userRepository.save(user);
+        }
+
         String token = jwtUtils.generateToken(user.getPhoneNumber());
+
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // Set to true in production with HTTPS
+        cookie.setPath("/");
+        cookie.setMaxAge(86400); // 1 day
+        response.addCookie(cookie);
+
         return ResponseEntity.ok(JwtResponse.builder()
-                .token(token)
+                .token("protected")
                 .phoneNumber(user.getPhoneNumber())
                 .userId(user.getId())
                 .build());
@@ -65,24 +79,53 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/login/send-email-otp")
+    public ResponseEntity<Void> sendEmailOtp(@RequestParam String email) {
+        authService.sendEmailOtp(email);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/login/verify-otp")
-    public ResponseEntity<JwtResponse> verifyOtp(@Valid @RequestBody OtpVerificationRequest request) {
-        // 1. Verify Token (Firebase or Local)
+    public ResponseEntity<JwtResponse> verifyOtp(@Valid @RequestBody OtpVerificationRequest request,
+            jakarta.servlet.http.HttpServletResponse response) {
+        // 1. Verify Token (Firebase or Local SMS or Email)
         boolean isValid = authService.verifyOtp(request);
         if (!isValid) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // 2. Check if user exists in database
-        User user = userRepository.findByPhoneNumber(request.getPhoneNumber())
-                .orElseThrow(() -> new UserNotFoundException(
-                        "User not registered with phone number: " + request.getPhoneNumber()));
+        // 2. Check if user exists in database (using phone or email)
+        User user;
+        if (request.getPhoneNumber() != null) {
+            user = userRepository.findByPhoneNumber(request.getPhoneNumber())
+                    .orElseThrow(() -> new UserNotFoundException(
+                            "User not registered with phone number: " + request.getPhoneNumber()));
+        } else {
+            user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new UserNotFoundException(
+                            "User not registered with email: " + request.getEmail()));
+        }
 
-        // 3. Generate JWT
-        String token = jwtUtils.generateToken(request.getPhoneNumber());
+        // Restore soft-deleted account on successful login
+        if (user.isDeleted()) {
+            user.setDeleted(false);
+            user.setActive(true);
+            userRepository.save(user);
+        }
+
+        // 3. Generate JWT (using phone number as principal)
+        String token = jwtUtils.generateToken(user.getPhoneNumber());
+
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // Set to true in production with HTTPS
+        cookie.setPath("/");
+        cookie.setMaxAge(86400); // 1 day
+        response.addCookie(cookie);
+
         return ResponseEntity.ok(JwtResponse.builder()
-                .token(token)
-                .phoneNumber(request.getPhoneNumber())
+                .token("protected")
+                .phoneNumber(user.getPhoneNumber())
                 .userId(user.getId())
                 .build());
     }
@@ -110,26 +153,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // --- Address Management ---
-    @GetMapping("/{userId}/addresses")
-    public ResponseEntity<java.util.List<Address>> getAddresses(@PathVariable java.util.UUID userId) {
-        return ResponseEntity.ok(addressService.getAddressesByUserId(userId));
-    }
-
-    @PostMapping("/{userId}/addresses")
-    public ResponseEntity<Address> addAddress(@PathVariable java.util.UUID userId,
-            @Valid @RequestBody Address address) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(addressService.addAddress(userId, address));
-    }
-
-    @PutMapping("/{userId}/addresses/{addressId}")
-    public ResponseEntity<Address> updateAddress(@PathVariable java.util.UUID userId,
-            @PathVariable java.util.UUID addressId,
-            @Valid @RequestBody Address address) {
-        return ResponseEntity.ok(addressService.updateAddress(userId, addressId, address));
-    }
-
     @PostMapping("/forgot-password")
     public ResponseEntity<com.pikngo.user_service.dto.ApiResponse<String>> forgotPassword(@RequestParam String email) {
         authService.processForgotPassword(email);
@@ -141,5 +164,16 @@ public class UserController {
             @RequestParam String newPassword) {
         authService.resetPassword(token, newPassword);
         return ResponseEntity.ok(com.pikngo.user_service.dto.ApiResponse.success("Password successfully reset", null));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(jakarta.servlet.http.HttpServletResponse response) {
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
     }
 }

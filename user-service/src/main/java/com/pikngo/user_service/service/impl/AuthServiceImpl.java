@@ -68,8 +68,10 @@ public class AuthServiceImpl implements AuthService {
     public boolean verifyOtp(OtpVerificationRequest request) {
         if (request.getFirebaseToken() != null && !request.getFirebaseToken().isBlank()) {
             return verifyFirebaseToken(request.getFirebaseToken(), request.getPhoneNumber());
-        } else {
+        } else if (request.getPhoneNumber() != null) {
             return verifyLocalOtp(request.getPhoneNumber(), request.getOtpCode());
+        } else {
+            return verifyEmailOtp(request.getEmail(), request.getOtpCode());
         }
     }
 
@@ -91,22 +93,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean verifyLocalOtp(String phoneNumber, String code) {
-        return otpRepository.findTopByPhoneNumberAndIsUsedOrderByCreatedAtDesc(phoneNumber, false)
+        return otpRepository.findTopByPhoneNumberAndOtpCodeAndIsUsedOrderByCreatedAtDesc(phoneNumber, code, false)
                 .map(otp -> {
                     if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
                         log.warn("OTP expired for {}", phoneNumber);
                         return false;
                     }
-                    if (otp.getOtpCode().equals(code)) {
-                        otp.setUsed(true);
-                        otpRepository.save(otp);
-                        log.info("Local OTP verified successfully for {}", phoneNumber);
-                        return true;
-                    }
-                    log.warn("Invalid OTP code for {}", phoneNumber);
-                    return false;
+                    otp.setUsed(true);
+                    otpRepository.save(otp);
+                    log.info("Local OTP verified successfully for {}", phoneNumber);
+                    return true;
                 }).orElseGet(() -> {
-                    log.warn("No unused OTP found for {}", phoneNumber);
+                    log.warn("No matching unused OTP found for {}", phoneNumber);
                     return false;
                 });
     }
@@ -132,15 +130,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void processForgotPassword(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(
                         "No account found with this email"));
 
-        // Delete existing token if any
+        // Delete existing token if any to avoid unique constraint violation
         tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
 
-        String token = UUID.randomUUID().toString();
+        // Generate a simpler 8-character token for easier manual entry
+        String token = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         PasswordResetToken resetToken = PasswordResetToken
                 .builder()
                 .token(token)
@@ -151,7 +151,12 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.save(resetToken);
 
         log.info("Password reset token generated for {}: {}", email, token);
-        emailService.sendEmail(email, "Password Reset", "Your reset token is: " + token);
+        emailService.sendEmail(email, "PikNGo Password Reset",
+                "Hello " + user.getFirstName() + ",\n\n" +
+                        "A password reset was requested for your PikNGo account.\n" +
+                        "Your reset token is: " + token + "\n\n" +
+                        "This token will expire in 24 hours.\n\n" +
+                        "If you did not request this, please ignore this email.");
     }
 
     @Override
@@ -171,5 +176,44 @@ public class AuthServiceImpl implements AuthService {
 
         tokenRepository.delete(resetToken);
         log.info("Password successfully reset for user: {}", user.getEmail());
+    }
+
+    @Override
+    public void sendEmailOtp(String email) {
+        // 1. Check if user exists
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+
+        String otpCode = String.format("%06d", new Random().nextInt(999999));
+        log.info("Generated Email OTP for {}: {}", email, otpCode);
+
+        OtpVerification otp = OtpVerification.builder()
+                .email(email)
+                .phoneNumber(user.getPhoneNumber())
+                .otpCode(otpCode)
+                .expiryTime(LocalDateTime.now().plusMinutes(5))
+                .isUsed(false)
+                .build();
+
+        otpRepository.save(otp);
+        emailService.sendOtpEmail(email, otpCode);
+    }
+
+    @Override
+    public boolean verifyEmailOtp(String email, String otpCode) {
+        return otpRepository.findTopByEmailAndOtpCodeAndIsUsedOrderByCreatedAtDesc(email, otpCode, false)
+                .map(otp -> {
+                    if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
+                        log.warn("Email OTP expired for {}", email);
+                        return false;
+                    }
+                    otp.setUsed(true);
+                    otpRepository.save(otp);
+                    log.info("Email OTP verified successfully for {}", email);
+                    return true;
+                }).orElseGet(() -> {
+                    log.warn("No matching unused Email OTP found for {}", email);
+                    return false;
+                });
     }
 }
