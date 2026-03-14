@@ -1,0 +1,31 @@
+# OS files
+Thumbs.db
+Desktop.ini
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build & Dependency folders
+node_modules/
+target/
+build/
+bin/
+out/
+
+# Environment & Secrets
+.env
+.env.local
+*.jks
+src/main/resources/service-account.json
+credentials.json
+
+# Logs
+*.log
+logs/
+temp/
+
+# Spring Boot temporary files
+.mvn/wrapper/maven-wrapper.jar
