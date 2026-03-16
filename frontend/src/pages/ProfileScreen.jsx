@@ -1,21 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { authApi, addressApi } from '../services/api';
 import './Profile.css';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ onProfileUpdate }) => {
     const [user, setUser] = useState(null);
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState({ 
-        firstName: '', lastName: '', email: '', 
-        addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' 
-    });
-    const [showAddressForm, setShowAddressForm] = useState(false);
-    const [newAddress, setNewAddress] = useState({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const fileInputRef = useRef(null);
+
+    const [editData, setEditData] = useState({ 
+        firstName: '', lastName: '', email: '', 
+        addressLine1: '', addressLine2: '', city: '', state: '', pincode: '',
+        profileImageUrl: ''
+    });
+
+    const getPhotoUrl = (userId) => {
+        if (user?.profileImageUrl) return user.profileImageUrl;
+        if (!userId) return '';
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
+        const url = `${baseUrl}/users/profile/photo/${userId}?t=${new Date().getTime()}`;
+        console.log("Photo URL generated:", url);
+        return url;
+    };
+
+    const handlePhotoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setUploadingPhoto(true);
+        setError('');
+        setSuccess('');
+        try {
+            await authApi.uploadProfilePhoto(formData);
+            setSuccess('Profile photo updated successfully!');
+            // Refresh profile
+            const response = await authApi.getProfile();
+            setUser(response.data);
+            if (onProfileUpdate) onProfileUpdate(response.data);
+        } catch (err) {
+            setError('Failed to upload photo. Please try again.');
+        } finally {
+            setUploadingPhoto(false);
+        }
+    };
+
+    const [showAddressForm, setShowAddressForm] = useState(false);
+    const [newAddress, setNewAddress] = useState({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
 
     const fetchProfile = async () => {
         try {
@@ -30,6 +68,7 @@ const ProfileScreen = () => {
                 city: response.data.city || '',
                 state: response.data.state || '',
                 pincode: response.data.pincode || '',
+                profileImageUrl: response.data.profileImageUrl || '',
             });
             fetchAddresses();
         } catch (err) {
@@ -62,6 +101,7 @@ const ProfileScreen = () => {
         try {
             const response = await authApi.updateProfile(editData);
             setUser(response.data);
+            if (onProfileUpdate) onProfileUpdate(response.data);
             fetchAddresses(); // Refresh saved addresses list to sync with profile change
             setSuccess('Profile updated successfully!');
             setIsEditing(false);
@@ -124,9 +164,37 @@ const ProfileScreen = () => {
                     <div className="profile-header-card glass animate-fade-in">
                         <div className="profile-avatar-wrapper">
                             <div className="profile-avatar-large">
-                                <User size={48} />
+                                {uploadingPhoto ? (
+                                    <Loader2 size={32} className="animate-spin opacity-50" />
+                                ) : user?.profileImageUrl || user?.id ? (
+                                    <img 
+                                        src={getPhotoUrl(user?.id)} 
+                                        alt="Profile" 
+                                        className="profile-img-large" 
+                                        onError={(e) => {
+                                            if (!user?.profileImageUrl) {
+                                                e.target.style.display = 'none';
+                                                e.target.nextSibling.style.display = 'block';
+                                            }
+                                        }}
+                                    />
+                                ) : null}
+                                <User size={48} style={{ display: (user?.profileImageUrl || user?.id) ? 'none' : 'block' }} />
                             </div>
-                            <button className="edit-avatar-btn"><Camera size={16} /></button>
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                style={{ display: 'none' }} 
+                                accept="image/*" 
+                                onChange={handlePhotoUpload} 
+                            />
+                            <button 
+                                className="edit-avatar-btn" 
+                                onClick={() => fileInputRef.current.click()}
+                                disabled={uploadingPhoto}
+                            >
+                                {uploadingPhoto ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
+                            </button>
                         </div>
                         <div className="profile-main-info">
                             <h1 className="user-full-name">{user?.firstName} {user?.lastName}</h1>
@@ -276,6 +344,16 @@ const ProfileScreen = () => {
                                     <div className="form-group">
                                         <label>Pincode</label>
                                         <input type="text" value={editData.pincode} onChange={e => setEditData({ ...editData, pincode: e.target.value })} />
+                                    </div>
+                                    <div className="form-group span-full">
+                                        <label>Profile Image URL</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Paste image URL here"
+                                            value={editData.profileImageUrl} 
+                                            onChange={e => setEditData({ ...editData, profileImageUrl: e.target.value })} 
+                                        />
+                                        <p className="text-xs opacity-60 mt-1">Provide a URL for your profile picture (e.g. from Unsplash or a public link)</p>
                                     </div>
                                 </div>
                                 <button type="submit" className="btn-primary w-full mt-4" disabled={loading}>

@@ -26,6 +26,11 @@ credentials.json
 *.log
 logs/
 temp/
+OTP_DEBUG.txt
 
 # Spring Boot temporary files
 .mvn/wrapper/maven-wrapper.jar
+
+# Secrets
+**/service-account.json
+**/credentials.json

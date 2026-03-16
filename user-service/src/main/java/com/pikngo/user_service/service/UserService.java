@@ -15,5 +15,9 @@ public interface UserService {
 
     User updateUserProfile(String phoneNumber, ProfileUpdateRequest request);
 
+    void updateProfilePhoto(String phoneNumber, byte[] photoBytes);
+
+    byte[] getProfilePhoto(UUID userId);
+
     void deleteUser(UUID userId, boolean softDelete);
 }

@@ -16,6 +16,15 @@ public class EmailServiceImpl implements EmailService {
     @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
     private String fromEmail;
 
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        if (mailSender == null) {
+            log.warn("EmailServiceImpl initialized but JavaMailSender is NULL!");
+        } else {
+            log.info("EmailServiceImpl initialized with JavaMailSender. From: {}", fromEmail);
+        }
+    }
+
     @Override
     public void sendEmail(String to, String subject, String body) {
         log.info("Preparing to send email to {} from {}", to, fromEmail);

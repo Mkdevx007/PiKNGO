@@ -34,3 +34,6 @@ build/
 
 ### Firebase ###
 src/main/resources/service-account.json
+
+### Logs ###
+*.log

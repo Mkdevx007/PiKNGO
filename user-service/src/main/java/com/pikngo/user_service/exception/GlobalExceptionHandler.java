@@ -137,7 +137,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex, WebRequest request) {
-        log.error("Unexpected error occurred: ", ex);
+        log.error("Unexpected error occurred (500) at {}: ", request.getDescription(false), ex);
         
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());

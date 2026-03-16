@@ -42,7 +42,8 @@ public class SecurityConfig {
                                 "/api/v1/users/login/**",
                                 "/api/v1/users/forgot-password",
                                 "/api/v1/users/reset-password",
-                                "/api/v1/auth/google")
+                                "/api/v1/auth/google",
+                                "/api/v1/users/profile/photo/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/restaurants/**").permitAll()
                         .requestMatchers("/api/v1/restaurants/**").authenticated()

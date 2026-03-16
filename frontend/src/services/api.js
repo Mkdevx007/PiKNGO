@@ -22,6 +22,7 @@ export const authApi = {
     resetPassword: (token, newPassword) => api.post(`/users/reset-password?token=${token}&newPassword=${newPassword}`),
     getProfile: () => api.get('/users/profile'),
     updateProfile: (userData) => api.patch('/users/profile', userData),
+    uploadProfilePhoto: (formData) => api.post('/users/profile/photo', formData),
     deleteProfile: (softDelete = true) => api.delete(`/users/delete?softDelete=${softDelete}`),
     logout: () => api.post('/users/logout'),
 };

@@ -1,26 +1,65 @@
-# PikNGo - Highway Food Discovery App
+# 🚗 PikNGo - Highway Food Discovery App
 
-## Current Status: Email & OTP Login Milestone
-The project is currently at the stable milestone where **Email & Phone OTP Login** is fully functional with a premium UI.
+PikNGo is a modern, highway-focused food discovery platform designed to help travelers find the best dining options on their journey. Built with a premium UI/UX, it offers seamless authentication and robust restaurant management features.
 
-### Completed Features:
-- **Authentication System**:
-  - Phone OTP Login (Simulated)
-  - Email OTP Login (SMTP Integrated for real emails)
-  - Password-based Login
-  - Forgot/Reset Password via Email
-- **Premium UI/UX**:
-  - Dark/Light Theme Support
-  - Glassmorphism Design
-  - Smooth Animations
+---
 
-### Next Steps:
-- Address Management System
-- Restaurant Discovery & Geolocation
-- Order Flow Implementation
+## ✨ Key Features
 
-### Deployment Notes:
-- Backend: Run `com.pikngo.user_service.UserServiceApplication`
-- Frontend: `npm run dev` in `/frontend`
-- **SMTP Setup**: Update `application.properties` with your email and app password to receive real OTPs.
-3. **Frontend**: Geolocation will prompt the user for access to show relevant nearby results.
+### 🔐 Authentication System
+- **Advanced Login Options**: Supports Password, Phone OTP (Simulated), and **Email OTP** (SMTP Integrated).
+- **Secure Account Recovery**: Robust forgot/reset password flow via email.
+- **Premium UI**: Glassmorphism design with smooth animations and dark/light theme support.
+
+### 📍 Structured Address Management
+- **Unified Schema**: Both user profiles and saved addresses use a consistent 5-field structure: `Address Line 1`, `Address Line 2`, `City`, `State`, and `Pincode`.
+- **Flexible Profiles**: Easily manage primary and secondary locations for faster food discovery.
+
+### 🍽️ Restaurant Service
+- **Enterprise Ready**: Full tracking with `created_ts`, `modify_ts`, and `is_deleted` flags for complete auditability.
+- **Secure API**: DTO-based architecture prevents sensitive data leakage and ensures JPA stability.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | Java 17, Spring Boot 3, JPA/Hibernate, Spring Security |
+| **Database** | PostgreSQL |
+| **Frontend** | React.js, Lucide-React, Axios |
+| **Integrations** | SMTP (Email OTP), Browser Geolocation |
+
+---
+
+## 🚀 Getting Started
+
+### ⚡ Unified Development Command
+Run both the backend and frontend simultaneously with a single command:
+```bash
+npm run dev
+```
+
+### Manual Setup
+#### Backend Setup
+1. Navigate to `user-service/`.
+2. Configure `application.properties` with your PostgreSQL and SMTP credentials.
+3. Run `UserServiceApplication.java`.
+
+### Frontend Setup
+1. Navigate to `frontend/`.
+2. Run `npm install`.
+3. Start the development server: `npm run dev`.
+
+---
+
+## 📂 Project Structure
+- `/user-service`: Spring Boot microservice handling users, authentication, and restaurant logic.
+- `/frontend`: Modern React application with glassmorphism design.
+
+---
+
+## 🗺️ Roadmap
+- [ ] Address Management System (Full UI Integration)
+- [ ] Restaurant Discovery & Geolocation Enhancements
+- [ ] Complete Order Flow Implementation

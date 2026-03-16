@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
                 .city(request.getCity())
                 .state(request.getState())
                 .pincode(request.getPincode())
+                .profileImageUrl(request.getProfileImageUrl())
                 .isActive(true)
                 .build();
 
@@ -119,6 +120,7 @@ public class UserServiceImpl implements UserService {
         if (request.getCity() != null) { user.setCity(request.getCity()); addressChanged = true; }
         if (request.getState() != null) { user.setState(request.getState()); addressChanged = true; }
         if (request.getPincode() != null) { user.setPincode(request.getPincode()); addressChanged = true; }
+        if (request.getProfileImageUrl() != null) { user.setProfileImageUrl(request.getProfileImageUrl()); }
 
         log.info("UPDATING USER PROFILE: Phone: {}, City: {}, State: {}, Pincode: {}", 
                 user.getPhoneNumber(), user.getCity(), user.getState(), user.getPincode());
@@ -140,6 +142,33 @@ public class UserServiceImpl implements UserService {
         }
 
         return updatedUser;
+    }
+
+    @Override
+    public void updateProfilePhoto(String phoneNumber, byte[] photoBytes) {
+        log.info("Attempting to update profile photo for user: {}", phoneNumber);
+        if (photoBytes == null) {
+            log.error("Photo bytes are null for user: {}", phoneNumber);
+            return;
+        }
+        log.info("Photo size: {} bytes", photoBytes.length);
+        User user = getUserByPhoneNumber(phoneNumber);
+        user.setProfilePhoto(photoBytes);
+        try {
+            userRepository.save(user);
+            log.info("Profile photo saved successfully for user: {}", phoneNumber);
+        } catch (Exception e) {
+            log.error("Error saving profile photo for user: {}", phoneNumber, e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public byte[] getProfilePhoto(UUID userId) {
+        return userRepository.findById(userId)
+                .map(User::getProfilePhoto)
+                .orElse(null);
     }
 
     @Override

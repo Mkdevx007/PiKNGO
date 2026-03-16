@@ -1,0 +1,67 @@
+.pikngo-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pikngo-logo:hover {
+  transform: translateY(-2px);
+}
+
+.pikngo-pin {
+  width: 44px;
+  height: 52px;
+  filter: drop-shadow(0 8px 15px rgba(230, 74, 25, 0.25));
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  perspective: 1000px;
+}
+
+.pikngo-logo:hover .pikngo-pin {
+  transform: rotateY(15deg) rotateX(10deg) scale(1.1);
+}
+
+.pikngo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.pikngo-brand {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.8rem;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-orange) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+}
+
+.pg-accent {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8a65 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-style: italic;
+  font-weight: 900;
+  margin: 0 1px;
+}
+
+.pikngo-tagline {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+/* Light Mode specific refinements */
+[data-theme='light'] .pikngo-brand {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}

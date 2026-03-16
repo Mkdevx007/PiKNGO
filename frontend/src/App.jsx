@@ -16,11 +16,13 @@ import './App.css';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
+  const [profileImageUrl, setProfileImageUrl] = useState('');
 
   // Handle Login State
   const handleLogin = (data) => {
     setIsLoggedIn(true);
-    setUserName(data.phoneNumber);
+    setUserName(data.firstName || data.phoneNumber);
+    setProfileImageUrl(data.profileImageUrl || '');
     localStorage.setItem('phone', data.phoneNumber);
     localStorage.setItem('userId', data.userId);
   };
@@ -36,6 +38,7 @@ function App() {
     localStorage.removeItem('userId');
     setIsLoggedIn(false);
     setUserName('');
+    setProfileImageUrl('');
   };
 
   useEffect(() => {
@@ -43,10 +46,12 @@ function App() {
       try {
         const response = await authApi.getProfile();
         setIsLoggedIn(true);
-        setUserName(response.data.phoneNumber);
+        setUserName(response.data.firstName || response.data.phoneNumber);
+        setProfileImageUrl(response.data.profileImageUrl || '');
       } catch (err) {
         setIsLoggedIn(false);
         setUserName('');
+        setProfileImageUrl('');
       }
     };
     checkAuth();
@@ -56,7 +61,7 @@ function App() {
     <ThemeProvider>
       <Router>
         <div className="app">
-          <Navbar isLoggedIn={isLoggedIn} userName={userName} onLogout={handleLogout} />
+          <Navbar isLoggedIn={isLoggedIn} userName={userName} profileImageUrl={profileImageUrl} onLogout={handleLogout} />
           <main>
             <Routes>
               <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <LandingPage isLoggedIn={isLoggedIn} />} />
@@ -64,7 +69,7 @@ function App() {
               <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
 
               <Route path="/register" element={<AuthPage onLogin={handleLogin} />} />
-              <Route path="/profile" element={isLoggedIn ? <ProfileScreen /> : <Navigate to="/login" />} />
+              <Route path="/profile" element={isLoggedIn ? <ProfileScreen onProfileUpdate={(data) => setProfileImageUrl(data.profileImageUrl)} /> : <Navigate to="/login" />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/trending" element={<TrendingPage />} />
               <Route path="/menu/:restaurantId" element={<MenuPage />} />

@@ -153,6 +153,50 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/profile/photo")
+    public ResponseEntity<?> uploadProfilePhoto(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            java.security.Principal principal) {
+        try {
+            if (principal == null) {
+                log.error("Principal is null in photo upload!");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+            }
+            log.info("Received photo upload request from user: {}", principal.getName());
+            if (file == null || file.isEmpty()) {
+                log.error("File is null or empty in photo upload!");
+                return ResponseEntity.badRequest().body("File is empty");
+            }
+            log.info("File name: {}, size: {} bytes", file.getOriginalFilename(), file.getSize());
+            
+            userService.updateProfilePhoto(principal.getName(), file.getBytes());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Unhandled error in photo upload controller: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Upload failed: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/profile/photo/{userId}")
+    public ResponseEntity<byte[]> getProfilePhoto(@PathVariable java.util.UUID userId) {
+        try {
+            log.info("Fetching profile photo for user ID: {}", userId);
+            byte[] photo = userService.getProfilePhoto(userId);
+            if (photo == null || photo.length == 0) {
+                log.warn("No profile photo found for user ID: {}", userId);
+                return ResponseEntity.notFound().build();
+            }
+            log.info("Found photo of size: {} bytes", photo.length);
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.IMAGE_JPEG)
+                    .body(photo);
+        } catch (Exception e) {
+            log.error("Error retrieving profile photo for user ID: {}", userId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<com.pikngo.user_service.dto.ApiResponse<String>> forgotPassword(@RequestParam String email) {
         authService.processForgotPassword(email);

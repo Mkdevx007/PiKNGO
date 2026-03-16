@@ -66,6 +66,12 @@ public class User {
     @Column(name = "pincode")
     private String pincode;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
+    @Column(name = "profile_photo", columnDefinition = "bytea")
+    private byte[] profilePhoto;
+
     @Builder.Default
     @Column(name = "is_active")
     private boolean isActive = true;

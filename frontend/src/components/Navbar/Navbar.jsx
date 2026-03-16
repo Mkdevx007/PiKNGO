@@ -5,8 +5,14 @@ import { useTheme } from '../../context/ThemeContext';
 import Logo from '../Logo/Logo';
 import './Navbar.css';
 
-const Navbar = ({ isLoggedIn, userName, onLogout }) => {
+const Navbar = ({ isLoggedIn, userName, profileImageUrl, onLogout }) => {
     const { isDarkMode, toggleTheme } = useTheme();
+    const userId = localStorage.getItem('userId');
+
+    const getPhotoUrl = () => {
+        if (profileImageUrl) return profileImageUrl;
+        return `${import.meta.env.VITE_API_BASE_URL}/users/profile/photo/${userId}?t=${new Date().getTime()}`;
+    };
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -36,7 +42,7 @@ const Navbar = ({ isLoggedIn, userName, onLogout }) => {
         <nav className={`navbar ${isNavbarScrolled ? 'scrolled glass' : 'transparent'}`}>
             <div className="navbar-container">
                 <NavLink to={isLoggedIn ? "/dashboard" : "/"} className="logo-link">
-                    <Logo width={240} height={48} />
+                    <Logo />
                 </NavLink>
 
                 <div className={`nav-links ${isOpen ? 'active' : ''}`}>
@@ -60,10 +66,23 @@ const Navbar = ({ isLoggedIn, userName, onLogout }) => {
                         <div className="profile-wrapper" onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
                             <div className="profile-trigger glass-pill">
                                 <div className="avatar-small">
-                                    <User size={12} />
+                                    {profileImageUrl || userId ? (
+                                        <img 
+                                            src={getPhotoUrl()} 
+                                            alt="Profile" 
+                                            className="nav-profile-img" 
+                                            onError={(e) => {
+                                                if (!profileImageUrl) {
+                                                    e.target.style.display = 'none';
+                                                    e.target.nextSibling.style.display = 'block';
+                                                }
+                                            }}
+                                        />
+                                    ) : null}
+                                    <User size={12} style={{ display: (profileImageUrl || userId) ? 'none' : 'block' }} />
                                 </div>
                                 <span className="user-name">{userName}</span>
-                                <ChevronDown size={10} className={`chevron ${showDropdown ? 'rotate' : ''}`} />
+                                <ChevronDown size={14} className={`chevron ${showDropdown ? 'rotate' : ''}`} />
                             </div>
 
                             {showDropdown && (
