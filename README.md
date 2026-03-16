@@ -32,6 +32,35 @@ PikNGo is a modern, highway-focused food discovery platform designed to help tra
 
 ---
 
+## 📋 Prerequisites
+
+Before running the project, ensure you have the following installed:
+- **Java 17 or higher**
+- **Node.js (LTS version)**
+- **PostgreSQL 14+**
+- **Maven** (optional, wrapper included)
+
+---
+
+## ⚙️ Configuration & Environment Setup
+
+The project relies on environment variables for security and flexibility. Follow these steps to set up your local environment:
+
+1. **Create Environment File**: 
+   Copy the `.env.example` file to a new file named `.env` in the root directory.
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Configure Variables**:
+   Open the `.env` file and fill in the following values:
+   - `DB_PASSWORD`: Your local PostgreSQL password.
+   - `MAIL_PASSWORD`: Your Google App Password for SMTP (used for OTP emails).
+   - `VITE_ARCGIS_API_KEY`: Your ArcGIS developers API key for map services.
+   - `VITE_API_BASE_URL`: Should be `http://localhost:8081/api/v1` for local development.
+
+---
+
 ## 🚀 Getting Started
 
 ### ⚡ Unified Development Command
