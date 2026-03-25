@@ -7,12 +7,11 @@ const FoodCard = ({ id, image, name, price, rating, restaurant, address, distanc
 
     const navigate = useNavigate();
 
-    const restaurantId = restaurant.toLowerCase().replace(/\s+/g, '-');
 
     return (
         <div
             className="food-card glass-card flex-col animate-fade-in"
-            onClick={() => navigate(`/menu/${restaurantId}`)}
+            onClick={() => navigate(`/menu/${id}`)}
             onMouseEnter={() => onHover && id && onHover(id)}
             onMouseLeave={() => onLeave && onLeave()}
             style={{ cursor: 'pointer' }}
@@ -36,9 +35,9 @@ const FoodCard = ({ id, image, name, price, rating, restaurant, address, distanc
                     </div>
                     <p className="food-vendor">{address || restaurant}</p>
                 </div>
-                <div className="food-action-row mockup-buttons">
-                    <button className="btn-outline">View Details</button>
-                    <button className="btn-solid">Book Table</button>
+                <div className="food-action-row">
+                    <button className="btn-outline">View Menu</button>
+                    <button className="btn-solid" onClick={(e) => { e.stopPropagation(); navigate(`/menu/${id}`); }}>Order Now</button>
                 </div>
             </div>
         </div>

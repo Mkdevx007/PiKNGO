@@ -35,13 +35,7 @@ const Dashboard = () => {
 
     const [hoveredRestId, setHoveredRestId] = useState(null);
 
-    const restaurantImages = [
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1470&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1374&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1470&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1470&auto=format&fit=crop"
-    ];
+    const defaultRestaurantImage = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop";
 
     // Mock filtering logic for demo purposes
     const filteredRestaurants = restaurants.filter(res => {
@@ -294,7 +288,7 @@ const Dashboard = () => {
                                     address={res.address}
                                     price="$$" 
                                     rating={4.5} 
-                                    image={restaurantImages[index % restaurantImages.length]}
+                                    image={res.imageUrl || defaultRestaurantImage}
                                     distance={res.distance}
                                     onHover={(id) => setHoveredRestId(id)}
                                     onLeave={() => setHoveredRestId(null)}

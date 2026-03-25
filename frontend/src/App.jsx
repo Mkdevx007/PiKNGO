@@ -9,6 +9,9 @@ import ProfileScreen from './pages/ProfileScreen';
 import Dashboard from './pages/Dashboard';
 import TrendingPage from './pages/TrendingPage';
 import MenuPage from './pages/MenuPage';
+import { menuApi } from './services/api';
+import { CartProvider } from './context/CartContext';
+import CheckoutPage from './pages/CheckoutPage';
 import './App.css';
 
 
@@ -59,7 +62,8 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router>
+      <CartProvider>
+        <Router>
         <div className="app">
           <Navbar isLoggedIn={isLoggedIn} userName={userName} profileImageUrl={profileImageUrl} onLogout={handleLogout} />
           <main>
@@ -73,13 +77,15 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/trending" element={<TrendingPage />} />
               <Route path="/menu/:restaurantId" element={<MenuPage />} />
+              <Route path="/checkout" element={isLoggedIn ? <CheckoutPage /> : <Navigate to="/login" />} />
               <Route path="*" element={<Navigate to="/" />} />
 
 
             </Routes>
           </main>
         </div>
-      </Router>
+        </Router>
+      </CartProvider>
     </ThemeProvider>
   );
 }

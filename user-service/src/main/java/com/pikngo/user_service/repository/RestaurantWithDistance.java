@@ -9,4 +9,8 @@ public interface RestaurantWithDistance {
     Double getLatitude();
     Double getLongitude();
     Double getDistance();
+    String getImageUrl();
+    String getCategory();
+    Double getRating();
+    String getDeliveryTime();
 }

@@ -13,6 +13,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, UUID> {
     List<Restaurant> findByIsActiveTrueAndIsDeletedFalse();
 
     @Query(value = "SELECT r._id as id, r.resturant_name as resturantName, r.address as address, r.latitude as latitude, r.longitude as longitude, " +
+            "r.image_url as imageUrl, r.category as category, r.rating as rating, r.delivery_time as deliveryTime, " +
             "(6371 * acos(cos(radians(?1)) * cos(radians(r.latitude)) * cos(radians(r.longitude) - radians(?2)) + sin(radians(?1)) * sin(radians(r.latitude)))) as distance " +
             "FROM restaurants r WHERE r.is_active = true AND r.is_deleted = false AND " +
             "(6371 * acos(cos(radians(?1)) * cos(radians(r.latitude)) * cos(radians(r.longitude) - radians(?2)) + sin(radians(?1)) * sin(radians(r.latitude)))) < ?3 " +

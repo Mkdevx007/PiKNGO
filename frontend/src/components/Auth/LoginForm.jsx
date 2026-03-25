@@ -4,7 +4,7 @@ import { authApi } from '../../services/api';
 
 const LoginForm = ({ onLogin, onError, loading, setLoading, onForgot }) => {
     const [loginMethod, setLoginMethod] = useState('otp');
-    const [otpMethod, setOtpMethod] = useState('phone');
+    const [otpMethod] = useState('email');
     const [loginIdentifier, setLoginIdentifier] = useState('');
     const [loginPassword, setLoginPassword] = useState('');
     const [loginOtpCode, setLoginOtpCode] = useState('');
@@ -25,11 +25,7 @@ const LoginForm = ({ onLogin, onError, loading, setLoading, onForgot }) => {
         onError('');
         if (loginMethod === 'otp') {
             try {
-                if (otpMethod === 'phone') {
-                    await authApi.sendOtp(loginIdentifier);
-                } else {
-                    await authApi.sendEmailOtp(loginIdentifier);
-                }
+                await authApi.sendEmailOtp(loginIdentifier);
                 setLoginStep(2);
                 setOtpTimer(30);
             } catch (err) {
@@ -50,9 +46,7 @@ const LoginForm = ({ onLogin, onError, loading, setLoading, onForgot }) => {
         setLoading(true);
         onError('');
         try {
-            const payload = otpMethod === 'phone'
-                ? { phoneNumber: loginIdentifier, otpCode: loginOtpCode }
-                : { email: loginIdentifier, otpCode: loginOtpCode };
+            const payload = { email: loginIdentifier, otpCode: loginOtpCode };
             const response = await authApi.verifyOtp(payload);
             onLogin(response.data);
         } catch (err) {
@@ -64,11 +58,7 @@ const LoginForm = ({ onLogin, onError, loading, setLoading, onForgot }) => {
         if (otpTimer > 0) return;
         setLoading(true);
         try {
-            if (otpMethod === 'phone') {
-                await authApi.sendOtp(loginIdentifier);
-            } else {
-                await authApi.sendEmailOtp(loginIdentifier);
-            }
+            await authApi.sendEmailOtp(loginIdentifier);
             setOtpTimer(30);
         } catch (err) {
             onError('Failed to resend OTP.');
@@ -81,16 +71,26 @@ const LoginForm = ({ onLogin, onError, loading, setLoading, onForgot }) => {
             {loginStep === 2 && <p className="auth-subtitle">{`Code sent to ${loginIdentifier}`}</p>}
             {loginStep === 1 && (
                 <>
-                    <div className="method-toggle">
-                        <button className={loginMethod === 'otp' ? 'active' : ''} onClick={() => { setLoginMethod('otp'); setLoginIdentifier(''); onError(''); }}>OTP</button>
-                        <button className={loginMethod === 'password' ? 'active' : ''} onClick={() => { setLoginMethod('password'); setLoginIdentifier(''); onError(''); }}>Password</button>
+                    <div className="segmented-control">
+                        <div 
+                            className="segmented-indicator" 
+                            style={{ transform: loginMethod === 'password' ? 'translateX(100%)' : 'translateX(0)' }}
+                        ></div>
+                        <button 
+                            type="button" 
+                            className={loginMethod === 'otp' ? 'active' : ''} 
+                            onClick={() => { setLoginMethod('otp'); setLoginIdentifier(''); onError(''); }}
+                        >
+                            OTP
+                        </button>
+                        <button 
+                            type="button" 
+                            className={loginMethod === 'password' ? 'active' : ''} 
+                            onClick={() => { setLoginMethod('password'); setLoginIdentifier(''); onError(''); }}
+                        >
+                            Password
+                        </button>
                     </div>
-                    {loginMethod === 'otp' && (
-                        <div className="sub-method-toggle">
-                            <button className={otpMethod === 'phone' ? 'active' : ''} onClick={() => { setOtpMethod('phone'); setLoginIdentifier(''); }}>Phone</button>
-                            <button className={otpMethod === 'email' ? 'active' : ''} onClick={() => { setOtpMethod('email'); setLoginIdentifier(''); }}>Email</button>
-                        </div>
-                    )}
                 </>
             )}
 
@@ -98,26 +98,16 @@ const LoginForm = ({ onLogin, onError, loading, setLoading, onForgot }) => {
                 {loginStep === 1 ? (
                     <div className="animate-slide-in">
                         <div className="form-group">
-                            <label>{loginMethod === 'password' ? 'Email/Phone' : (otpMethod === 'phone' ? 'Phone' : 'Email')}</label>
+                            <label>{loginMethod === 'password' ? 'Email/Phone' : 'Email'}</label>
                             <div className="input-wrapper">
-                                {loginMethod === 'password' ? <Mail size={18} className="input-icon" /> : (otpMethod === 'phone' ? <Phone size={18} className="input-icon" /> : <Mail size={18} className="input-icon" />)}
-                                {loginMethod === 'otp' && otpMethod === 'phone' ? (
-                                    <input
-                                        type="text"
-                                        value={loginIdentifier}
-                                        onChange={(e) => setLoginIdentifier(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                        placeholder="10 digit number"
-                                        required
-                                    />
-                                ) : (
+                                <Mail size={18} className="input-icon" />
                                     <input
                                         type="text"
                                         value={loginIdentifier}
                                         onChange={(e) => setLoginIdentifier(e.target.value)}
-                                        placeholder={otpMethod === 'email' ? 'name@example.com' : ''}
+                                        placeholder={loginMethod === 'otp' ? 'name@example.com' : 'Email or Phone'}
                                         required
                                     />
-                                )}
                             </div>
                         </div>
                         {loginMethod === 'password' && (

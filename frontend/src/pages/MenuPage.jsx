@@ -1,79 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Star,
-    Clock,
-    ChevronLeft,
-    ShoppingCart,
-    Info,
-    Filter,
-    Search,
-    ArrowRight
-} from 'lucide-react';
+import { restaurantApi, menuApi } from '../services/api';
+import { useCart } from '../context/CartContext';
+import { ChevronLeft, Star, Clock, Search, Filter, ArrowRight, ShoppingCart } from 'lucide-react';
 import './MenuPage.css';
 
-const restaurantData = {
-    'highway-king---jaipur': {
-        name: 'Highway King - Jaipur',
-        rating: 4.8,
-        deliveryTime: '20-25 min',
-        category: 'North Indian • Mughlai',
-        banner: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop',
-        menu: [
-            { id: 101, name: 'Dal Makhani Elite', price: 320, desc: 'Premium black lentils slow-cooked overnight.', image: 'https://images.unsplash.com/photo-1546833998-877b37c2e5c6?q=80&w=1000', category: 'Main' },
-            { id: 102, name: 'Paneer Lababdar', price: 350, desc: 'Creamy cottage cheese in tomato gravy.', image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?q=80&w=1000', category: 'Main' },
-            { id: 103, name: 'Garlic Naan', price: 60, desc: 'Tandoori bread with garlic and butter.', image: 'https://images.unsplash.com/photo-1601050638917-3f80fc014923?q=80&w=1000', category: 'Breads' },
-        ]
-    },
-    'haldiram---gurgaon': {
-        name: 'Haldiram - Gurgaon',
-        rating: 4.6,
-        deliveryTime: '15-20 min',
-        category: 'Indian Snacks • Sweets',
-        banner: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=2072&auto=format&fit=crop',
-        menu: [
-            { id: 201, name: 'Chole Bhature', price: 180, desc: 'Classic spiced chickpeas with fluffy fried bread.', image: 'https://images.unsplash.com/photo-1626132646529-5006375bc85a?q=80&w=1000', category: 'Main' },
-            { id: 202, name: 'Raj Kachori', price: 120, desc: 'The king of chaats with yogurt and chutneys.', image: 'https://images.unsplash.com/photo-1601050638917-3f80fc014923?q=80&w=1000', category: 'Starters' },
-        ]
-    },
-    'mcd---behror': {
-        name: 'McD - Behror',
-        rating: 4.5,
-        deliveryTime: '10-15 min',
-        category: 'Fast Food • Burgers',
-        banner: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=2070&auto=format&fit=crop',
-        menu: [
-            { id: 301, name: 'McVeggie Burger', price: 120, desc: 'Classic veg patty with lettuce and mayo.', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000', category: 'Main' },
-            { id: 302, name: 'French Fries (L)', price: 95, desc: 'Golden crispy potato fries.', image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=1000', category: 'Snacks' },
-        ]
-    }
-};
 
 
 const MenuPage = () => {
     const { restaurantId } = useParams();
     const navigate = useNavigate();
+    const { addToCart } = useCart();
+    
     const [restaurant, setRestaurant] = useState(null);
+    const [menuItems, setMenuItems] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('All');
 
     useEffect(() => {
-        // Find restaurant by ID or name slug
-        const data = restaurantData[restaurantId] || restaurantData['highway-king---jaipur'];
+        const fetchDetails = async () => {
+            setLoading(true);
+            try {
+                // Fetch restaurant first
+                const resResponse = await restaurantApi.getById(restaurantId);
+                setRestaurant(resResponse.data);
+                
+                // Then try to fetch menu items separately to be resilient
+                try {
+                    const menuResponse = await menuApi.getMenu(restaurantId);
+                    setMenuItems(menuResponse.data || []);
+                } catch (menuErr) {
+                    console.error("Failed to fetch menu items", menuErr);
+                    setMenuItems([]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch restaurant details", err);
+                setRestaurant(null);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        setRestaurant(data);
+        if (restaurantId) {
+            console.log("MenuPage: Fetching details for", restaurantId);
+            fetchDetails();
+        }
         window.scrollTo(0, 0);
     }, [restaurantId]);
 
-    const categories = ['All', ...new Set(restaurant?.menu.map(item => item.category) || [])];
-    const filteredMenu = selectedCategory === 'All'
-        ? restaurant?.menu
-        : restaurant?.menu.filter(item => item.category === selectedCategory);
+    console.log("MenuPage: State", { restaurant, menuItemsCount: menuItems.length, loading });
 
-    if (!restaurant) return <div className="loading-state">Initializing Premium Experience...</div>;
+    const categories = ['All', ...new Set((menuItems || []).map(item => item?.category).filter(Boolean))];
+    const filteredMenu = selectedCategory === 'All'
+        ? menuItems
+        : menuItems.filter(item => item.category === selectedCategory);
+
+    if (loading) return <div className="loading-state">Initializing Premium Experience...</div>;
+    if (!restaurant) return <div className="loading-state">Restaurant not found.</div>;
 
     return (
         <div className="menu-page">
-            <div className="menu-hero" style={{ backgroundImage: `url(${restaurant.banner})` }}>
+            <div className="menu-hero" style={{ backgroundImage: `url(${restaurant.imageUrl || restaurant.banner || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1500'})` }}>
                 <div className="hero-overlay"></div>
                 <div className="container hero-content-wrapper">
                     <button className="back-btn glass" onClick={() => navigate(-1)}>
@@ -89,8 +76,8 @@ const MenuPage = () => {
                                 <span className="stat"><Clock size={14} /> {restaurant.deliveryTime}</span>
                             </div>
                         </div>
-                        <h1 className="rest-name">{restaurant.name}</h1>
-                        <p className="rest-tagline">Serving excellence on your journey since 2012.</p>
+                        <h1 className="rest-name">{restaurant.resturantName || restaurant.name || 'Premium Restaurant'}</h1>
+                        <p className="rest-tagline">{restaurant.address || 'Serving excellence on your journey since 2012.'}</p>
                     </div>
                 </div>
             </div>
@@ -137,7 +124,7 @@ const MenuPage = () => {
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
                                     <div className="item-img-wrapper">
-                                        <img src={item.image} alt={item.name} />
+                                        <img src={item.imageUrl || item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500'} alt={item.name} />
                                         <div className="item-category-tag">{item.category}</div>
                                     </div>
                                     <div className="item-details">
@@ -146,7 +133,10 @@ const MenuPage = () => {
                                             <div className="item-price">₹{item.price}</div>
                                         </div>
                                         <p className="item-desc">{item.desc}</p>
-                                        <button className="add-to-cart-btn btn-primary-slim">
+                                        <button 
+                                            className="add-to-cart-btn btn-primary-slim"
+                                            onClick={() => addToCart(item, restaurant.id, restaurant.resturantName || restaurant.name)}
+                                        >
                                             <ShoppingCart size={16} />
                                             <span>Add to Order</span>
                                         </button>

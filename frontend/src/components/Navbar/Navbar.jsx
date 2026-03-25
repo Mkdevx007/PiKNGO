@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { User, LogIn, Menu, X, ChevronDown, LogOut, Settings, Sun, Moon } from 'lucide-react';
+import { User, LogIn, Menu, X, ChevronDown, LogOut, Settings, Sun, Moon, ShoppingCart } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
 import Logo from '../Logo/Logo';
 import './Navbar.css';
 
 const Navbar = ({ isLoggedIn, userName, profileImageUrl, onLogout }) => {
     const { isDarkMode, toggleTheme } = useTheme();
+    const { getCartCount } = useCart();
     const userId = localStorage.getItem('userId');
 
     const getPhotoUrl = () => {
@@ -61,6 +63,11 @@ const Navbar = ({ isLoggedIn, userName, profileImageUrl, onLogout }) => {
                     <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
                         {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
                     </button>
+
+                    <NavLink to="/checkout" className="cart-nav-link glass-pill">
+                        <ShoppingCart size={22} />
+                        {getCartCount() > 0 && <span className="cart-badge">{getCartCount()}</span>}
+                    </NavLink>
 
                     {isLoggedIn ? (
                         <div className="profile-wrapper" onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>

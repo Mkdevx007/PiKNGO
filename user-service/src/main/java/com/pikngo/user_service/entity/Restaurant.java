@@ -44,6 +44,18 @@ public class Restaurant {
     @Column(name = "is_active")
     private boolean isActive = true;
 
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
+
+    @Column(name = "category", length = 100)
+    private String category;
+
+    @Column(name = "rating")
+    private Double rating;
+
+    @Column(name = "delivery_time", length = 50)
+    private String deliveryTime;
+
     @CreationTimestamp
     @Column(name = "created_ts", updatable = false)
     private LocalDateTime createdTs;

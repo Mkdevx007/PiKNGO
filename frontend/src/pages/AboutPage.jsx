@@ -22,7 +22,7 @@ const AboutPage = () => {
                             along their route.
                         </p>
                         <p>
-                            We partner with top-rated highway restaurants to ensure that your
+                            We handpick top-rated highway restaurants to ensure that your
                             journey is as delicious as it is comfortable. No more waiting,
                             no more confusion—just pick, order, and go.
                         </p>
@@ -30,7 +30,7 @@ const AboutPage = () => {
                     <div className="about-stats glass">
                         <div className="stat-item">
                             <h3>500+</h3>
-                            <p>Partner Restaurants</p>
+                            <p>Handpicked Restaurants</p>
                         </div>
                         <div className="stat-item">
                             <h3>50k+</h3>

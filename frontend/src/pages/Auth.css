@@ -12,6 +12,58 @@
 
 .auth-page.theme-aurora {
     background: #020617;
+    position: relative;
+    z-index: 1;
+}
+
+/* Enhanced Background Elements */
+.bg-aurora {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: -2;
+}
+
+.blob {
+    position: absolute;
+    filter: blur(80px);
+    opacity: 0.4;
+    border-radius: 50%;
+    animation: blobFloat 20s infinite alternate;
+}
+
+.blob-1 {
+    width: 500px;
+    height: 500px;
+    background: var(--accent-orange);
+    top: -100px;
+    left: -100px;
+}
+
+.blob-2 {
+    width: 400px;
+    height: 400px;
+    background: #4f46e5;
+    bottom: -50px;
+    right: -50px;
+    animation-delay: -5s;
+}
+
+.blob-3 {
+    width: 300px;
+    height: 300px;
+    background: #0ea5e9;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -10s;
+}
+
+@keyframes blobFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0, 0) scale(1); }
 }
 
 .back-home-btn {
@@ -69,21 +121,17 @@ body:not(.dark-theme) .back-home-btn:hover {
 .auth-split-container {
     display: flex;
     width: 100%;
-    max-width: 1080px;
-    min-height: 680px;
-    /* Sufficient for multi-step segmented form */
-    background: rgba(15, 23, 42, 0.9);
-    /* Enhanced Transparency */
-    backdrop-filter: blur(25px);
-    border-radius: 40px;
+    max-width: 1100px;
+    min-height: 650px;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-radius: 32px;
     overflow: hidden;
-    box-shadow:
-        0 40px 100px rgba(0, 0, 0, 0.5),
-        inset 0 0 80px rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    /* Performance & Sharpness */
-    transform: translateZ(0);
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     z-index: 10;
 }
@@ -166,16 +214,9 @@ body:not(.dark-theme) .auth-visual-overlay {
     z-index: 3;
 }
 
-.auth-logo-badge {
+.logo-container {
     display: inline-flex;
-    padding: 0.6rem;
-    /* Further reduced */
-    border-radius: 16px;
-    margin-bottom: 0.8rem;
-    /* Further reduced */
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+    margin-bottom: 1.5rem;
 }
 
 .auth-brand-content h2 {
@@ -211,9 +252,8 @@ body:not(.dark-theme) .auth-visual-overlay {
     flex: 1;
     position: relative;
     perspective: 2000px;
-    background: var(--bg-navy);
+    background: rgba(15, 23, 42, 0.2);
     z-index: 10;
-    border-left: 1px solid var(--glass-border);
 }
 
 body:not(.dark-theme) .auth-form-side {
@@ -249,11 +289,9 @@ body:not(.dark-theme) .auth-form-side {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2.5rem 3rem;
-    overflow: hidden;
-    background: var(--bg-deep);
+    padding: 3rem;
+    background: transparent;
     color: var(--text-primary);
-    transition: opacity 0.3s ease;
 }
 
 body:not(.dark-theme) .auth-card-front,
@@ -388,17 +426,21 @@ body:not(.dark-theme) .auth-subtitle {
 
 .input-wrapper input {
     width: 100%;
-    padding: 0.7rem 1.2rem 0.7rem 3.4rem;
-    background: var(--bg-deep);
-    border: 1.5px solid var(--glass-border);
-    border-radius: 16px;
-    /* Slightly sharper but still rounded */
+    padding: 0.85rem 1.2rem 0.85rem 3.4rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     color: var(--text-primary);
-    font-size: 0.95rem;
-    /* Slightly smaller font */
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 500;
     outline: none;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-wrapper input:focus {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 4px rgba(255, 77, 41, 0.1);
 }
 
 .input-wrapper input:focus {
@@ -516,71 +558,51 @@ body:not(.dark-theme) .auth-subtitle {
     color: var(--accent-orange);
 }
 
-/* Method Toggle */
-.method-toggle {
+/* Segmented Control */
+.segmented-control {
     display: flex;
-    background: var(--bg-deep);
-    padding: 0.4rem;
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 12px;
     margin-bottom: 2rem;
-    border: 1.5px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
 }
 
-.method-toggle button {
+.segmented-control button {
     flex: 1;
-    padding: 0.8rem;
+    padding: 0.75rem;
     border: none;
     background: none;
-    cursor: pointer;
-    border-radius: 16px;
+    color: var(--text-secondary);
     font-size: 0.9rem;
-    font-weight: 800;
-    color: var(--text-secondary);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.method-toggle button.active {
-    background: white;
-    color: var(--accent-orange);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-}
-
-.dark-theme .method-toggle button.active {
-    background: var(--bg-navy);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-}
-
-/* Sub-method Toggle (Phone vs Email) */
-.sub-method-toggle {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    animation: fieldReveal 0.6s ease backwards;
-}
-
-.sub-method-toggle button {
-    padding: 0.5rem 1.2rem;
-    border-radius: 100px;
-    border: 1.5px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
+    z-index: 1;
     transition: all 0.3s ease;
 }
 
-.sub-method-toggle button.active {
-    background: var(--accent-orange);
-    border-color: var(--accent-orange);
+.segmented-control button.active {
     color: white;
-    box-shadow: 0 5px 15px var(--accent-orange-glow);
 }
 
-.sub-method-toggle button:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--text-muted);
+.segmented-indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: var(--accent-orange);
+    border-radius: 8px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+    box-shadow: 0 4px 12px rgba(255, 77, 41, 0.3);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 /* Button Upgrades */

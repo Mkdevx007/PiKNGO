@@ -13,14 +13,6 @@ const steps = [
     { id: 3, title: 'Seamless Pickup', desc: 'Arrive at the stop, skip the queue, and grab your fresh meal.', icon: <Truck size={32} /> },
 ];
 
-const partners = [
-    { name: 'Haldiram', logo: 'https://www.logo.wine/a/logo/Haldiram\'s/Haldiram\'s-Logo.wine.svg' },
-    { name: 'McDonalds', logo: 'https://www.logo.wine/a/logo/McDonald%27s/McDonald%27s-Logo.wine.svg' },
-    { name: 'Burger King', logo: 'https://www.logo.wine/a/logo/Burger_King/Burger_King-Logo.wine.svg' },
-    { name: 'KFC', logo: 'https://www.logo.wine/a/logo/KFC/KFC-Logo.wine.svg' },
-    { name: 'Starbucks', logo: 'https://www.logo.wine/a/logo/Starbucks/Starbucks-Logo.wine.svg' },
-    { name: 'Costa Coffee', logo: 'https://www.logo.wine/a/logo/Costa_Coffee/Costa_Coffee-Logo.wine.svg' },
-];
 
 const LandingPage = ({ isLoggedIn }) => {
     const [restaurants, setRestaurants] = useState([]);
@@ -133,13 +125,7 @@ const LandingPage = ({ isLoggedIn }) => {
         }
     };
 
-    const restaurantImages = [
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1470&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1374&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1470&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1470&auto=format&fit=crop"
-    ];
+    const defaultRestaurantImage = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop";
 
     return (
         <div className="landing-page auth-page-global-bg">
@@ -155,17 +141,6 @@ const LandingPage = ({ isLoggedIn }) => {
                 onSearch={handleRouteSearch}
             />
 
-            <section className="partner-ticker">
-                <div className="ticker-wrapper">
-                    <div className="ticker-track">
-                        {[...partners, ...partners].map((partner, i) => (
-                            <div key={i} className="partner-logo">
-                                <img src={partner.logo} alt={partner.name} title={partner.name} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
 
 
@@ -214,12 +189,13 @@ const LandingPage = ({ isLoggedIn }) => {
                                 restaurants.map((res, index) => (
                                     <FoodCard 
                                         key={res._id || res.id} 
+                                        id={res._id || res.id}
                                         name={res.resturantName || res.restaurantName} 
                                         restaurant={res.resturantName || res.restaurantName} 
                                         address={res.address}
                                         price="$$" 
                                         rating={4.5} 
-                                        image={restaurantImages[index % restaurantImages.length]}
+                                        image={res.imageUrl || defaultRestaurantImage}
                                     />
 
                                 ))
@@ -279,7 +255,6 @@ const LandingPage = ({ isLoggedIn }) => {
                             <a href="#">Help Center</a>
                             <a href="#">Safety</a>
                             <a href="#">Contact Us</a>
-                            <a href="#">Partners</a>
                         </div>
                     </div>
                     <div className="footer-bottom">

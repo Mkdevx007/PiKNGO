@@ -52,6 +52,10 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .latitude(restaurant.getLatitude())
                 .longitude(restaurant.getLongitude())
                 .distance(null)
+                .imageUrl(restaurant.getImageUrl())
+                .category(restaurant.getCategory())
+                .rating(restaurant.getRating())
+                .deliveryTime(restaurant.getDeliveryTime())
                 .build();
     }
 
@@ -63,6 +67,10 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .latitude(projection.getLatitude())
                 .longitude(projection.getLongitude())
                 .distance(projection.getDistance())
+                .imageUrl(projection.getImageUrl())
+                .category(projection.getCategory())
+                .rating(projection.getRating())
+                .deliveryTime(projection.getDeliveryTime())
                 .build();
     }
 
@@ -149,5 +157,19 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public RestaurantResponseDTO getRestaurantById(UUID id) {
+        log.info("Fetching restaurant by ID: {}", id);
+        return restaurantRepository.findById(id)
+                .map(res -> {
+                    log.debug("Found restaurant: {}", res.getResturantName());
+                    return mapToDTO(res);
+                })
+                .orElseThrow(() -> {
+                    log.error("Restaurant lookup failed for ID: {}", id);
+                    return new RuntimeException("Restaurant not found with ID: " + id);
+                });
     }
 }

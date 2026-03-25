@@ -29,12 +29,18 @@ export const authApi = {
 
 export const restaurantApi = {
     getAll: () => api.get('/restaurants'),
+    getById: (id) => api.get(`/restaurants/${id}`),
     getNearby: (lat, lon, radius = 100) => api.get(`/restaurants/nearby?lat=${lat}&lon=${lon}&radius=${radius}`),
     searchByRoute: (srcLat, srcLon, destLat, destLon, radius = 50) =>
         api.get(`/restaurants/search?srcLat=${srcLat}&srcLon=${srcLon}&destLat=${destLat}&destLon=${destLon}&radius=${radius}`),
 
     create: (data) => api.post('/restaurants', data),
     update: (id, data) => api.put(`/restaurants/${id}`, data),
+};
+
+export const menuApi = {
+    getMenu: (restaurantId) => api.get(`/restaurants/${restaurantId}/menu`),
+    addItem: (restaurantId, data) => api.post(`/restaurants/${restaurantId}/menu`, data),
 };
 
 export const addressApi = {

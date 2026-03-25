@@ -18,4 +18,8 @@ public class RestaurantResponseDTO {
     private Double latitude;
     private Double longitude;
     private Double distance;
+    private String imageUrl;
+    private String category;
+    private Double rating;
+    private String deliveryTime;
 }

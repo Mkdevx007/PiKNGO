@@ -20,4 +20,9 @@ public class RestaurantRequestDTO {
     private Double longitude;
 
     private boolean isActive = true;
+
+    private String category;
+    private Double rating;
+    private String deliveryTime;
+    private String imageUrl;
 }

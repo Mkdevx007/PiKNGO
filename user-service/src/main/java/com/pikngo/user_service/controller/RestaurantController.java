@@ -31,6 +31,10 @@ public class RestaurantController {
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .isActive(dto.isActive())
+                .category(dto.getCategory())
+                .rating(dto.getRating())
+                .deliveryTime(dto.getDeliveryTime())
+                .imageUrl(dto.getImageUrl())
                 .build();
         return new ResponseEntity<>(restaurantService.createRestaurant(restaurant), HttpStatus.CREATED);
     }
@@ -44,6 +48,10 @@ public class RestaurantController {
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .isActive(dto.isActive())
+                .category(dto.getCategory())
+                .rating(dto.getRating())
+                .deliveryTime(dto.getDeliveryTime())
+                .imageUrl(dto.getImageUrl())
                 .build();
         return ResponseEntity.ok(restaurantService.updateRestaurant(id, restaurant));
     }
@@ -73,5 +81,11 @@ public class RestaurantController {
     public ResponseEntity<List<RestaurantResponseDTO>> getAll() {
         log.info("REST request to get all active restaurants");
         return ResponseEntity.ok(restaurantService.getAllActiveRestaurants());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RestaurantResponseDTO> getById(@PathVariable UUID id) {
+        log.info("REST request to get restaurant by ID: {}", id);
+        return ResponseEntity.ok(restaurantService.getRestaurantById(id));
     }
 }

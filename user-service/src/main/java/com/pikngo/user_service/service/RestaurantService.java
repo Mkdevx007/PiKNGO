@@ -16,4 +16,6 @@ public interface RestaurantService {
             Double radius);
 
     List<RestaurantResponseDTO> getAllActiveRestaurants();
+
+    RestaurantResponseDTO getRestaurantById(UUID id);
 }

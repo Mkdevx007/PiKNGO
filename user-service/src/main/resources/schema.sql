@@ -1,8 +1,3 @@
--- Database schema for PikNGo User Service
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
--- Users Table
--- Stores basic user information after registration
 CREATE TABLE IF NOT EXISTS users (
     _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name VARCHAR(50) NOT NULL,
@@ -23,8 +18,6 @@ CREATE TABLE IF NOT EXISTS users (
     last_modified_by VARCHAR(100)
 );
 
--- OTP Verifications Table
--- Stores temporary OTPs for login and verification
 CREATE TABLE IF NOT EXISTS otp_verifications (
     _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     phone_number VARCHAR(15),
@@ -36,14 +29,6 @@ CREATE TABLE IF NOT EXISTS otp_verifications (
     created_by VARCHAR(100),
     last_modified_by VARCHAR(100)
 );
-
--- Addresses Table
--- Ensure address columns exist in users table if table was created previously without them
-ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line_1 VARCHAR(255);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line_2 VARCHAR(255);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(100);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS pincode VARCHAR(20);
 
 CREATE TABLE IF NOT EXISTS addresses (
     _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -58,11 +43,6 @@ CREATE TABLE IF NOT EXISTS addresses (
     is_deleted BOOLEAN DEFAULT FALSE
 );
 
--- Ensure CASCADE is added to existing foreign key
-ALTER TABLE addresses DROP CONSTRAINT IF EXISTS addresses_user_id_fkey;
-ALTER TABLE addresses ADD CONSTRAINT addresses_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(_id) ON DELETE CASCADE;
-
--- Restaurants Table
 CREATE TABLE IF NOT EXISTS restaurants (
     _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     resturant_name VARCHAR(255) NOT NULL,
@@ -70,9 +50,22 @@ CREATE TABLE IF NOT EXISTS restaurants (
     latitude DOUBLE PRECISION NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
+    category VARCHAR(100),
+    rating DOUBLE PRECISION,
+    delivery_time VARCHAR(50),
+    image_url TEXT,
     created_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     modify_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT FALSE
 );
 
-
+CREATE TABLE IF NOT EXISTS menu_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    price DOUBLE PRECISION,
+    description TEXT,
+    category VARCHAR(100),
+    restaurant_id UUID REFERENCES restaurants(_id) ON DELETE CASCADE,
+    created_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    modify_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
