@@ -190,6 +190,48 @@
     font-weight: 600;
 }
 
+.admin-card {
+    border: 1px solid rgba(139, 92, 246, 0.3); /* Purple accent for Admin */
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(30, 41, 59, 0.4) 100%);
+}
+
+.admin-card .card-header {
+    color: #a78bfa;
+}
+
+.admin-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.admin-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 1.5rem;
+    background: var(--bg-navy);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.admin-action-btn:hover {
+    transform: translateY(-5px);
+    background: rgba(139, 92, 246, 0.15);
+    border-color: #a78bfa;
+    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);
+}
+
+.admin-action-btn svg {
+    color: #a78bfa;
+}
+
 .danger-card {
     border: 1px solid rgba(239, 68, 68, 0.2);
 }

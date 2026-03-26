@@ -59,7 +59,7 @@ public class UserController {
             userRepository.save(user);
         }
 
-        String token = jwtUtils.generateToken(user.getPhoneNumber());
+        String token = jwtUtils.generateToken(user.getPhoneNumber(), user.getRole().name());
 
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
         cookie.setHttpOnly(true);
@@ -72,6 +72,7 @@ public class UserController {
                 .token("protected")
                 .phoneNumber(user.getPhoneNumber())
                 .userId(user.getId())
+                .role(user.getRole().name())
                 .build());
     }
 
@@ -116,7 +117,7 @@ public class UserController {
         }
 
         // 3. Generate JWT (using phone number as principal)
-        String token = jwtUtils.generateToken(user.getPhoneNumber());
+        String token = jwtUtils.generateToken(user.getPhoneNumber(), user.getRole().name());
 
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
         cookie.setHttpOnly(true);
@@ -129,6 +130,7 @@ public class UserController {
                 .token("protected")
                 .phoneNumber(user.getPhoneNumber())
                 .userId(user.getId())
+                .role(user.getRole().name())
                 .build());
     }
 

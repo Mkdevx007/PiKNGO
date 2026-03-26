@@ -9,16 +9,18 @@ import ProfileScreen from './pages/ProfileScreen';
 import Dashboard from './pages/Dashboard';
 import TrendingPage from './pages/TrendingPage';
 import MenuPage from './pages/MenuPage';
-import { menuApi } from './services/api';
+import ManageRestaurants from './pages/ManageRestaurants';
+import OrdersPage from './pages/OrdersPage';
+import ManageMenu from './pages/ManageMenu';
+import { authApi } from './services/api';
 import { CartProvider } from './context/CartContext';
 import CheckoutPage from './pages/CheckoutPage';
 import './App.css';
 
-
-
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'USER');
   const [profileImageUrl, setProfileImageUrl] = useState('');
 
   // Handle Login State
@@ -26,8 +28,10 @@ function App() {
     setIsLoggedIn(true);
     setUserName(data.firstName || data.phoneNumber);
     setProfileImageUrl(data.profileImageUrl || '');
+    setUserRole(data.role || 'USER');
     localStorage.setItem('phone', data.phoneNumber);
     localStorage.setItem('userId', data.userId);
+    localStorage.setItem('userRole', data.role || 'USER');
   };
 
   // Logout logic
@@ -39,9 +43,11 @@ function App() {
     }
     localStorage.removeItem('phone');
     localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
     setIsLoggedIn(false);
     setUserName('');
     setProfileImageUrl('');
+    setUserRole('USER');
   };
 
   useEffect(() => {
@@ -51,10 +57,12 @@ function App() {
         setIsLoggedIn(true);
         setUserName(response.data.firstName || response.data.phoneNumber);
         setProfileImageUrl(response.data.profileImageUrl || '');
+        setUserRole(response.data.role || 'USER');
       } catch (err) {
         setIsLoggedIn(false);
         setUserName('');
         setProfileImageUrl('');
+        setUserRole('USER');
       }
     };
     checkAuth();
@@ -65,22 +73,28 @@ function App() {
       <CartProvider>
         <Router>
         <div className="app">
-          <Navbar isLoggedIn={isLoggedIn} userName={userName} profileImageUrl={profileImageUrl} onLogout={handleLogout} />
+          <Navbar 
+            isLoggedIn={isLoggedIn} 
+            userName={userName} 
+            userRole={userRole}
+            profileImageUrl={profileImageUrl} 
+            onLogout={handleLogout} 
+          />
           <main>
             <Routes>
               <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <LandingPage isLoggedIn={isLoggedIn} />} />
               <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />} />
               <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
-
               <Route path="/register" element={<AuthPage onLogin={handleLogin} />} />
               <Route path="/profile" element={isLoggedIn ? <ProfileScreen onProfileUpdate={(data) => setProfileImageUrl(data.profileImageUrl)} /> : <Navigate to="/login" />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/trending" element={<TrendingPage />} />
               <Route path="/menu/:restaurantId" element={<MenuPage />} />
               <Route path="/checkout" element={isLoggedIn ? <CheckoutPage /> : <Navigate to="/login" />} />
+              <Route path="/orders" element={isLoggedIn ? <OrdersPage /> : <Navigate to="/login" />} />
+              <Route path="/admin/restaurants" element={isLoggedIn && userRole === 'ADMIN' ? <ManageRestaurants /> : <Navigate to="/" />} />
+              <Route path="/admin/menu/:restaurantId" element={isLoggedIn && userRole === 'ADMIN' ? <ManageMenu /> : <Navigate to="/" />} />
               <Route path="*" element={<Navigate to="/" />} />
-
-
             </Routes>
           </main>
         </div>

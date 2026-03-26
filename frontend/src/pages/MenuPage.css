@@ -322,6 +322,46 @@
     letter-spacing: -1px;
 }
 
+.name-veg-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.veg-indicator {
+    width: 14px;
+    height: 14px;
+    border: 2px solid;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.veg-indicator::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.veg-indicator.veg {
+    border-color: #00813e;
+}
+
+.veg-indicator.veg::after {
+    background-color: #00813e;
+}
+
+.veg-indicator.non-veg {
+    border-color: #bf1219;
+}
+
+.veg-indicator.non-veg::after {
+    background-color: #bf1219;
+}
+
 .item-desc {
     font-size: 0.95rem;
     color: var(--text-secondary);

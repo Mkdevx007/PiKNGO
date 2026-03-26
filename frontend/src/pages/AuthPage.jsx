@@ -98,24 +98,25 @@ const AuthPage = ({ onLogin }) => {
                 <div className="auth-form-side">
                     <div className="auth-flip-inner">
                         <div className="auth-card-front">
+                            {error && !isFlipped && <div className="error-message">{error}</div>}
+                            {success && <div className="success-message">{success}</div>}
+                            
                             {showForgot ? (
                                 <ForgotPasswordForm 
                                     onSuccess={setSuccess} 
                                     onError={setError} 
                                     loading={loading} 
                                     setLoading={setLoading} 
-                                    onBack={() => setShowForgot(false)} 
+                                    onBack={() => { setShowForgot(false); setSuccess(''); setError(''); }} 
                                 />
                             ) : (
                                 <div className="auth-card-content">
-                                    {error && !isFlipped && <div className="error-message">{error}</div>}
-                                    {success && <div className="success-message">{success}</div>}
                                     <LoginForm 
                                         onLogin={completeAuth} 
                                         onError={setError} 
                                         loading={loading} 
                                         setLoading={setLoading} 
-                                        onForgot={() => setShowForgot(true)}
+                                        onForgot={() => { setShowForgot(true); setSuccess(''); setError(''); }}
                                     />
                                     <p className="auth-footer">New here? <a href="#" onClick={toggleAuth}>Sign Up Now</a></p>
                                 </div>

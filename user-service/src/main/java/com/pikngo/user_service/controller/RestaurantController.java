@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +23,7 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Restaurant> createRestaurant(@Valid @RequestBody RestaurantRequestDTO dto) {
         log.info("REST request to create restaurant: {}", dto.getRestaurantName());
         Restaurant restaurant = Restaurant.builder()
@@ -40,6 +41,7 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Restaurant> updateRestaurant(@PathVariable UUID id, @Valid @RequestBody RestaurantRequestDTO dto) {
         log.info("REST request to update restaurant: {}", id);
         Restaurant restaurant = Restaurant.builder()

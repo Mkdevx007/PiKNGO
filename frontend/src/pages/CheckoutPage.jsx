@@ -5,7 +5,7 @@ import {
     ChevronLeft, Trash2, CreditCard, ShieldCheck, 
     MapPin, Plus, CheckCircle2, Wallet, Smartphone, Banknote
 } from 'lucide-react';
-import { addressApi } from '../services/api';
+import { addressApi, orderApi } from '../services/api';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
@@ -43,22 +43,45 @@ const CheckoutPage = () => {
         }
     };
 
-    const handlePlaceOrder = () => {
+    const handlePlaceOrder = async () => {
         if (!selectedAddress) {
             alert("Please select a delivery address.");
             return;
         }
+
+        const restaurantId = cartItems[0]?.restaurantId;
+        if (!restaurantId) {
+            alert("Error: Restaurant information missing from cart.");
+            return;
+        }
+
         setIsProcessing(true);
         
-        // Mock processing delay
-        setTimeout(() => {
-            setIsProcessing(false);
+        const orderRequest = {
+            restaurantId: restaurantId,
+            totalAmount: finalTotal,
+            deliveryAddress: `${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}`,
+            paymentMethod: paymentMethod,
+            items: cartItems.map(item => ({
+                menuItemId: item.id,
+                quantity: item.quantity,
+                price: item.price
+            }))
+        };
+
+        try {
+            await orderApi.placeOrder(orderRequest);
             setIsSuccess(true);
             setTimeout(() => {
                 clearCart();
                 navigate('/dashboard');
             }, 3000);
-        }, 2500);
+        } catch (err) {
+            console.error("Failed to place order:", err);
+            alert("Payment failed or order could not be placed. Please try again.");
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const total = getCartTotal();
@@ -269,6 +292,11 @@ const CheckoutPage = () => {
                             <p className="secure-text">
                                 <ShieldCheck size={14} /> 100% Safe & Secure Payments
                             </p>
+                            
+                            <div className="trust-badges">
+                                <span className="badge">🔒 SSL Encrypted</span>
+                                <span className="badge">✓ PCI DSS Compliant</span>
+                            </div>
                         </section>
                     </aside>
                 </div>

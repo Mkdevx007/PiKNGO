@@ -50,10 +50,11 @@ public class EmailServiceImpl implements EmailService {
             e.printStackTrace(); // This will help see the full trace in console
             log.info("[SIMULATED EMAIL FALLBACK] To: {} | Subject: {} | Body: {}", to, subject, body);
 
-            // DEBUG: Write to a file in the project root for easy access during development
-            try (java.io.FileWriter writer = new java.io.FileWriter("../OTP_DEBUG.txt", true)) {
-                writer.write(String.format("[%s] EMAIL To: %s | Subject: %s | %s%n",
+            // DEBUG: Write to a file in the user-service directory for easy access
+            try (java.io.FileWriter writer = new java.io.FileWriter("OTP_DEBUG.txt", true)) {
+                writer.write(String.format("[%s] EMAIL To: %s | Subject: %s | Body: %s%n",
                         java.time.LocalDateTime.now(), to, subject, body));
+                log.info("Reset token logged to OTP_DEBUG.txt in base directory.");
             } catch (java.io.IOException ioe) {
                 log.error("Failed to write to OTP_DEBUG.txt: {}", ioe.getMessage());
             }

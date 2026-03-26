@@ -13,4 +13,5 @@ public class JwtResponse {
     private String token;
     private String phoneNumber;
     private java.util.UUID userId;
+    private String role;
 }

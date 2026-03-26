@@ -129,7 +129,12 @@ const MenuPage = () => {
                                     </div>
                                     <div className="item-details">
                                         <div className="item-header">
-                                            <h4>{item.name}</h4>
+                                            <div className="name-veg-row">
+                                                {item.veg !== undefined && (
+                                                    <span className={`veg-indicator ${item.veg ? 'veg' : 'non-veg'}`}></span>
+                                                )}
+                                                <h4>{item.name}</h4>
+                                            </div>
                                             <div className="item-price">₹{item.price}</div>
                                         </div>
                                         <p className="item-desc">{item.desc}</p>

@@ -23,6 +23,10 @@ import java.util.UUID;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class User {
+    
+    public enum UserRole {
+        USER, ADMIN, OWNER
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -79,6 +83,11 @@ public class User {
     @Builder.Default
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    @Builder.Default
+    private UserRole role = UserRole.USER;
 
     @CreationTimestamp
     @Column(name = "created_ts", updatable = false)

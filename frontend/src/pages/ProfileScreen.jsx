@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X, Loader2, CheckCircle, AlertCircle, LayoutDashboard, Store, ClipboardList } from 'lucide-react';
 import { authApi, addressApi } from '../services/api';
 import './Profile.css';
 
@@ -239,6 +240,30 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                             </div>
                         </div>
                     </div>
+                    
+                    {user?.role === 'ADMIN' && (
+                        <div className="profile-card glass admin-card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+                            <div className="card-header">
+                                <ShieldCheck size={20} />
+                                <h3>Admin Control Center</h3>
+                            </div>
+                            <p className="text-sm opacity-80 mb-4">You have administrative privileges. Access management tools below.</p>
+                            <div className="admin-actions-grid">
+                                <NavLink to="/admin/restaurants" className="admin-action-btn">
+                                    <Store size={24} />
+                                    <span>Manage Restaurants</span>
+                                </NavLink>
+                                <NavLink to="/orders" className="admin-action-btn">
+                                    <ClipboardList size={24} />
+                                    <span>Manage Orders</span>
+                                </NavLink>
+                                <NavLink to="/dashboard" className="admin-action-btn">
+                                    <LayoutDashboard size={24} />
+                                    <span>Main Dashboard</span>
+                                </NavLink>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="profile-card glass animate-fade-in-up span-full">
                         <div className="card-header flex justify-between items-center w-full">

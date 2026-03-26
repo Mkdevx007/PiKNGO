@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/Hero/Hero';
 import FoodCard from '../components/FoodCard/FoodCard';
-import { Truck, Clock, ShieldCheck, Map, MapPin, Loader2, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Truck, Clock, ShieldCheck, Map, MapPin, Loader2 } from 'lucide-react';
 import Logo from '../components/Logo/Logo';
 import { restaurantApi } from '../services/api';
 import { getCoordsForCity } from '../utils/geoUtils';
@@ -147,9 +147,7 @@ const LandingPage = ({ isLoggedIn }) => {
 
             <section className="how-it-works container animate-fade-in">
                 <div className="section-header">
-                    <span className="section-badge silver-text">Simple Operations</span>
                     <h2 className="section-title">Your Highway Meal, <span className="gradient-text">Simplified</span></h2>
-                    <p className="section-desc">Experience the future of highway dining in three easy steps. No more waiting, no more low-quality food.</p>
                 </div>
                 <div className="steps-grid">
                     {steps.map((step, index) => (
@@ -193,8 +191,8 @@ const LandingPage = ({ isLoggedIn }) => {
                                         name={res.resturantName || res.restaurantName} 
                                         restaurant={res.resturantName || res.restaurantName} 
                                         address={res.address}
-                                        price="$$" 
-                                        rating={4.5} 
+                                        price={res.deliveryTime || "$$"} 
+                                        rating={res.rating || 0} 
                                         image={res.imageUrl || defaultRestaurantImage}
                                     />
 
@@ -219,7 +217,6 @@ const LandingPage = ({ isLoggedIn }) => {
                         <p>Join thousands of travelers who never settle for mediocre highway food.</p>
                         <div className="cta-actions">
                             <button className="landing-btn-primary">Start Your Journey</button>
-                            <button className="landing-btn-secondary">Download App</button>
                         </div>
                     </div>
                     <div className="cta-visual">
@@ -237,33 +234,20 @@ const LandingPage = ({ isLoggedIn }) => {
                                 Your ultimate companion for highway food discovery.
                                 Pre-order meals from the best rest stops along your route.
                             </p>
-                            <div className="footer-socials">
-                                <a href="#" className="social-btn" aria-label="Twitter"><Twitter size={18} /></a>
-                                <a href="#" className="social-btn" aria-label="Instagram"><Instagram size={18} /></a>
-                                <a href="#" className="social-btn" aria-label="LinkedIn"><Linkedin size={18} /></a>
-                            </div>
                         </div>
                         <div className="link-col">
                             <h4>Company</h4>
                             <a href="/about">About Us</a>
-                            <a href="#">Careers</a>
-                            <a href="#">Press</a>
-                            <a href="#">Blog</a>
+                            <a href="#">Contact Us</a>
                         </div>
                         <div className="link-col">
-                            <h4>Support</h4>
-                            <a href="#">Help Center</a>
-                            <a href="#">Safety</a>
-                            <a href="#">Contact Us</a>
+                            <h4>Legal</h4>
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
                         </div>
                     </div>
                     <div className="footer-bottom">
                         <p>&copy; 2026 PikNGo Inc. All rights reserved.</p>
-                        <div className="legal-links">
-                            <a href="#">Privacy</a>
-                            <a href="#">Terms</a>
-                            <a href="#">Cookies</a>
-                        </div>
                     </div>
                 </div>
             </footer>

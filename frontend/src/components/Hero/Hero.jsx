@@ -48,8 +48,8 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
                     Food on the Go
                 </h1>
                 <p className="hero-subtitle">
-                    Discover top-rated highway rest crops. From local delicacies to global cuisines,
-                    order ahead and enjoy a seamless pickup on your route.
+                    Discover top-rated highway rest stops along your route. 
+                    Order ahead and skip the queue for a seamless journey.
                 </p>
 
                 <form className="search-wrapper glass animate-fade-in" onSubmit={handleSubmit}>

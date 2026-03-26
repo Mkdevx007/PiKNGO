@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     pincode VARCHAR(20),
     is_active BOOLEAN DEFAULT TRUE,
     is_deleted BOOLEAN DEFAULT FALSE,
+    role VARCHAR(20) DEFAULT 'USER',
     created_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     modified_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(100),
@@ -68,4 +69,24 @@ CREATE TABLE IF NOT EXISTS menu_items (
     restaurant_id UUID REFERENCES restaurants(_id) ON DELETE CASCADE,
     created_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     modify_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS orders (
+    _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(_id),
+    restaurant_id UUID REFERENCES restaurants(_id),
+    total_amount DOUBLE PRECISION NOT NULL,
+    status VARCHAR(50) DEFAULT 'PENDING',
+    delivery_address TEXT,
+    payment_method VARCHAR(50),
+    created_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    modified_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+    _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID REFERENCES orders(_id) ON DELETE CASCADE,
+    menu_item_id UUID REFERENCES menu_items(id),
+    quantity INTEGER NOT NULL,
+    price DOUBLE PRECISION NOT NULL
 );

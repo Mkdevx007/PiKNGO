@@ -24,6 +24,7 @@ public class MenuItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Restaurant restaurant;
 
     @Column(nullable = false)
@@ -43,11 +44,11 @@ public class MenuItem {
 
     @Builder.Default
     @Column(name = "is_available")
-    private boolean isAvailable = true;
+    private boolean available = true;
 
     @Builder.Default
     @Column(name = "is_veg")
-    private boolean isVeg = true;
+    private boolean veg = true;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

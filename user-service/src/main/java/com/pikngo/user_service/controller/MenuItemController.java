@@ -18,12 +18,25 @@ public class MenuItemController {
 
     @GetMapping
     public ResponseEntity<List<MenuItem>> getMenu(@PathVariable UUID restaurantId) {
-        return ResponseEntity.ok(menuItemService.getMenuItemsByRestaurant(restaurantId));
+        System.out.println("Fetching menu for restaurant: " + restaurantId);
+        List<MenuItem> items = menuItemService.getMenuItemsByRestaurant(restaurantId);
+        System.out.println("Found " + items.size() + " items");
+        return ResponseEntity.ok(items);
     }
 
     @PostMapping
     public ResponseEntity<MenuItem> addMenuItem(@PathVariable UUID restaurantId, @RequestBody MenuItem menuItem) {
-        // Simple set for now, in real case we would fetch restaurant
-        return ResponseEntity.ok(menuItemService.addMenuItem(menuItem));
+        return ResponseEntity.ok(menuItemService.addMenuItem(restaurantId, menuItem));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable UUID restaurantId, @PathVariable UUID id, @RequestBody MenuItem menuItem) {
+        return ResponseEntity.ok(menuItemService.updateMenuItem(id, menuItem));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMenuItem(@PathVariable UUID restaurantId, @PathVariable UUID id) {
+        menuItemService.deleteMenuItem(id);
+        return ResponseEntity.ok().build();
     }
 }

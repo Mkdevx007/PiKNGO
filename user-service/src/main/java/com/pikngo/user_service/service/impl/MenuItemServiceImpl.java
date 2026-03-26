@@ -11,9 +11,11 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@org.springframework.transaction.annotation.Transactional
 public class MenuItemServiceImpl implements MenuItemService {
 
     private final MenuItemRepository menuItemRepository;
+    private final com.pikngo.user_service.repository.RestaurantRepository restaurantRepository;
 
     @Override
     public List<MenuItem> getMenuItemsByRestaurant(UUID restaurantId) {
@@ -21,7 +23,10 @@ public class MenuItemServiceImpl implements MenuItemService {
     }
 
     @Override
-    public MenuItem addMenuItem(MenuItem menuItem) {
+    public MenuItem addMenuItem(UUID restaurantId, MenuItem menuItem) {
+        com.pikngo.user_service.entity.Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+        menuItem.setRestaurant(restaurant);
         return menuItemRepository.save(menuItem);
     }
 

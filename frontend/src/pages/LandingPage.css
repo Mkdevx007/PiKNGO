@@ -20,35 +20,21 @@
 }
 
 .section-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    margin-bottom: 8rem;
-}
-
-.section-badge {
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: var(--accent-orange);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-    display: inline-block;
+    margin: 0 auto 6rem;
+    width: 100%;
 }
 
 .section-title {
     font-size: 4.8rem;
     font-weight: 900;
     letter-spacing: -3px;
-    line-height: 1;
-    margin-bottom: 2rem;
-}
-
-.section-desc {
-    font-size: 1.3rem;
-    color: var(--text-secondary);
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
-    opacity: 0.8;
+    line-height: 1.1;
+    margin-bottom: 0;
+    text-align: center;
 }
 
 .steps-grid {
@@ -80,7 +66,7 @@
     right: 3rem;
     font-size: 5rem;
     font-weight: 900;
-    opacity: 0.05;
+    opacity: 0.08;
 }
 
 .step-icon-wrapper {

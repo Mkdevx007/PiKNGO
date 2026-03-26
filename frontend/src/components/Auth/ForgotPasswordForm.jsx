@@ -14,11 +14,8 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
         onError('');
         try {
             await authApi.forgotPassword(forgotEmail);
-            onSuccess('Reset token sent to your email! (Check backend logs)');
-            setTimeout(() => {
-                onSuccess('');
-                setShowReset(true);
-            }, 2000);
+            onSuccess('Reset token generated! (Check user-service/OTP_DEBUG.txt)');
+            setShowReset(true);
         } catch (err) {
             onError(err.response?.data?.message || 'Failed to send reset link.');
         } finally { setLoading(false); }
@@ -45,8 +42,8 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
             <h2 className="auth-title">{showReset ? 'Set New Password' : 'Forgot Password?'}</h2>
             <p className="auth-subtitle">
                 {showReset
-                    ? 'Enter the token from your email and your new password.'
-                    : 'Enter your email and we\'ll send you a link to reset your password.'}
+                    ? 'Check your email for the reset code and enter it below.'
+                    : 'Enter your email and we\'ll send you a code to reset your password.'}
             </p>
 
             {!showReset ? (
@@ -68,10 +65,10 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
             ) : (
                 <form className="auth-form" onSubmit={handleResetSubmit}>
                     <div className="form-group">
-                        <label>Reset Token</label>
+                        <label>Reset Code</label>
                         <div className="input-wrapper">
                             <Key size={18} className="input-icon" />
-                            <input type="text" value={resetToken} onChange={(e) => setResetToken(e.target.value)} placeholder="Paste token here" required />
+                            <input type="text" value={resetToken} onChange={(e) => setResetToken(e.target.value)} placeholder="Enter 6-digit code" required />
                         </div>
                     </div>
                     <div className="form-group">
@@ -83,6 +80,9 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
                     </div>
                     <button type="submit" className="btn-primary w-full" disabled={loading}>
                         {loading ? <div className="loader"></div> : 'Reset Password'}
+                    </button>
+                    <button type="button" className="btn-secondary w-full" onClick={() => setShowReset(false)}>
+                        Back
                     </button>
                 </form>
             )}

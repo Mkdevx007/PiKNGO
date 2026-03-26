@@ -133,6 +133,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle TokenException - when password reset token is invalid or expired
+     */
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<Object> handleTokenException(TokenException ex, WebRequest request) {
+        log.warn("TokenException: {}", ex.getMessage());
+        
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Invalid Token");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handle all other general exceptions
      */
     @ExceptionHandler(Exception.class)

@@ -37,23 +37,19 @@ const Dashboard = () => {
 
     const defaultRestaurantImage = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop";
 
-    // Mock filtering logic for demo purposes
+    // Dynamic filtering logic
     const filteredRestaurants = restaurants.filter(res => {
         if (activeCategory === 'All') return true;
-        const name = (res.resturantName || res.restaurantName || '').toLowerCase();
-        if (activeCategory === 'Pure Veg' && (name.includes('veg') || name.includes('pure'))) return true;
-        if (activeCategory === 'Fast Food' && (name.includes('burger') || name.includes('dhaba') || name.includes('king'))) return true;
-        if (activeCategory === 'Fine Dining' && (name.includes('restaurant') || name.includes('hotel'))) return true;
-        return name.length % 2 === 0; // Random-ish fallback for others
+        return (res.category || '').toLowerCase() === activeCategory.toLowerCase();
     });
 
     const categories = [
         { name: 'All', icon: <LayoutGrid size={18} /> },
-        { name: 'Pure Veg', icon: '🥦' },
+        { name: 'Indian', icon: '🍲' },
         { name: 'Fast Food', icon: '🍔' },
-        { name: 'Fine Dining', icon: '🍷' },
-        { name: 'Beverages', icon: '☕' },
-        { name: 'Desserts', icon: '🍰' }
+        { name: 'Italian', icon: '🍕' },
+        { name: 'Chinese', icon: '🥡' },
+        { name: 'Beverages', icon: '☕' }
     ];
 
     const getLocation = () => {
@@ -109,7 +105,6 @@ const Dashboard = () => {
         } catch (err) {
             console.error("Failed to fetch restaurants", err);
         } finally {
-            setLoading(true); // Wait, this should be false, but I want to keep the loading state for a bit? No, false.
             setLoading(false);
         }
     };
@@ -287,7 +282,7 @@ const Dashboard = () => {
                                     restaurant={res.resturantName || res.restaurantName} 
                                     address={res.address}
                                     price="$$" 
-                                    rating={4.5} 
+                                    rating={res.rating || 0} 
                                     image={res.imageUrl || defaultRestaurantImage}
                                     distance={res.distance}
                                     onHover={(id) => setHoveredRestId(id)}

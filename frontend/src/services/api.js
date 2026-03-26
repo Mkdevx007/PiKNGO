@@ -41,6 +41,8 @@ export const restaurantApi = {
 export const menuApi = {
     getMenu: (restaurantId) => api.get(`/restaurants/${restaurantId}/menu`),
     addItem: (restaurantId, data) => api.post(`/restaurants/${restaurantId}/menu`, data),
+    updateItem: (restaurantId, itemId, data) => api.put(`/restaurants/${restaurantId}/menu/${itemId}`, data),
+    deleteItem: (restaurantId, itemId) => api.delete(`/restaurants/${restaurantId}/menu/${itemId}`),
 };
 
 export const addressApi = {
@@ -48,6 +50,14 @@ export const addressApi = {
     create: (data) => api.post('/addresses', data),
     update: (id, data) => api.put(`/addresses/${id}`, data),
     delete: (id) => api.delete(`/addresses/${id}`),
+};
+
+export const orderApi = {
+    placeOrder: (data) => api.post('/orders', data),
+    getMyOrders: () => api.get('/orders/my-orders'),
+    getRestaurantOrders: (restaurantId) => api.get(`/orders/restaurant/${restaurantId}`),
+    getAllOrders: () => api.get('/orders/all'),
+    updateStatus: (orderId, status) => api.patch(`/orders/${orderId}/status?status=${status}`),
 };
 
 export default api;

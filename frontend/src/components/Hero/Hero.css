@@ -281,64 +281,6 @@ body:not(.dark-theme) .search-action-btn {
     box-shadow: 0 15px 35px rgba(230, 74, 25, 0.4);
 }
 
-.hero-cta-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 4rem;
-}
-
-.btn-get-started {
-    background: linear-gradient(135deg, var(--accent-orange) 0%, #ff6b4a 100%);
-    color: white;
-    border: none;
-    padding: 1.4rem 4rem;
-    border-radius: 100px;
-    display: flex;
-    align-items: center;
-    gap: 1.2rem;
-    font-weight: 900;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 20px 40px var(--accent-orange-glow);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.btn-get-started:hover {
-    transform: scale(1.08) translateY(-5px);
-    box-shadow: 0 30px 60px var(--accent-orange-glow);
-    filter: brightness(1.1);
-}
-
-.btn-get-started svg {
-    transition: transform 0.4s ease;
-}
-
-.btn-get-started:hover svg {
-    transform: translateX(5px);
-}
-
-.cta-secondary-text {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-}
-
-.cta-secondary-text span {
-    color: var(--accent-orange);
-    cursor: pointer;
-    text-decoration: underline;
-    margin-left: 5px;
-    transition: color 0.3s ease;
-}
-
-.cta-secondary-text span:hover {
-    color: white;
-}
-
 .hero-features {
     display: flex;
     align-items: center;

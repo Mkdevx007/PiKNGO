@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { User, LogIn, Menu, X, ChevronDown, LogOut, Settings, Sun, Moon, ShoppingCart } from 'lucide-react';
+import { 
+    User, LogIn, Menu, X, ChevronDown, LogOut, Settings, 
+    Sun, Moon, ShoppingCart, LayoutDashboard, 
+    Home, Utensils, Info, ShoppingBag 
+} from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useCart } from '../../context/CartContext';
 import Logo from '../Logo/Logo';
 import './Navbar.css';
 
-const Navbar = ({ isLoggedIn, userName, profileImageUrl, onLogout }) => {
+const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) => {
     const { isDarkMode, toggleTheme } = useTheme();
     const { getCartCount } = useCart();
     const userId = localStorage.getItem('userId');
@@ -49,14 +53,28 @@ const Navbar = ({ isLoggedIn, userName, profileImageUrl, onLogout }) => {
 
                 <div className={`nav-links ${isOpen ? 'active' : ''}`}>
                     {!isLoggedIn && (
-                        <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Home</NavLink>
+                        <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                            <Home size={16} /> <span>Home</span>
+                        </NavLink>
                     )}
                     {isLoggedIn && (
-                        <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Dashboard</NavLink>
+                        <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                            <Home size={16} /> <span>Dashboard</span>
+                        </NavLink>
                     )}
-                    <NavLink to="/trending" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>Food</NavLink>
+                    <NavLink to="/trending" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                        <Utensils size={16} /> <span>Food</span>
+                    </NavLink>
 
-                    <NavLink to="/about" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>About</NavLink>
+                    {isLoggedIn && (
+                        <NavLink to="/orders" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                            <ShoppingBag size={16} /> <span>My Orders</span>
+                        </NavLink>
+                    )}
+
+                    <NavLink to="/about" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                        <Info size={16} /> <span>About</span>
+                    </NavLink>
                 </div>
 
                 <div className="nav-actions-group">
@@ -98,6 +116,12 @@ const Navbar = ({ isLoggedIn, userName, profileImageUrl, onLogout }) => {
                                         <User size={16} />
                                         <span>Profile</span>
                                     </NavLink>
+                                    {userRole === 'ADMIN' && (
+                                        <NavLink to="/admin/restaurants" className="dropdown-item">
+                                            <LayoutDashboard size={16} />
+                                            <span>Admin Panel</span>
+                                        </NavLink>
+                                    )}
                                     <div className="dropdown-divider"></div>
                                     <button className="dropdown-item logout-item" onClick={onLogout}>
                                         <LogOut size={16} />

@@ -1,6 +1,25 @@
 .checkout-page {
     padding: 120px 0 60px;
-    min-height: 90vh;
+    min-height: 100vh;
+    background: radial-gradient(circle at top right, rgba(255, 126, 0, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+                var(--bg-deep);
+    position: relative;
+    overflow: hidden;
+}
+
+.checkout-page::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, var(--accent-orange-glow) 0%, transparent 70%);
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: floating 15s infinite alternate ease-in-out;
+    pointer-events: none;
 }
 
 .checkout-header {
@@ -31,9 +50,23 @@
 }
 
 .checkout-section {
-    padding: 2rem;
+    padding: 2.5rem;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.checkout-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+    pointer-events: none;
 }
 
 .section-header {
@@ -72,13 +105,15 @@
 }
 
 .address-item:hover {
-    border-color: rgba(255, 126, 0, 0.3);
-    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 126, 0, 0.4);
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
 }
 
 .address-item.active {
     border-color: var(--accent-orange);
-    background: rgba(255, 126, 0, 0.05);
+    background: linear-gradient(90deg, rgba(255, 126, 0, 0.1) 0%, transparent 100%);
+    box-shadow: 0 5px 20px rgba(255, 126, 0, 0.1);
 }
 
 .address-radio {
@@ -152,12 +187,14 @@
 .pay-method-btn.active {
     border-color: var(--accent-orange);
     color: white;
-    background: rgba(255, 126, 0, 0.05);
+    background: rgba(255, 126, 0, 0.1);
+    box-shadow: 0 0 20px var(--accent-orange-glow);
 }
 
-.pay-method-btn.active svg {
-    color: var(--accent-orange);
-    opacity: 1;
+.pay-method-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
 }
 
 /* Card Form */
@@ -366,6 +403,11 @@
 @keyframes progress { 
     from { transform: translateX(-100%); }
     to { transform: translateX(0); }
+}
+
+@keyframes floating {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(10%, 15%) scale(1.1); }
 }
 
 @media (max-width: 992px) {

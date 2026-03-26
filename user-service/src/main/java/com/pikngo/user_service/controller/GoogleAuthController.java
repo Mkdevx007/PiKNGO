@@ -63,7 +63,7 @@ public class GoogleAuthController {
                     return userRepository.save(newUser);
                 });
 
-                String token = jwtUtils.generateToken(user.getPhoneNumber());
+                String token = jwtUtils.generateToken(user.getPhoneNumber(), user.getRole().name());
                 
                 Cookie cookie = new Cookie("token", token);
                 cookie.setHttpOnly(true);
@@ -76,6 +76,7 @@ public class GoogleAuthController {
                         .token("protected")
                         .phoneNumber(user.getPhoneNumber())
                         .userId(user.getId())
+                        .role(user.getRole().name())
                         .build());
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid ID token.");

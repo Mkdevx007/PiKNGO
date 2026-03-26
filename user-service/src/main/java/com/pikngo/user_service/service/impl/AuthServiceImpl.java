@@ -136,8 +136,9 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UserNotFoundException(
                         "No account found with this email"));
 
-        // Delete existing token if any to avoid unique constraint violation
-        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+        // Delete existing token and flush to ensure unique constraint on user_id is cleared immediately
+        tokenRepository.deleteByUser(user);
+        tokenRepository.flush();
 
         // Generate a simpler 8-character token for easier manual entry
         String token = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -162,12 +163,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void resetPassword(String token, String newPassword) {
-        PasswordResetToken resetToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
+        String upperToken = token.trim().toUpperCase();
+        log.info("Attempting to reset password with token: {}", upperToken);
+        
+        PasswordResetToken resetToken = tokenRepository.findByToken(upperToken)
+                .orElseThrow(() -> new com.pikngo.user_service.exception.TokenException("Invalid reset code. Please check your email and try again."));
 
         if (resetToken.isExpired()) {
             tokenRepository.delete(resetToken);
-            throw new RuntimeException("Token has expired");
+            throw new com.pikngo.user_service.exception.TokenException("Reset code has expired. Please request a new one.");
         }
 
         User user = resetToken.getUser();
@@ -196,6 +200,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         otpRepository.save(otp);
+        System.out.println("DEBUG_OTP_EMAIL: " + email + " CODE: " + otpCode);
         emailService.sendOtpEmail(email, otpCode);
     }
 
