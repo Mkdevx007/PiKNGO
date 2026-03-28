@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import './MapView.css';
+import { HIGHWAYS } from '../../data/highways';
 
 // Fix for default marker icons in Leaflet with React
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -50,27 +51,41 @@ const RoutingEngine = ({ sourceCoords, destinationCoords }) => {
             map.removeControl(routingControlRef.current);
         }
 
-        // Create new routing control
+        // Create new routing control with improved styling
         routingControlRef.current = L.Routing.control({
             waypoints: [
                 L.latLng(sourceCoords.lat, sourceCoords.lon),
                 L.latLng(destinationCoords.lat, destinationCoords.lon)
             ],
             lineOptions: {
-                styles: [{ color: '#2196F3', weight: 6, opacity: 0.9 }] // Bright Blue Route Line
+                styles: [
+                    { color: '#000', weight: 8, opacity: 0.3 }, // Shadow/Glow base
+                    { color: '#2196F3', weight: 6, opacity: 0.95 } // Main vibrant blue line
+                ],
+                extendToWaypoints: true,
+                missingRouteTolerance: 10
             },
-            createMarker: () => null,
+            createMarker: () => null, // Don't create default markers (we have our own)
             addWaypoints: false,
             draggableWaypoints: false,
             fitSelectedRoutes: true,
             show: false,
-            collapsible: true, // Allow user to expand if needed but hidden by default
+            collapsible: true,
             itinerary: {
-                containerClassName: 'routing-itinerary-hidden' // Custom class to hide
+                containerClassName: 'routing-itinerary-hidden'
             }
         }).addTo(map);
 
-        // Hide the default itinerary container manually for better control
+        // Ensure the line is on top and visible
+        routingControlRef.current.on('routesfound', (e) => {
+            const routes = e.routes;
+            if (routes && routes[0]) {
+                const bounds = L.latLngBounds(routes[0].coordinates);
+                map.fitBounds(bounds, { padding: [50, 50], animate: true });
+            }
+        });
+
+        // Force hide the container if it's injected
         const container = routingControlRef.current.getContainer();
         if (container) {
             container.style.display = 'none';
@@ -95,18 +110,23 @@ const restaurantIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
-const MapAutoCenter = ({ coords }) => {
+const MapAutoCenter = ({ coords, focusedHighwayPath }) => {
     const map = useMap();
     useEffect(() => {
-        if (coords && coords.length > 0) {
+        if (focusedHighwayPath && focusedHighwayPath.length > 0) {
+            const bounds = L.latLngBounds(focusedHighwayPath);
+            map.fitBounds(bounds, { padding: [100, 100], animate: true });
+        } else if (coords && coords.length > 0) {
             const bounds = L.latLngBounds(coords);
             map.fitBounds(bounds, { padding: [50, 50] });
         }
-    }, [coords, map]);
+    }, [coords, focusedHighwayPath, map]);
     return null;
 };
 
-const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId }) => {
+const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, focusedHighwayId }) => {
+    const focusedHighway = HIGHWAYS.find(h => h.id === focusedHighwayId);
+
     return (
         <div className="map-view-container glass">
             <MapContainer 
@@ -130,6 +150,32 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId }
                         <Popup>Destination</Popup>
                     </Marker>
                 )}
+
+                {/* National Highway Routes Layer - Only show if focused */}
+                {HIGHWAYS.map(highway => {
+                    const isFocused = highway.id === focusedHighwayId;
+                    if (!isFocused) return null; // HIDDEN BY DEFAULT
+
+                    return (
+                        <Polyline
+                            key={highway.id}
+                            positions={highway.path}
+                            pathOptions={{ 
+                                color: highway.color, 
+                                weight: 8, 
+                                opacity: 1
+                            }}
+                        >
+                            <Tooltip sticky>
+                                <div className="highway-tooltip">
+                                    <span className="h-badge" style={{ backgroundColor: highway.color }}>{highway.id}</span>
+                                    <strong>{highway.name}</strong>
+                                    <p>{highway.description}</p>
+                                </div>
+                            </Tooltip>
+                        </Polyline>
+                    );
+                })}
 
                 <RoutingEngine sourceCoords={sourceCoords} destinationCoords={destinationCoords} />
 
@@ -166,9 +212,10 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId }
                     );
                 })}
 
-                {!sourceCoords && !destinationCoords && (
-                    <MapAutoCenter coords={restaurants.map(r => [r.latitude || (r.location && r.location.lat), r.longitude || (r.location && r.location.lon)]).filter(c => c[0] && c[1])} />
-                )}
+                <MapAutoCenter 
+                    coords={restaurants.map(r => [r.latitude || (r.location && r.location.lat), r.longitude || (r.location && r.location.lon)]).filter(c => c[0] && c[1])} 
+                    focusedHighwayPath={focusedHighway?.path}
+                />
             </MapContainer>
         </div>
     );

@@ -20,4 +20,6 @@ public interface UserService {
     byte[] getProfilePhoto(UUID userId);
 
     void deleteUser(UUID userId, boolean softDelete);
+
+    java.util.List<User> getAllUsers();
 }

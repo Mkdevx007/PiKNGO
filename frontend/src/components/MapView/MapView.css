@@ -114,3 +114,55 @@
 .custom-div-icon.marker-hovered .marker-pin::after {
     background: #ff6b00;
 }
+
+/* Highway Tooltip Styles */
+.highway-tooltip {
+    background: rgba(15, 15, 15, 0.9) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    max-width: 250px;
+}
+
+.h-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.highway-tooltip strong {
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    color: #fff;
+}
+
+.highway-tooltip p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.4;
+}
+
+/* Leaflet Tooltip Overrides */
+.leaflet-tooltip-top:before, 
+.leaflet-tooltip-bottom:before, 
+.leaflet-tooltip-left:before, 
+.leaflet-tooltip-right:before {
+    border: none !important;
+}
+
+.leaflet-tooltip {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}

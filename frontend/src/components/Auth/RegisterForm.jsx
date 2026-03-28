@@ -6,7 +6,7 @@ const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
     const [regStep, setRegStep] = useState(1);
     const [registerData, setRegisterData] = useState({
         firstName: '', lastName: '', email: '', phoneNumber: '', 
-        addressLine1: '', city: '', state: '', pincode: '',
+        addressLine1: '', addressLine2: '', city: '', state: '', pincode: '',
         password: '', confirmPassword: ''
     });
     const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +29,16 @@ const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
             return;
         }
 
+        if (regStep === 2) {
+            if (!registerData.addressLine1 || !registerData.city || !registerData.state || !registerData.pincode) {
+                onError('Please fill in all required address fields');
+                return;
+            }
+            setRegStep(3);
+            onError('');
+            return;
+        }
+
         if (registerData.password !== registerData.confirmPassword) {
             onError('Passwords do not match');
             return;
@@ -47,16 +57,17 @@ const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
 
     const prevStep = (e) => {
         e.preventDefault();
-        setRegStep(1);
+        setRegStep(prev => prev - 1);
     };
 
     return (
         <div className="auth-card-content">
-            <div className="progress-container">
-                <div className="progress-bar" style={{ width: `${(regStep / 2) * 100}%` }}></div>
-            </div>
             <h2 className="auth-title">Create Account</h2>
-            <p className="auth-subtitle">{regStep === 1 ? 'Personal & Contact Details' : 'Address & Security'}</p>
+            <p className="auth-subtitle">
+                {regStep === 1 && 'Step 1: Personal Details'}
+                {regStep === 2 && 'Step 2: Address Details'}
+                {regStep === 3 && 'Step 3: Account Security'}
+            </p>
 
             <form className="auth-form" onSubmit={handleRegister}>
                 {regStep === 1 && (
@@ -102,11 +113,19 @@ const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
 
                 {regStep === 2 && (
                     <div className="step-content animate-slide-in">
-                        <div className="form-group">
-                            <label>Street Address</label>
-                            <div className="input-wrapper">
-                                <MapPin size={18} className="input-icon" />
-                                <input type="text" placeholder="House No, Street" value={registerData.addressLine1} onChange={(e) => setRegisterData({ ...registerData, addressLine1: e.target.value })} required />
+                        <div className="grid-2">
+                            <div className="form-group">
+                                <label>Street Address</label>
+                                <div className="input-wrapper">
+                                    <MapPin size={18} className="input-icon" />
+                                    <input type="text" placeholder="House No, Street" value={registerData.addressLine1} onChange={(e) => setRegisterData({ ...registerData, addressLine1: e.target.value })} required />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label>Area / Landmark</label>
+                                <div className="input-wrapper">
+                                    <input type="text" placeholder="Society, Area" value={registerData.addressLine2} onChange={(e) => setRegisterData({ ...registerData, addressLine2: e.target.value })} />
+                                </div>
                             </div>
                         </div>
                         <div className="grid-2">
@@ -117,12 +136,23 @@ const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label>Pincode</label>
+                                <label>State</label>
                                 <div className="input-wrapper">
-                                    <input type="text" placeholder="6 Digits" value={registerData.pincode} onChange={(e) => setRegisterData({ ...registerData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} required />
+                                    <input type="text" placeholder="State" value={registerData.state} onChange={(e) => setRegisterData({ ...registerData, state: e.target.value })} required />
                                 </div>
                             </div>
                         </div>
+                        <div className="form-group">
+                            <label>Pincode</label>
+                            <div className="input-wrapper">
+                                <input type="text" placeholder="6 Digits" value={registerData.pincode} onChange={(e) => setRegisterData({ ...registerData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} required />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {regStep === 3 && (
+                    <div className="step-content animate-slide-in">
                         <div className="grid-2">
                             <div className="form-group">
                                 <label>Password</label>
@@ -146,14 +176,14 @@ const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
                 )}
 
                 <div className="form-actions multi-step">
-                    {regStep === 2 && (
+                    {regStep > 1 && (
                         <button type="button" className="btn-secondary flex-1" onClick={prevStep} disabled={loading}>
                             <ChevronLeft size={18} />
                         </button>
                     )}
                     <button type="submit" className="btn-primary w-full" disabled={loading}>
-                        {loading ? 'Processing...' : (regStep === 1 ? 'Next Step' : 'Create Account')}
-                        {regStep === 1 && <ArrowRight size={18} />}
+                        {loading ? 'Processing...' : (regStep < 3 ? 'Next Step' : 'Create Account')}
+                        {regStep < 3 && <ArrowRight size={18} />}
                     </button>
                 </div>
             </form>

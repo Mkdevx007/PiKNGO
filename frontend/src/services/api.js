@@ -25,6 +25,7 @@ export const authApi = {
     uploadProfilePhoto: (formData) => api.post('/users/profile/photo', formData),
     deleteProfile: (softDelete = true) => api.delete(`/users/delete?softDelete=${softDelete}`),
     logout: () => api.post('/users/logout'),
+    getUsers: () => api.get('/users/all'),
 };
 
 export const restaurantApi = {

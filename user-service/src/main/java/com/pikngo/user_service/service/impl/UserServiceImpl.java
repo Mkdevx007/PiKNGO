@@ -182,4 +182,12 @@ public class UserServiceImpl implements UserService {
             userRepository.delete(user);
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll().stream()
+                .filter(u -> !u.isDeleted())
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

@@ -138,8 +138,25 @@ const Dashboard = () => {
         }
     };
 
+    const [focusedHighwayId, setFocusedHighwayId] = useState(null);
+
     const handleRouteSearch = async (e) => {
         e.preventDefault();
+        if (!searchQuery.source && !searchQuery.destination) return;
+
+        // Check if searching for a highway (e.g., "NH44")
+        const highwayMatch = (searchQuery.source + ' ' + searchQuery.destination).match(/NH\s?\d+/i);
+        if (highwayMatch) {
+            const hId = highwayMatch[0].toUpperCase().replace(/\s/g, '');
+            setFocusedHighwayId(hId);
+            setLocationStatus(`Visualizing ${hId}...`);
+            setViewMode('map');
+            // We still proceed with normal search if both source/destination are provided
+            // but the highway highlight takes priority for the view.
+        } else {
+            setFocusedHighwayId(null);
+        }
+
         if (!searchQuery.source || !searchQuery.destination) return;
 
         setLoading(true);
@@ -148,7 +165,7 @@ const Dashboard = () => {
             const destCoord = await getCoords(searchQuery.destination);
 
             if (!srcCoord || !destCoord) {
-                setLocationStatus("Could not find locations. Please try again.");
+                if (!highwayMatch) setLocationStatus("Could not find locations. Please try again.");
                 setLoading(false);
                 return;
             }
@@ -157,12 +174,11 @@ const Dashboard = () => {
                 srcCoord.lat, srcCoord.lon, 
                 destCoord.lat, destCoord.lon
             );
-            console.log("Search Results:", response.data);
             setRestaurants(response.data);
             setSourceCoords(srcCoord);
             setDestinationCoords(destCoord);
-            setLocationStatus(`Showing restaurants between ${searchQuery.source} and ${searchQuery.destination}`);
-            setViewMode('map'); // Automatically switch to map view on search
+            if (!highwayMatch) setLocationStatus(`Showing restaurants between ${searchQuery.source} and ${searchQuery.destination}`);
+            setViewMode('map');
         } catch (err) {
             console.error("Search failed", err);
         } finally {
@@ -185,83 +201,83 @@ const Dashboard = () => {
                 <main className="dashboard-main-full">
                     {/* Search and Filters Strip */}
                     <div className="search-filter-strip">
-                        <form className="route-search-bar glass-floating horizontal-search" onSubmit={handleRouteSearch}>
-                            <div className="search-input">
-                                <div className="input-glow"></div>
-                                <div className="input-group">
+                        <form className="route-search-bar-unified glass-modern animate-slide-up" onSubmit={handleRouteSearch}>
+                            <div className="search-field">
+                                <MapPin className="search-field-icon source" size={20} />
+                                <div className="search-field-content">
                                     <label>Source</label>
                                     <input 
                                         type="text" 
-                                        placeholder="My Location - 123 Main St" 
+                                        placeholder="Starting location..." 
                                         value={searchQuery.source}
                                         onChange={(e) => setSearchQuery({ ...searchQuery, source: e.target.value })}
                                     />
                                 </div>
                             </div>
-                            <div className="divider-icon"><Navigation size={18} /></div>
-                            <div className="search-input">
-                                <div className="input-glow"></div>
-                                <div className="input-group">
+                            
+                            <div className="search-divider">
+                                <div className="divider-line"></div>
+                                <Navigation className="divider-nav-icon" size={16} />
+                            </div>
+
+                            <div className="search-field">
+                                <MapPin className="search-field-icon destination" size={20} />
+                                <div className="search-field-content">
                                     <label>Destination</label>
                                     <input 
                                         type="text" 
-                                        placeholder="Downtown - City Center" 
+                                        placeholder="Where are you going?" 
                                         value={searchQuery.destination}
                                         onChange={(e) => setSearchQuery({ ...searchQuery, destination: e.target.value })}
                                     />
                                 </div>
                             </div>
-                            <button type="submit" className="search-btn-premium">
-                                <Search size={22} />
-                                <span>Search</span>
+
+                            <button type="submit" className="search-submit-btn">
+                                <Search size={20} />
+                                <span>Find Route</span>
                             </button>
                         </form>
 
-                        <div className="filter-dropdowns">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3>Filters</h3>
-                                {locationPermission !== 'granted' && (
-                                    <button 
-                                        className="location-prompt-banner glass" 
-                                        onClick={getLocation}
-                                        style={{ 
-                                            padding: '4px 12px', 
-                                            borderRadius: '20px', 
-                                            fontSize: '0.8rem',
-                                            background: 'rgba(255, 126, 0, 0.1)',
-                                            border: '1px solid var(--accent-orange)',
-                                            color: 'var(--accent-orange)',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px'
-                                        }}
-                                    >
-                                        <MapPin size={14} /> 
-                                        {locationPermission === 'denied' ? 'Location Denied - Click to retry' : 'Enable Location for Nearby results'}
-                                    </button>
-                                )}
+                        <div className="filter-pill-strip animate-fade-in">
+                            <button 
+                                type="button" 
+                                className={`filter-pill ${coords ? 'active' : ''}`} 
+                                onClick={getLocation}
+                            >
+                                <MapPin size={14} />
+                                <span>{coords ? 'Near Me Active' : 'Near Me'}</span>
+                                {coords && <div className="pulse-dot"></div>}
+                            </button>
+
+                            <div className="filter-divider"></div>
+
+                            <div className="filter-group">
+                                <select className="filter-select-pill">
+                                    <option>Cuisine</option>
+                                    <option>Indian</option>
+                                    <option>Fast Food</option>
+                                    <option>Italian</option>
+                                </select>
+                                <select className="filter-select-pill">
+                                    <option>Price</option>
+                                    <option>$ Low</option>
+                                    <option>$$ Mid</option>
+                                    <option>$$$ High</option>
+                                </select>
+                                <select className="filter-select-pill">
+                                    <option>Rating</option>
+                                    <option>4.0+</option>
+                                    <option>3.0+</option>
+                                </select>
                             </div>
-                            <div className="dropdowns-container">
-                                <button 
-                                    type="button" 
-                                    className={`filter-select glass ${coords ? 'active-filter' : ''}`} 
-                                    onClick={getLocation} 
-                                    style={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        gap: '6px', 
-                                        color: coords ? 'white' : 'var(--accent-orange)', 
-                                        borderColor: 'var(--accent-orange)',
-                                        background: coords ? 'var(--accent-orange)' : 'transparent'
-                                    }}
-                                >
-                                    <MapPin size={14} /> {coords ? 'Near Me Active' : 'Near Me'}
+
+                            {locationPermission !== 'granted' && (
+                                <button className="location-request-pill" onClick={getLocation}>
+                                    <Compass size={14} className="animate-spin-slow" />
+                                    <span>Enable GPS for Nearby</span>
                                 </button>
-                                <select className="filter-select glass"><option>Cuisine</option></select>
-                                <select className="filter-select glass"><option>Price</option></select>
-                                <select className="filter-select glass"><option>Rating</option></select>
-                            </div>
+                            )}
                         </div>
                     </div>
 
@@ -305,6 +321,7 @@ const Dashboard = () => {
                         sourceCoords={sourceCoords} 
                         destinationCoords={destinationCoords} 
                         hoveredRestId={hoveredRestId}
+                        focusedHighwayId={focusedHighwayId}
                     />
                 </div>
             </div>

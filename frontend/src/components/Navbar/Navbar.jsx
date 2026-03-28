@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
     User, LogIn, Menu, X, ChevronDown, LogOut, Settings, 
     Sun, Moon, ShoppingCart, LayoutDashboard, 
-    Home, Utensils, Info, ShoppingBag 
+    Home, Utensils, Info, ShoppingBag, Users
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useCart } from '../../context/CartContext';
@@ -117,10 +117,16 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
                                         <span>Profile</span>
                                     </NavLink>
                                     {userRole === 'ADMIN' && (
-                                        <NavLink to="/admin/restaurants" className="dropdown-item">
-                                            <LayoutDashboard size={16} />
-                                            <span>Admin Panel</span>
-                                        </NavLink>
+                                        <>
+                                            <NavLink to="/admin/restaurants" className="dropdown-item">
+                                                <Utensils size={16} />
+                                                <span>Manage Restaurants</span>
+                                            </NavLink>
+                                            <NavLink to="/admin/users" className="dropdown-item">
+                                                <Users size={16} />
+                                                <span>Manage Users</span>
+                                            </NavLink>
+                                        </>
                                     )}
                                     <div className="dropdown-divider"></div>
                                     <button className="dropdown-item logout-item" onClick={onLogout}>

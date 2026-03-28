@@ -214,6 +214,12 @@ public class UserController {
         return ResponseEntity.ok(com.pikngo.user_service.dto.ApiResponse.success("Password successfully reset", null));
     }
 
+    @GetMapping("/all")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<java.util.List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(jakarta.servlet.http.HttpServletResponse response) {
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", null);

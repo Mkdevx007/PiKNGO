@@ -12,6 +12,7 @@ import MenuPage from './pages/MenuPage';
 import ManageRestaurants from './pages/ManageRestaurants';
 import OrdersPage from './pages/OrdersPage';
 import ManageMenu from './pages/ManageMenu';
+import ManageUsers from './pages/ManageUsers';
 import { authApi } from './services/api';
 import { CartProvider } from './context/CartContext';
 import CheckoutPage from './pages/CheckoutPage';
@@ -93,6 +94,7 @@ function App() {
               <Route path="/checkout" element={isLoggedIn ? <CheckoutPage /> : <Navigate to="/login" />} />
               <Route path="/orders" element={isLoggedIn ? <OrdersPage /> : <Navigate to="/login" />} />
               <Route path="/admin/restaurants" element={isLoggedIn && userRole === 'ADMIN' ? <ManageRestaurants /> : <Navigate to="/" />} />
+              <Route path="/admin/users" element={isLoggedIn && userRole === 'ADMIN' ? <ManageUsers /> : <Navigate to="/" />} />
               <Route path="/admin/menu/:restaurantId" element={isLoggedIn && userRole === 'ADMIN' ? <ManageMenu /> : <Navigate to="/" />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

@@ -8,11 +8,9 @@ import ForgotPasswordForm from '../components/Auth/ForgotPasswordForm.jsx';
 import './Auth.css';
 
 
-const benefits = [
-    { icon: <Shield size={18} />, text: "Exclusive Highway Rest Stops" },
-    { icon: <ArrowRight size={18} />, text: "Priority Food Ordering" },
-    { icon: <Star size={18} />, text: "AI-Powered Trip Planning" },
-];
+
+const LOGIN_IMAGE = "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop";
+const REGISTER_IMAGE = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop";
 
 const AuthPage = ({ onLogin }) => {
     const location = useLocation();
@@ -73,7 +71,7 @@ const AuthPage = ({ onLogin }) => {
             <div className={`auth-split-container ${isFlipped ? 'flipped' : ''} ${showForgot ? 'show-forgot' : ''}`}>
                 <div className="auth-visual-side">
                     <img
-                        src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop"
+                        src={isFlipped ? REGISTER_IMAGE : LOGIN_IMAGE}
                         alt="Premium Travel Dining"
                         className="auth-hero-img"
                     />
@@ -82,16 +80,8 @@ const AuthPage = ({ onLogin }) => {
                         <div className="logo-container">
                             <Logo size={80} />
                         </div>
-                        <h2>Elite Travel <br /><span>Exceptional Taste</span></h2>
-                        <p>Join the community of premium highway travelers. Experience curated dining at every stop.</p>
-                        <div className="benefits-list">
-                            {benefits.map((b, i) => (
-                                <div key={i} className="benefit-item">
-                                    <span className="benefit-icon">{b.icon}</span>
-                                    <span>{b.text}</span>
-                                </div>
-                            ))}
-                        </div>
+                        <h2>Premium Highway <br /><span>Dining Experience</span></h2>
+                        <p>Join the elite community of travelers. Pre-order meals from the best rest stops along your route.</p>
                     </div>
                 </div>
 
