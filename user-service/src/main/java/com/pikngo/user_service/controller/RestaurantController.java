@@ -85,6 +85,13 @@ public class RestaurantController {
         return ResponseEntity.ok(restaurantService.getAllActiveRestaurants());
     }
 
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RestaurantResponseDTO>> getAllAdmin() {
+        log.info("REST request to get all restaurants for admin");
+        return ResponseEntity.ok(restaurantService.getAllRestaurantsForAdmin());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<RestaurantResponseDTO> getById(@PathVariable UUID id) {
         log.info("REST request to get restaurant by ID: {}", id);

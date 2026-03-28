@@ -18,7 +18,8 @@ const ManageMenu = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [submitting, setSubmitting] = useState(false);
-    
+    const [searchTerm, setSearchTerm] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('All');
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -140,10 +141,21 @@ const ManageMenu = () => {
                             <p>{restaurant?.resturantName || 'Restaurant'} • {menuItems.length} Items</p>
                         </div>
                     </div>
-                    <button className="btn-primary" onClick={() => { setEditingItem(null); resetForm(); setShowForm(true); }}>
-                        <Plus size={20} />
-                        <span>Add New Item</span>
-                    </button>
+                    <div className="header-right">
+                        <div className="search-box glass">
+                            <Search size={16} />
+                            <input 
+                                type="text" 
+                                placeholder="Search menu..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <button className="btn-primary-glow" onClick={() => { setEditingItem(null); resetForm(); setShowForm(true); }}>
+                            <Plus size={20} />
+                            <span>Add New Item</span>
+                        </button>
+                    </div>
                 </header>
 
                 <div className="menu-stats-row">
@@ -161,6 +173,17 @@ const ManageMenu = () => {
                             <span className="stat-label">Available</span>
                         </div>
                     </div>
+                    <div className="filter-pill-row scroll-x">
+                        {['All', ...new Set(menuItems.map(i => i.category))].map(cat => (
+                            <button 
+                                key={cat}
+                                className={`filter-pill ${categoryFilter === cat ? 'active' : ''}`}
+                                onClick={() => setCategoryFilter(cat)}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="menu-items-table glass-card">
@@ -172,11 +195,21 @@ const ManageMenu = () => {
                         <div className="col-actions">Actions</div>
                     </div>
                     <div className="table-body">
-                        {menuItems.length === 0 ? (
-                            <div className="empty-table">No menu items found. Add your first dish!</div>
+                        {menuItems.filter(item => {
+                            const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+                            const matchesCat = categoryFilter === 'All' || item.category === categoryFilter;
+                            return matchesSearch && matchesCat;
+                        }).length === 0 ? (
+                            <div className="empty-table">No menu items found matching your filters.</div>
                         ) : (
-                            menuItems.map(item => (
-                                <div key={item.id} className="table-row animate-slide-in">
+                            menuItems
+                                .filter(item => {
+                                    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+                                    const matchesCat = categoryFilter === 'All' || item.category === categoryFilter;
+                                    return matchesSearch && matchesCat;
+                                })
+                                .map(item => (
+                                    <div key={item.id} className="table-row animate-slide-in">
                                     <div className="col-info">
                                         <div className="item-thumb">
                                             <img src={item.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=100'} alt="" />

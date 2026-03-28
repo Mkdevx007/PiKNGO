@@ -30,6 +30,7 @@ export const authApi = {
 
 export const restaurantApi = {
     getAll: () => api.get('/restaurants'),
+    getAllAdmin: () => api.get('/restaurants/admin/all'),
     getById: (id) => api.get(`/restaurants/${id}`),
     getNearby: (lat, lon, radius = 100) => api.get(`/restaurants/nearby?lat=${lat}&lon=${lon}&radius=${radius}`),
     searchByRoute: (srcLat, srcLon, destLat, destLon, radius = 50) =>

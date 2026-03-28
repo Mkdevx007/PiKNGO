@@ -22,4 +22,5 @@ public class RestaurantResponseDTO {
     private String category;
     private Double rating;
     private String deliveryTime;
+    private boolean isActive;
 }

@@ -13,4 +13,5 @@ public interface RestaurantWithDistance {
     String getCategory();
     Double getRating();
     String getDeliveryTime();
+    Boolean getIsActive();
 }

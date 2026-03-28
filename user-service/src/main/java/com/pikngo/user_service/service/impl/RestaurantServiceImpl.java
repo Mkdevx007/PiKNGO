@@ -56,6 +56,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .category(restaurant.getCategory())
                 .rating(restaurant.getRating())
                 .deliveryTime(restaurant.getDeliveryTime())
+                .isActive(restaurant.isActive())
                 .build();
     }
 
@@ -71,6 +72,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .category(projection.getCategory())
                 .rating(projection.getRating())
                 .deliveryTime(projection.getDeliveryTime())
+                .isActive(projection.getIsActive())
                 .build();
     }
 
@@ -154,6 +156,15 @@ public class RestaurantServiceImpl implements RestaurantService {
     public List<RestaurantResponseDTO> getAllActiveRestaurants() {
         log.info("Fetching all active restaurants");
         return restaurantRepository.findByIsActiveTrueAndIsDeletedFalse()
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RestaurantResponseDTO> getAllRestaurantsForAdmin() {
+        log.info("Fetching all restaurants for admin");
+        return restaurantRepository.findAll()
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());

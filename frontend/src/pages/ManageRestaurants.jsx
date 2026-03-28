@@ -21,6 +21,7 @@ const ManageRestaurants = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('restaurants'); // 'restaurants' or 'orders'
     const [allOrders, setAllOrders] = useState([]);
+    const [statusFilter, setStatusFilter] = useState('All'); // 'All', 'Active', 'Inactive'
     
     const [formData, setFormData] = useState({
         restaurantName: '',
@@ -47,7 +48,7 @@ const ManageRestaurants = () => {
     const fetchRestaurants = async () => {
         setLoading(true);
         try {
-            const res = await restaurantApi.getAll();
+            const res = await restaurantApi.getAllAdmin();
             setRestaurants(res.data || []);
         } catch (err) {
             console.error("Failed to fetch restaurants:", err);
@@ -122,21 +123,50 @@ const ManageRestaurants = () => {
         }
     };
 
+    const handleToggleStatus = async (res) => {
+        try {
+            const updatedData = {
+                restaurantName: res.resturantName || res.name,
+                address: res.address,
+                latitude: res.latitude,
+                longitude: res.longitude,
+                isActive: !res.isActive,
+                category: res.category,
+                rating: res.rating,
+                deliveryTime: res.deliveryTime,
+                imageUrl: res.imageUrl
+            };
+            await restaurantApi.update(res.id, updatedData);
+            setRestaurants(prev => prev.map(r => r.id === res.id ? { ...r, isActive: !r.isActive } : r));
+        } catch (err) {
+            console.error("Failed to toggle status:", err);
+            alert("Error updating status.");
+        }
+    };
+
     const handleUpdateStatus = async (orderId, newStatus) => {
         try {
             await orderApi.updateStatus(orderId, newStatus);
-            // Update local state
-            setRestaurantOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+            // Update local state if we are viewing specific restaurant orders
+            if (viewingOrdersFor) {
+                setRestaurantOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+            }
+            // Update allOrders state for the general orders tab
+            setAllOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
         } catch (err) {
             console.error("Failed to update status:", err);
             alert("Error updating order status.");
         }
     };
 
-    const filteredRestaurants = restaurants.filter(r => 
-        (r.resturantName || r.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (r.address || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredRestaurants = restaurants.filter(r => {
+        const matchesSearch = (r.resturantName || r.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             (r.address || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'All' || 
+                             (statusFilter === 'Active' && r.isActive) || 
+                             (statusFilter === 'Inactive' && !r.isActive);
+        return matchesSearch && matchesStatus;
+    });
 
     return (
         <div className="manage-page animate-fade-in">
@@ -184,9 +214,18 @@ const ManageRestaurants = () => {
                                         />
                                     </div>
                                     <div className="filter-group">
-                                        <button className="filter-pill active">All</button>
-                                        <button className="filter-pill">Active</button>
-                                        <button className="filter-pill">Inactive</button>
+                                        <button 
+                                            className={`filter-pill ${statusFilter === 'All' ? 'active' : ''}`}
+                                            onClick={() => setStatusFilter('All')}
+                                        >All</button>
+                                        <button 
+                                            className={`filter-pill ${statusFilter === 'Active' ? 'active' : ''}`}
+                                            onClick={() => setStatusFilter('Active')}
+                                        >Active</button>
+                                        <button 
+                                            className={`filter-pill ${statusFilter === 'Inactive' ? 'active' : ''}`}
+                                            onClick={() => setStatusFilter('Inactive')}
+                                        >Inactive</button>
                                         <div className="divider"></div>
                                         <button className="btn-icon-glass"><Filter size={18} /></button>
                                     </div>
@@ -203,7 +242,12 @@ const ManageRestaurants = () => {
                                                 <div className="card-banner">
                                                     <img src={res.imageUrl || res.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470'} alt={res.resturantName} />
                                                     <div className="card-overlay"></div>
-                                                    <div className={`status-pill ${res.isActive ? 'active' : 'inactive'}`}>
+                                                    <div 
+                                                        className={`status-pill ${res.isActive ? 'active' : 'inactive'}`}
+                                                        onClick={(e) => { e.stopPropagation(); handleToggleStatus(res); }}
+                                                        style={{ cursor: 'pointer' }}
+                                                        title="Click to toggle status"
+                                                    >
                                                         <span className="dot"></span>
                                                         {res.isActive ? 'Active' : 'Inactive'}
                                                     </div>
