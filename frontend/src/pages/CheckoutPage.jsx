@@ -184,7 +184,7 @@ const CheckoutPage = () => {
         return (
             <div className="checkout-page empty-checkout-hub animate-fade-in">
                 <div className="bg-mesh"></div>
-                <div className="container">
+                <div className="checkout-container">
                     <div className="elite-empty-card glass-modern">
                         <div className="empty-radar-glow">
                             <Plus size={40} className="pulse-icon" />
@@ -236,7 +236,7 @@ const CheckoutPage = () => {
                 </div>
             )}
             
-            <div className="container">
+            <div className="checkout-container">
                 <header className="terminal-header animate-slide-up">
                     <button className="terminal-back-btn glass-pill" onClick={() => navigate(-1)}>
                         <ChevronLeft size={18} />
