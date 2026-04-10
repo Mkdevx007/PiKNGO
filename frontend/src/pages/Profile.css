@@ -1,22 +1,22 @@
 .profile-page {
     min-height: 100vh;
-    padding: 120px 0 60px;
+    padding: 110px 0 60px;
     background: var(--bg-deep);
     position: relative;
     overflow-x: hidden;
 }
 
-/* Subtle background glow effect */
 .profile-page::before {
     content: '';
     position: absolute;
     top: -20%;
     left: -10%;
-    width: 60%;
-    height: 60%;
-    background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, rgba(15,23,42,0) 70%);
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(circle, rgba(255, 107, 0, 0.07) 0%, transparent 70%);
     z-index: 0;
     pointer-events: none;
+    filter: blur(80px);
 }
 
 .profile-page::after {
@@ -26,14 +26,15 @@
     right: -10%;
     width: 60%;
     height: 60%;
-    background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, rgba(15,23,42,0) 70%);
+    background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
     z-index: 0;
     pointer-events: none;
 }
 
+/* Profile Hero Section */
 .profile-hero {
     position: relative;
-    padding-bottom: 4rem;
+    padding-bottom: 3rem;
     z-index: 2;
 }
 
@@ -42,14 +43,24 @@
     align-items: center;
     gap: 3rem;
     padding: 3rem;
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
+    background: rgba(15, 23, 42, 0.55);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 40px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 0 40px rgba(255, 255, 255, 0.02);
+    border-top: 1px solid rgba(255, 107, 0, 0.2);
+    border-radius: 36px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 60px rgba(255, 107, 0, 0.05);
     position: relative;
+    overflow: hidden;
+}
+
+.profile-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.5), transparent);
+    pointer-events: none;
 }
 
 /* Avatar Elite Styling */

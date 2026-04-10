@@ -149,9 +149,12 @@ const ProfileScreen = ({ onProfileUpdate }) => {
     };
 
     if (loading && !user) return (
-        <div className="checkout-page processing-overlay">
-            <div className="loader-ring"></div>
-            <p>Loading your elite profile...</p>
+        <div className="profile-page" style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+            <div className="bg-mesh"></div>
+            <div style={{textAlign:'center', position:'relative', zIndex:10}}>
+                <div style={{width:80,height:80,border:'3px solid rgba(255,107,0,0.1)',borderTopColor:'var(--accent-orange)',borderRadius:'50%',animation:'spin 1s linear infinite',margin:'0 auto 1.5rem',boxShadow:'0 0 30px rgba(255,107,0,0.2)'}}></div>
+                <p style={{color:'rgba(255,255,255,0.5)',fontWeight:800,letterSpacing:'2px',fontSize:'0.8rem'}}>LOADING AGENT PROFILE...</p>
+            </div>
         </div>
     );
 
