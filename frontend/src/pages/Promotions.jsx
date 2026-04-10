@@ -136,10 +136,11 @@ const Promotions = () => {
 
                 {viewMode === 'list' ? (
                     <>
-                        <header className="page-header">
-                            <div>
-                                <h1>Growth <span className="gradient-text">Promotions</span></h1>
-                                <p>Manage offers, vouchers, and marketing campaigns</p>
+                        <header className="promotions-header elite-header-card">
+                            <div className="header-left">
+                                <span className="elite-h-accent">MARKETING PROTOCOLS // CAMPAIGN ENGINE</span>
+                                <h1>Platform <span className="gradient-text">Promotions</span></h1>
+                                <p>Orchestrate network growth and seasonal incentives</p>
                             </div>
                             <button className="btn-primary-glow" onClick={handleCreatePromo}>
                                 <Plus size={18} />

@@ -94,3 +94,74 @@ main {
     transform: translateY(0) scale(1); 
   }
 }
+
+/* --- Shared Elite Admin Utilities --- */
+
+.elite-header-card {
+  padding: 2.5rem 3rem;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 107, 0, 0.3);
+  border-radius: 28px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.elite-h-accent {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.elite-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 12px;
+  position: relative;
+}
+
+.elite-status-dot.active {
+  background: var(--accent-orange);
+  box-shadow: 0 0 10px var(--accent-orange-glow);
+}
+
+.elite-status-dot.active::after {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-orange);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.glass-modern-input {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  padding: 0.8rem 1rem !important;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.glass-modern-input:focus {
+  border-color: var(--accent-orange) !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  outline: none;
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.1);
+}

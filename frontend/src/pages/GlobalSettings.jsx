@@ -74,14 +74,15 @@ const GlobalSettings = () => {
                     {toastMessage}
                 </div>
             )}
-            <header className="page-header">
-                <div>
+            <header className="page-header elite-header-card">
+                <div className="header-left">
+                    <span className="elite-h-accent">CORE CONFIGURATION // SYSTEM PARAMS</span>
                     <h1>Platform <span className="gradient-text">Settings</span></h1>
-                    <p>Global configuration and security controls</p>
+                    <p>Global sovereignty and operational directives</p>
                 </div>
                 <button className="btn-primary-glow" onClick={handleSave}>
                     <Save size={18} />
-                    <span>Save Changes</span>
+                    <span>APPLY CHANGES</span>
                 </button>
             </header>
 
@@ -100,7 +101,7 @@ const GlobalSettings = () => {
                                             <label>Platform Name</label>
                                             <p>Used across customer communications</p>
                                         </div>
-                                        <input type="text" name="platformName" value={settings.platformName} onChange={handleChange} className="glass-input" />
+                                        <input type="text" name="platformName" value={settings.platformName} onChange={handleChange} className="glass-modern-input" />
                                     </div>
                                     <div className="setting-item">
                                         <div className="setting-info">
@@ -128,7 +129,7 @@ const GlobalSettings = () => {
                                         </div>
                                         <div className="input-with-symbol">
                                             <span>₹</span>
-                                            <input type="number" name="deliveryFee" value={settings.deliveryFee} onChange={handleChange} className="glass-input" />
+                                            <input type="number" name="deliveryFee" value={settings.deliveryFee} onChange={handleChange} className="glass-modern-input" />
                                         </div>
                                     </div>
                                     <div className="setting-item">
@@ -138,7 +139,7 @@ const GlobalSettings = () => {
                                         </div>
                                         <div className="input-with-symbol">
                                             <span>%</span>
-                                            <input type="number" name="tax" value={settings.tax} onChange={handleChange} className="glass-input" />
+                                            <input type="number" name="tax" value={settings.tax} onChange={handleChange} className="glass-modern-input" />
                                         </div>
                                     </div>
                                 </div>
@@ -235,7 +236,7 @@ const GlobalSettings = () => {
                                             <label>Payment Gateway Webhook</label>
                                             <p>Endpoint URL for Razorpay/Stripe events</p>
                                         </div>
-                                        <input type="text" defaultValue="https://api.pikngo.com/v1/webhooks/pay" className="glass-input" style={{ width: '280px' }} />
+                                        <input type="text" defaultValue="https://api.pikngo.com/v1/webhooks/pay" className="glass-modern-input" style={{ width: '280px' }} />
                                     </div>
                                     <div className="setting-item">
                                         <div className="setting-info">
@@ -244,7 +245,7 @@ const GlobalSettings = () => {
                                         </div>
                                         <div className="input-with-symbol">
                                             <span>🔑</span>
-                                            <input type="password" defaultValue="AIzaSyAXXXXXXX_XXXXXXXX" className="glass-input" />
+                                            <input type="password" defaultValue="AIzaSyAXXXXXXX_XXXXXXXX" className="glass-modern-input" />
                                         </div>
                                     </div>
                                 </div>

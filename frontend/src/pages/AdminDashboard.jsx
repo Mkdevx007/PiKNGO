@@ -141,19 +141,20 @@ const AdminDashboard = () => {
 
     return (
         <div className="admin-dashboard animate-fade-in">
-            <header className="dashboard-header-row">
+            <header className="dashboard-header-row elite-header-card">
                 <div className="header-left">
+                    <span className="elite-h-accent">GLOBAL OPERATIONS // ANALYTICS HUD</span>
                     <h1>Command <span className="gradient-text">Center</span></h1>
-                    <p>Real-time performance analytics for PikNGo</p>
+                    <p>Real-time performance surveillance of the PikNGo network</p>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-refresh glass-modern" onClick={fetchStats} disabled={loading}>
+                    <button className="btn-refresh glass-pill" onClick={fetchStats} disabled={loading}>
                         {loading ? <Loader2 className="animate-spin" size={16} /> : <Activity size={16} />}
-                        <span>{loading ? 'Refreshing...' : 'Refresh Analytics'}</span>
+                        <span>{loading ? 'RE-SYNC' : 'REFRESH INTEL'}</span>
                     </button>
                     <div className="live-pill">
-                        <span className="pulse-dot"></span>
-                        LIVE
+                        <span className="elite-status-dot active"></span>
+                        LIVE STREAM
                     </div>
                 </div>
             </header>

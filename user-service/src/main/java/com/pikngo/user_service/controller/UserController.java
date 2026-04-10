@@ -5,6 +5,7 @@ import com.pikngo.user_service.dto.LoginRequest;
 import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.dto.UserRegistrationRequest;
 import com.pikngo.user_service.dto.ApiResponse;
+import com.pikngo.user_service.dto.ChangePasswordRequest;
 import com.pikngo.user_service.dto.ProfileUpdateRequest;
 import com.pikngo.user_service.dto.UserDto;
 import com.pikngo.user_service.entity.User;
@@ -253,5 +254,13 @@ public class UserController {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
         return ResponseEntity.ok(ApiResponse.success("Logout successful", null));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Principal principal) {
+        authService.changePassword(principal.getName(), request);
+        return ResponseEntity.ok(ApiResponse.success("Password updated successfully", null));
     }
 }

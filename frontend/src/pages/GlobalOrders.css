@@ -12,9 +12,10 @@
 }
 
 .header-left h1 {
-    font-size: 2.2rem;
+    font-size: 2.8rem;
     font-weight: 900;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem;
+    letter-spacing: -1.5px;
 }
 
 .header-left p {
@@ -105,10 +106,16 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: rgba(15, 23, 42, 0.4);
-    padding: 0.8rem 1.5rem;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1rem 1.8rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+}
+
+.search-box-large:focus-within {
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.1);
 }
 
 .search-box-large input {
@@ -158,13 +165,24 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.order-pro-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.2), transparent);
 }
 
 .order-pro-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 107, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .order-card-header {
@@ -177,13 +195,15 @@
 }
 
 .order-id-badge {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
     font-weight: 800;
     color: #ff6b00;
     background: rgba(255, 107, 0, 0.1);
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border: 1px solid rgba(255, 107, 0, 0.2);
 }
 
 .order-date {

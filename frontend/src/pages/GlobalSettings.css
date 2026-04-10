@@ -1,6 +1,7 @@
 .settings-page {
-    padding: 2rem;
-    position: relative;
+    padding: 110px 2rem 5rem;
+    min-height: 100vh;
+    background: #020617; /* Slate deep */
 }
 
 .promo-toast {
@@ -203,7 +204,9 @@
 
 .mini-nav button.active {
     background: rgba(255, 107, 0, 0.1);
-    color: var(--accent-orange);
+    color: #ff6b00;
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.1);
 }
 
 .help-card {

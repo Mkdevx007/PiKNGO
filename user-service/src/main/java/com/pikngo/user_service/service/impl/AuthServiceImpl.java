@@ -2,6 +2,7 @@ package com.pikngo.user_service.service.impl;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
+import com.pikngo.user_service.dto.ChangePasswordRequest;
 import com.pikngo.user_service.dto.LoginRequest;
 import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.entity.OtpVerification;
@@ -17,6 +18,7 @@ import com.pikngo.user_service.service.EmailService;
 import com.pikngo.user_service.service.SmsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -241,5 +243,20 @@ public class AuthServiceImpl implements AuthService {
                     log.warn("No matching unused Email OTP found for {}", email);
                     return false;
                 });
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String phoneNumber, ChangePasswordRequest request) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phoneNumber));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getUserPassword())) {
+            throw new BadCredentialsException("Current password does not match");
+        }
+
+        user.setUserPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        log.info("Password successfully changed for user: {}", phoneNumber);
     }
 }

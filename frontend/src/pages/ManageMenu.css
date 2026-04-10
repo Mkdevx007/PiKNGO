@@ -5,9 +5,9 @@
 }
 
 .manage-menu-page {
-    padding-top: 120px;
+    padding-top: 110px;
     padding-bottom: 5rem;
-    background: var(--bg-deep);
+    background: #020617;
 }
 
 .header-left {
@@ -287,33 +287,32 @@
 
 .table-header {
     display: grid;
-    grid-template-columns: 1.8fr 1fr 0.8fr 1fr 100px;
-    padding: 1.2rem 1.5rem;
+    grid-template-columns: 2fr 1fr 100px 140px 120px;
+    padding: 1.2rem 2rem;
     background: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid var(--glass-border);
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.3);
 }
 
 .table-row {
     display: grid;
-    grid-template-columns: 1.8fr 1fr 0.8fr 1fr 100px;
-    padding: 1.2rem 1.5rem;
+    grid-template-columns: 2fr 1fr 100px 140px 120px;
+    padding: 1.2rem 2rem;
     align-items: center;
-    border-bottom: 1px solid var(--glass-border);
-    transition: background 0.3s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: all 0.3s ease;
+}
+
+.table-row:hover {
+    background: rgba(255, 107, 0, 0.03);
 }
 
 .table-row:last-child {
     border-bottom: none;
-}
-
-.table-row:hover {
-    background: rgba(255, 255, 255, 0.02);
 }
 
 .col-info {
@@ -376,10 +375,17 @@
 }
 
 .price-tag {
+    font-family: 'JetBrains Mono', monospace;
     font-weight: 800;
-    color: var(--accent-orange);
-    font-size: 1.1rem;
-    white-space: nowrap;
+    color: #ff6b00;
+    font-size: 0.95rem;
+}
+
+.monospace-data {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
 .status-dot {

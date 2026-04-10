@@ -136,15 +136,16 @@ const ManageMenu = () => {
     return (
         <div className="manage-page manage-menu-page animate-fade-in">
             <div className="container">
-                <header className="manage-header">
+                <header className="manage-header elite-header-card">
                     <div className="header-left">
-                        <button className="back-btn glass" onClick={() => navigate('/admin/restaurants')}>
+                        <button className="back-btn glass-pill" onClick={() => navigate('/admin/restaurants')}>
                             <ChevronLeft size={20} />
-                            <span>Back to Restaurants</span>
+                            <span>NODE REGISTRY</span>
                         </button>
                         <div className="header-titles">
+                            <span className="elite-h-accent">CATALOG IDENTIFIER // {restaurant?.restaurantName?.toUpperCase()}</span>
                             <h1>Manage <span className="gradient-text">Menu</span></h1>
-                            <p>{restaurant?.restaurantName || 'Restaurant'} • {menuItems.length} Items</p>
+                            <p>{menuItems.length} Registered Transmission Nodes</p>
                         </div>
                     </div>
                     <div className="header-right">
@@ -293,8 +294,8 @@ const ManageMenu = () => {
                                                         <span className="price-tag">₹{item.itemPrice}</span>
                                                     </div>
                                                     <div className="col-status">
-                                                        <span className={`status-dot ${item.isAvailable ? 'active' : 'inactive'}`}></span>
-                                                        {item.isAvailable ? 'Available' : 'Sold Out'}
+                                                        <span className={`elite-status-dot ${item.isAvailable ? 'active' : 'inactive'}`}></span>
+                                                        <span className="monospace-data">{item.isAvailable ? 'AVAILABLE' : 'OFFLINE'}</span>
                                                     </div>
                                                     <div className="col-actions">
                                                         <button className="btn-icon-glass sm" onClick={() => handleEdit(item)}><Edit3 size={14} /></button>

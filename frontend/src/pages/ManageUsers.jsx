@@ -134,16 +134,11 @@ const ManageUsers = () => {
     return (
         <div className="manage-page animate-fade-in">
             <div className="container">
-                <header className="manage-header">
+                <header className="manage-header elite-header-card">
                     <div className="header-left">
+                        <span className="elite-h-accent">CITIZEN DATA // ACCESS CONTROL</span>
                         <h1>Manage <span className="gradient-text">Users</span></h1>
-                        <p>Monitor your user base and manage permissions with production-grade tools</p>
-                    </div>
-                    <div className="stats-pills">
-                        <div className="stat-pill glass">
-                            <Users size={16} />
-                            <span>{pagination.totalElements} Total Users</span>
-                        </div>
+                        <p>Total of {pagination.totalElements} verified accounts in the network</p>
                     </div>
                 </header>
 
@@ -174,12 +169,12 @@ const ManageUsers = () => {
                 <div className="users-table-wrapper glass-card elite-entrance">
                     <table className="users-table">
                         <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Contact Info</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                            <tr className="elite-table-header">
+                                <th>IDENTITY // USER</th>
+                                <th>CONTACT INTEL</th>
+                                <th>ACCESS ROLE</th>
+                                <th>OPERATIONAL STATUS</th>
+                                <th>DIRECTIVES</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -237,9 +232,9 @@ const ManageUsers = () => {
                                             </td>
                                             <td>
                                                 <div className="status-cell">
-                                                    <span className={`status-dot ${status.className}`}></span>
-                                                    <span className={`status-label ${status.className}`}>
-                                                        {status.label}
+                                                    <span className={`elite-status-dot ${status.className === 'active' ? 'active' : 'inactive'}`}></span>
+                                                    <span className={`status-label monospace-data ${status.className}`}>
+                                                        {status.label.toUpperCase()}
                                                     </span>
                                                 </div>
                                             </td>

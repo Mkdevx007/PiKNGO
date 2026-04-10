@@ -12,6 +12,7 @@ const ProfileScreen = ({ onProfileUpdate }) => {
     const [loading, setLoading] = useState(true);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const fileInputRef = useRef(null);
 
     const [editData, setEditData] = useState({ 
@@ -142,9 +143,33 @@ const ProfileScreen = ({ onProfileUpdate }) => {
             await authApi.deleteProfile(soft);
             showToast('Account deleted. Goodbye!', 'info');
             localStorage.clear();
-            window.location.href = '/login';
         } catch (err) {
             showToast('Failed to delete account', 'error');
+        }
+    };
+
+    const [pwdData, setPwdData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        if (pwdData.newPassword !== pwdData.confirmPassword) {
+            showToast('New passwords do not match', 'error');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await authApi.changePassword({
+                oldPassword: pwdData.oldPassword,
+                newPassword: pwdData.newPassword
+            });
+            showToast('Password updated successfully', 'success');
+            setIsPasswordModalOpen(false);
+            setPwdData({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (err) {
+            showToast(err.message || 'Failed to change password', 'error');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -162,7 +187,8 @@ const ProfileScreen = ({ onProfileUpdate }) => {
         <div className="profile-page">
             <div className="profile-hero">
                 <div className="container">
-                    <div className="profile-header-card glass animate-fade-in">
+                    <div className="profile-header-card elite-header-card animate-fade-in">
+                        <div className="profile-header-overlay"></div>
                         <div className="profile-avatar-wrapper">
                             <div className="profile-avatar-large">
                                 {uploadingPhoto ? (
@@ -198,7 +224,11 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                             </button>
                         </div>
                         <div className="profile-main-info">
-                            <h1 className="user-full-name">{user?.firstName} {user?.lastName}</h1>
+                            <span className="premium-label-elite">PREMIUM ACCOUNT // PRIVILEGED ACCESS</span>
+                            <h1 className="user-full-name">
+                                {user?.firstName} {user?.lastName}
+                                <span className="premium-status-ring active ml-4"></span>
+                            </h1>
                             <p className="user-membership">💎 Elite Member</p>
                         </div>
                         <div className="profile-header-actions">
@@ -218,7 +248,7 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                     <div className="profile-card glass animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                         <div className="card-header">
                             <User size={20} />
-                            <h3>Personal Details</h3>
+                            <h3>Profile Details</h3>
                         </div>
                         <div className="info-list">
                             <div className="info-row">
@@ -242,7 +272,7 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                         <div className="profile-card glass admin-card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
                             <div className="card-header">
                                 <ShieldCheck size={20} />
-                                <h3>Administrative Access</h3>
+                                <h3>Admin Settings</h3>
                             </div>
                             <p className="text-sm opacity-80 mb-6">You are signed in as an administrator. Manage restaurants, users, and platform settings from the command center.</p>
                             <NavLink to="/admin/dashboard" className="admin-dashboard-link">
@@ -261,7 +291,7 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                                 <MapPin size={20} />
                                 <h3>Saved Addresses</h3>
                             </div>
-                            <button className="btn-text flex items-center gap-1" onClick={() => setShowAddressForm(!showAddressForm)}>
+                            <button className="elite-action-btn-mini flex items-center gap-1" onClick={() => setShowAddressForm(!showAddressForm)}>
                                 {showAddressForm ? <><X size={16} /> Cancel</> : <><Plus size={16} /> Add New</>}
                             </button>
                         </div>
@@ -271,30 +301,30 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                                 <div className="grid-2">
                                     <div className="form-group">
                                         <label>Address Line 1</label>
-                                        <input type="text" value={newAddress.addressLine1} onChange={e => setNewAddress({ ...newAddress, addressLine1: e.target.value })} required />
+                                        <input type="text" value={newAddress.addressLine1} onChange={e => setNewAddress({ ...newAddress, addressLine1: e.target.value })} required className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
                                         <label>Address Line 2 (Optional)</label>
-                                        <input type="text" value={newAddress.addressLine2} onChange={e => setNewAddress({ ...newAddress, addressLine2: e.target.value })} />
+                                        <input type="text" value={newAddress.addressLine2} onChange={e => setNewAddress({ ...newAddress, addressLine2: e.target.value })} className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
-                                        <label>City</label>
-                                        <input type="text" value={newAddress.city} onChange={e => setNewAddress({ ...newAddress, city: e.target.value })} required />
+                                        <label>City / Hub</label>
+                                        <input type="text" value={newAddress.city} onChange={e => setNewAddress({ ...newAddress, city: e.target.value })} required className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
-                                        <label>State</label>
-                                        <input type="text" value={newAddress.state} onChange={e => setNewAddress({ ...newAddress, state: e.target.value })} required />
+                                        <label>State / Province</label>
+                                        <input type="text" value={newAddress.state} onChange={e => setNewAddress({ ...newAddress, state: e.target.value })} required className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
-                                        <label>Pincode</label>
-                                        <input type="text" value={newAddress.pincode} onChange={e => setNewAddress({ ...newAddress, pincode: e.target.value })} required />
+                                        <label>ZIP / Pincode</label>
+                                        <input type="text" value={newAddress.pincode} onChange={e => setNewAddress({ ...newAddress, pincode: e.target.value })} required className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
                                         <label>Address Type</label>
                                         <select 
                                             value={newAddress.type} 
                                             onChange={e => setNewAddress({ ...newAddress, type: e.target.value })}
-                                            className="address-type-select"
+                                            className="glass-modern-input"
                                         >
                                             <option value="Home">Home</option>
                                             <option value="Work">Work</option>
@@ -343,37 +373,37 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                                 <div className="grid-2">
                                     <div className="form-group">
                                         <label>First Name</label>
-                                        <input type="text" value={editData.firstName} onChange={e => setEditData({ ...editData, firstName: e.target.value })} required />
+                                        <input type="text" value={editData.firstName} onChange={e => setEditData({ ...editData, firstName: e.target.value })} required className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
                                         <label>Last Name</label>
-                                        <input type="text" value={editData.lastName} onChange={e => setEditData({ ...editData, lastName: e.target.value })} required />
+                                        <input type="text" value={editData.lastName} onChange={e => setEditData({ ...editData, lastName: e.target.value })} required className="glass-modern-input" />
                                     </div>
                                 </div>
                                 <div className="form-group">
-                                    <label>Email</label>
-                                    <input type="email" value={editData.email} onChange={e => setEditData({ ...editData, email: e.target.value })} required />
+                                    <label>Email Address</label>
+                                    <input type="email" value={editData.email} onChange={e => setEditData({ ...editData, email: e.target.value })} required className="glass-modern-input" />
                                 </div>
                                 <div className="grid-2">
                                     <div className="form-group">
                                         <label>Address Line 1</label>
-                                        <input type="text" value={editData.addressLine1} onChange={e => setEditData({ ...editData, addressLine1: e.target.value })} />
+                                        <input type="text" value={editData.addressLine1} onChange={e => setEditData({ ...editData, addressLine1: e.target.value })} className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
                                         <label>Address Line 2</label>
-                                        <input type="text" value={editData.addressLine2} onChange={e => setEditData({ ...editData, addressLine2: e.target.value })} />
+                                        <input type="text" value={editData.addressLine2} onChange={e => setEditData({ ...editData, addressLine2: e.target.value })} className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
-                                        <label>City</label>
-                                        <input type="text" value={editData.city} onChange={e => setEditData({ ...editData, city: e.target.value })} />
+                                        <label>Hub / City</label>
+                                        <input type="text" value={editData.city} onChange={e => setEditData({ ...editData, city: e.target.value })} className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
-                                        <label>State</label>
-                                        <input type="text" value={editData.state} onChange={e => setEditData({ ...editData, state: e.target.value })} />
+                                        <label>Province / State</label>
+                                        <input type="text" value={editData.state} onChange={e => setEditData({ ...editData, state: e.target.value })} className="glass-modern-input" />
                                     </div>
                                     <div className="form-group">
-                                        <label>Pincode</label>
-                                        <input type="text" value={editData.pincode} onChange={e => setEditData({ ...editData, pincode: e.target.value })} />
+                                        <label>ZIP / Pincode</label>
+                                        <input type="text" value={editData.pincode} onChange={e => setEditData({ ...editData, pincode: e.target.value })} className="glass-modern-input" />
                                     </div>
                                     <div className="form-group span-full">
                                         <label>Profile Image URL</label>
@@ -421,7 +451,7 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                                     <label>Password</label>
                                     <p>••••••••••••</p>
                                 </div>
-                                <button className="btn-text">Change</button>
+                                <button className="elite-action-btn-mini" onClick={() => setIsPasswordModalOpen(true)}>Change</button>
                             </div>
                             <div className="info-row">
                                 <ShieldCheck size={16} />
@@ -446,6 +476,57 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Change Password Modal */}
+            {isPasswordModalOpen && (
+                <div className="elite-modal-backdrop animate-fade-in">
+                    <div className="elite-modal-content glass animate-scale-in">
+                        <div className="modal-header">
+                            <Lock size={20} className="text-orange" />
+                            <span className="elite-h-accent">UPDATE CREDENTIALS</span>
+                            <button className="close-btn" onClick={() => setIsPasswordModalOpen(false)}><X size={20} /></button>
+                        </div>
+                        <form onSubmit={handleChangePassword} className="modal-body">
+                            <div className="form-group">
+                                <label>Current Password</label>
+                                <input 
+                                    type="password" 
+                                    className="glass-modern-input" 
+                                    required 
+                                    value={pwdData.oldPassword}
+                                    onChange={e => setPwdData({...pwdData, oldPassword: e.target.value})}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>New Password</label>
+                                <input 
+                                    type="password" 
+                                    className="glass-modern-input" 
+                                    required 
+                                    value={pwdData.newPassword}
+                                    onChange={e => setPwdData({...pwdData, newPassword: e.target.value})}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Confirm New Password</label>
+                                <input 
+                                    type="password" 
+                                    className="glass-modern-input" 
+                                    required 
+                                    value={pwdData.confirmPassword}
+                                    onChange={e => setPwdData({...pwdData, confirmPassword: e.target.value})}
+                                />
+                            </div>
+                            <div className="modal-actions pt-4">
+                                <button type="button" className="btn-text" onClick={() => setIsPasswordModalOpen(false)}>Cancel</button>
+                                <button type="submit" className="btn-primary-slim" disabled={loading}>
+                                    {loading ? 'Updating...' : 'Update Password'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

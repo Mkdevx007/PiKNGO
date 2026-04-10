@@ -1,5 +1,6 @@
 package com.pikngo.user_service.service;
 
+import com.pikngo.user_service.dto.ChangePasswordRequest;
 import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.dto.LoginRequest;
 
@@ -19,4 +20,5 @@ public interface AuthService {
     void sendEmailOtp(String email);
 
     boolean verifyEmailOtp(String email, String otp);
+    void changePassword(String phoneNumber, ChangePasswordRequest request);
 }

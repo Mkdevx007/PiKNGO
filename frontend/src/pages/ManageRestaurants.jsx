@@ -152,10 +152,11 @@ const ManageRestaurants = () => {
             <div className="container">
                 {viewMode === 'list' ? (
                     <>
-                        <header className="manage-header">
+                        <header className="manage-header elite-header-card">
                             <div className="header-left">
+                                <span className="elite-h-accent">NODE REGISTRY // NETWORK STATUS</span>
                                 <h1>Manage <span className="gradient-text">Restaurants</span></h1>
-                                <p>Configure and monitor your restaurant network</p>
+                                <p>Surveillance and configuration of partner nodes</p>
                             </div>
                             <button className="btn-primary-glow" onClick={() => setViewMode('form')}>
                                 <PlusCircle size={20} className="btn-icon-pulse" />
@@ -199,8 +200,8 @@ const ManageRestaurants = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 title="Click to toggle status"
                                             >
-                                                <span className="dot"></span>
-                                                {res.isActive !== false ? 'Active' : 'Inactive'}
+                                                <span className="elite-status-dot active"></span>
+                                                {res.isActive !== false ? 'LIVE' : 'OFFLINE'}
                                             </div>
                                             <div className="card-rating-chip">
                                                 <Star size={12} fill="currentColor" />

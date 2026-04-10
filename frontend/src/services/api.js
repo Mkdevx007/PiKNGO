@@ -43,6 +43,7 @@ export const authApi = {
     uploadProfilePhoto: (formData) => api.post('/users/profile/photo', formData),
     deleteProfile: (softDelete = true) => api.delete(`/users/delete?softDelete=${softDelete}`),
     logout: () => api.post('/users/logout'),
+    changePassword: (data) => api.post('/users/change-password', data),
     getUsers: () => api.get('/users/all'),
     updateStatus: (userId, active) => api.patch(`/users/${userId}/status?active=${active}`),
     updateRole: (userId, role) => api.patch(`/users/${userId}/role?role=${role}`),

@@ -1,6 +1,7 @@
 .promotions-page {
-    padding: 2rem;
-    position: relative;
+    padding: 110px 2rem 5rem;
+    min-height: 100vh;
+    background: #020617; /* Slate deep */
 }
 
 .promo-toast {
@@ -57,6 +58,13 @@
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+.promotions-header h1 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    margin-bottom: 0.2rem;
+    letter-spacing: -1.5px;
 }
 
 .stat-data h3 {
