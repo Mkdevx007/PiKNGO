@@ -18,13 +18,12 @@
 }
 
 .checkout-container {
-    max-width: 1280px;
-    width: 100%;
+    width: 92%;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 4rem;
+    box-sizing: border-box;
     position: relative;
     z-index: 10;
-    box-sizing: border-box;
 }
 
 .terminal-header h1 {
@@ -63,34 +62,35 @@
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* Layout Grid */
+/* Layout - Flexbox for reliable cross-browser centering */
 .terminal-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
+    display: flex;
+    flex-direction: row;
     gap: 2.5rem;
     align-items: flex-start;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .terminal-main-deck {
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    min-width: 0;
-    overflow: hidden;
 }
 
 .terminal-section {
     padding: 1.8rem 2rem;
     border-radius: 24px;
     position: relative;
-    min-width: 0;
-    overflow: hidden;
     box-sizing: border-box;
+    width: 100%;
 }
 
 .terminal-sidebar {
-    min-width: 0;
+    flex: 0 0 340px;
+    width: 340px;
 }
 
 .section-title-hud {

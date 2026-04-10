@@ -171,7 +171,7 @@ const ManageUsers = () => {
                     </div>
                 </div>
 
-                <div className="users-table-wrapper glass-card animate-slide-up">
+                <div className="users-table-wrapper glass-card elite-entrance">
                     <table className="users-table">
                         <thead>
                             <tr>

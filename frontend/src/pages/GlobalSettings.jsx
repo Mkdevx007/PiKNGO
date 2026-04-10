@@ -69,7 +69,7 @@ const GlobalSettings = () => {
     return (
         <div className="settings-page animate-fade-in">
             {toastMessage && (
-                <div className="promo-toast animate-slide-up">
+                <div className="promo-toast elite-entrance">
                     <CheckCircle size={16} />
                     {toastMessage}
                 </div>

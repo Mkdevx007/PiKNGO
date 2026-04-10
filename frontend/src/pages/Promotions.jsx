@@ -148,21 +148,21 @@ const Promotions = () => {
                         </header>
 
                         <div className="promo-stats-grid">
-                            <div className="promo-stat glass-card orange animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                            <div className="promo-stat glass-card orange elite-entrance" style={{ animationDelay: '0.1s' }}>
                                 <div className="stat-icon"><Tag size={20} /></div>
                                 <div className="stat-data">
                                     <span className="label">Active Offers</span>
                                     <h3>8 Total</h3>
                                 </div>
                             </div>
-                            <div className="promo-stat glass-card blue animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                            <div className="promo-stat glass-card blue elite-entrance" style={{ animationDelay: '0.2s' }}>
                                 <div className="stat-icon"><Gift size={20} /></div>
                                 <div className="stat-data">
                                     <span className="label">Total Redeemed</span>
                                     <h3>1.2k+</h3>
                                 </div>
                             </div>
-                            <div className="promo-stat glass-card green animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                            <div className="promo-stat glass-card green elite-entrance" style={{ animationDelay: '0.3s' }}>
                                 <div className="stat-icon"><Percent size={20} /></div>
                                 <div className="stat-data">
                                     <span className="label">AVG Conversion</span>

@@ -37,7 +37,7 @@ const ReviewModal = ({ isOpen, onClose, order }) => {
 
     return (
         <div className="modal-overlay animate-fade-in" onClick={onClose}>
-            <div className="review-modal glass-card animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="review-modal glass-card elite-entrance" onClick={e => e.stopPropagation()}>
                 <button className="close-btn" onClick={onClose}>
                     <X size={20} />
                 </button>

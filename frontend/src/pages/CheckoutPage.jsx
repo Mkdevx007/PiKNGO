@@ -237,7 +237,7 @@ const CheckoutPage = () => {
             )}
             
             <div className="checkout-container">
-                <header className="terminal-header animate-slide-up">
+                <header className="terminal-header elite-entrance">
                     <button className="terminal-back-btn glass-pill" onClick={() => navigate(-1)}>
                         <ChevronLeft size={18} />
                         <span>CANCEL</span>
@@ -251,7 +251,7 @@ const CheckoutPage = () => {
                 <div className="terminal-grid">
                     <div className="terminal-main-deck">
                         {/* 0. Route Intel Toggle */}
-                        <section className="terminal-section route-intel animate-slide-up">
+                        <section className="terminal-section route-intel elite-entrance">
                             <div className="section-title-hud">
                                 <Navigation size={18} />
                                 <span>ROUTE INTELLIGENCE</span>
@@ -280,7 +280,7 @@ const CheckoutPage = () => {
 
                         {/* 1. Target Destination Section */}
                         {serviceType === 'delivery' ? (
-                            <section className="terminal-section destination-vault glass-modern animate-slide-up" style={{animationDelay: '0.1s'}}>
+                            <section className="terminal-section destination-vault glass-modern elite-entrance" style={{animationDelay: '0.1s'}}>
                                 <div className="section-header-hud">
                                     <MapPin size={22} className="accent-icon" />
                                     <h3>Target Destination</h3>
@@ -308,7 +308,7 @@ const CheckoutPage = () => {
                                 </div>
                             </section>
                         ) : (
-                            <section className="terminal-section pickup-hub glass-modern animate-slide-up" style={{animationDelay: '0.1s'}}>
+                            <section className="terminal-section pickup-hub glass-modern elite-entrance" style={{animationDelay: '0.1s'}}>
                                 <div className="pickup-intel-card">
                                     <div className="intel-visual">🏪</div>
                                     <div className="intel-data">
@@ -324,7 +324,7 @@ const CheckoutPage = () => {
                         )}
 
                         {/* 2. Secure Vault Section */}
-                        <section className="terminal-section secure-vault glass-modern animate-slide-up" style={{animationDelay: '0.2s'}}>
+                        <section className="terminal-section secure-vault glass-modern elite-entrance" style={{animationDelay: '0.2s'}}>
                             <div className="section-header-hud">
                                 <CreditCard size={22} className="accent-icon" />
                                 <h3>Secure Vault Access</h3>
@@ -381,7 +381,7 @@ const CheckoutPage = () => {
                     </div>
 
                     <aside className="terminal-sidebar">
-                        <section className="terminal-invoice glass-modern animate-slide-up" style={{animationDelay: '0.3s'}}>
+                        <section className="terminal-invoice glass-modern elite-entrance" style={{animationDelay: '0.3s'}}>
                             <div className="invoice-header">
                                 <ShieldCheck size={18} className="accent-icon" />
                                 <h3>Terminal Invoice</h3>
