@@ -1,0 +1,74 @@
+.admin-layout-wrapper {
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+.admin-main-content {
+    flex: 1;
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 100vh;
+    position: relative;
+    z-index: 5;
+    background: rgba(15, 23, 42, 0.2);
+}
+
+.admin-main-content.standard {
+    margin-left: 280px;
+}
+
+.admin-main-content.expanded {
+    margin-left: 80px;
+}
+
+.admin-content-container {
+    padding: 2.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Animations that look premium */
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar styling for admin area */
+.admin-main-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.admin-main-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-main-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 107, 0, 0.3);
+    border-radius: 10px;
+}
+
+.admin-main-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 107, 0, 0.5);
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+    .admin-main-content.standard, 
+    .admin-main-content.expanded {
+        margin-left: 0;
+    }
+    
+    .admin-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .admin-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+}

@@ -1,10 +1,16 @@
-HELP.md
+# Build Artifacts
 target/
-.mvn/wrapper/maven-wrapper.jar
+build/
+bin/
+out/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+# IDE Files
+.idea
+*.iws
+*.iml
+*.ipr
 .apt_generated
 .classpath
 .factorypath
@@ -12,28 +18,34 @@ target/
 .settings
 .springBeans
 .sts4-cache
+.vscode/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# Build Tools
+.mvn/wrapper/maven-wrapper.jar
+.gradle/
+.nb-gradle/
 
-### NetBeans ###
+# Secrets & Security (CRITICAL)
+application-secrets.yml
+secrets.properties
+**/service-account.json
+**/credentials.json
+firebase-key.json
+firebase-adminsdk.json
+.env
+.env.local
+.env.*
+*.jks
+*.p12
+*.pem
+*.key
+
+# Logs
+*.log
+logs/
+
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-
-### Firebase ###
-src/main/resources/service-account.json
-
-### Logs ###
-*.log

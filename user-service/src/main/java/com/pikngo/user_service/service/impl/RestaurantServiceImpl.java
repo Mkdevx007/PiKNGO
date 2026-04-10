@@ -5,8 +5,8 @@ import com.pikngo.user_service.repository.RestaurantRepository;
 import com.pikngo.user_service.service.RestaurantService;
 import com.pikngo.user_service.dto.RestaurantResponseDTO;
 import com.pikngo.user_service.repository.RestaurantWithDistance;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,16 +15,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class RestaurantServiceImpl implements RestaurantService {
 
+    private static final Logger log = LoggerFactory.getLogger(RestaurantServiceImpl.class);
+
     private final RestaurantRepository restaurantRepository;
+
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository) {
+        this.restaurantRepository = restaurantRepository;
+    }
 
     @Override
     @Transactional
     public Restaurant createRestaurant(Restaurant restaurant) {
-        log.info("Creating new restaurant: {}", restaurant.getResturantName());
+        log.info("Creating new restaurant: {}", restaurant.getRestaurantName());
         return restaurantRepository.save(restaurant);
     }
 
@@ -35,7 +39,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         Restaurant existing = restaurantRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found with ID: " + id));
 
-        existing.setResturantName(updatedRestaurant.getResturantName());
+        existing.setRestaurantName(updatedRestaurant.getRestaurantName());
         existing.setAddress(updatedRestaurant.getAddress());
         existing.setLatitude(updatedRestaurant.getLatitude());
         existing.setLongitude(updatedRestaurant.getLongitude());
@@ -47,11 +51,10 @@ public class RestaurantServiceImpl implements RestaurantService {
     private RestaurantResponseDTO mapToDTO(Restaurant restaurant) {
         return RestaurantResponseDTO.builder()
                 .id(restaurant.getId())
-                .resturantName(restaurant.getResturantName())
+                .restaurantName(restaurant.getRestaurantName())
                 .address(restaurant.getAddress())
                 .latitude(restaurant.getLatitude())
                 .longitude(restaurant.getLongitude())
-                .distance(null)
                 .imageUrl(restaurant.getImageUrl())
                 .category(restaurant.getCategory())
                 .rating(restaurant.getRating())
@@ -61,19 +64,19 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     private RestaurantResponseDTO mapToDTOWithDistance(RestaurantWithDistance projection) {
-        return RestaurantResponseDTO.builder()
-                .id(projection.getId())
-                .resturantName(projection.getResturantName())
-                .address(projection.getAddress())
-                .latitude(projection.getLatitude())
-                .longitude(projection.getLongitude())
-                .distance(projection.getDistance())
-                .imageUrl(projection.getImageUrl())
-                .category(projection.getCategory())
-                .rating(projection.getRating())
-                .deliveryTime(projection.getDeliveryTime())
-                .isActive(projection.getIsActive())
-                .build();
+        RestaurantResponseDTO dto = new RestaurantResponseDTO();
+        dto.setId(projection.getId());
+        dto.setRestaurantName(projection.getRestaurantName());
+        dto.setAddress(projection.getAddress());
+        dto.setLatitude(projection.getLatitude());
+        dto.setLongitude(projection.getLongitude());
+        dto.setImageUrl(projection.getImageUrl());
+        dto.setCategory(projection.getCategory());
+        dto.setRating(projection.getRating());
+        dto.setDeliveryTime(projection.getDeliveryTime());
+        dto.setActive(projection.getIsActive());
+        dto.setDistance(projection.getDistance());
+        return dto;
     }
 
     @Override
@@ -97,7 +100,6 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .filter(res -> isAlongRoute(srcLat, srcLon, destLat, destLon, res.getLatitude(), res.getLongitude(), radius))
                 .map(res -> {
                     RestaurantResponseDTO dto = mapToDTO(res);
-                    // calculate shortest distance to the route segment
                     double distToRoute = crossTrackDistance(srcLat, srcLon, destLat, destLon, res.getLatitude(), res.getLongitude());
                     dto.setDistance(Math.abs(distToRoute));
                     return dto;
@@ -106,14 +108,9 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     private boolean isAlongRoute(double lat1, double lon1, double lat2, double lon2, double lat3, double lon3, double radius) {
-        // Find if point (lat3, lon3) is within 'radius' km of the line segment [(lat1, lon1), (lat2, lon2)]
-        
-        // 1. Calculate Cross-Track Distance (approximate for short/medium distances)
         double dxt = crossTrackDistance(lat1, lon1, lat2, lon2, lat3, lon3);
         if (Math.abs(dxt) > radius) return false;
 
-        // 2. Ensure the point is not "behind" the source or "beyond" the destination
-        // We check Along-Track Distance or simply check if it's within a bounding box (with some padding)
         double minLat = Math.min(lat1, lat2) - (radius / 111.0);
         double maxLat = Math.max(lat1, lat2) + (radius / 111.0);
         double minLon = Math.min(lon1, lon2) - (radius / (111.0 * Math.cos(Math.toRadians(lat1))));
@@ -123,7 +120,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     private double crossTrackDistance(double lat1, double lon1, double lat2, double lon2, double lat3, double lon3) {
-        double R = 6371; // Earth radius in km
+        double R = 6371; 
         double d13 = haversine(lat1, lon1, lat3, lon3);
         double brng13 = bearing(lat1, lon1, lat3, lon3);
         double brng12 = bearing(lat1, lon1, lat2, lon2);
@@ -174,13 +171,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     public RestaurantResponseDTO getRestaurantById(UUID id) {
         log.info("Fetching restaurant by ID: {}", id);
         return restaurantRepository.findById(id)
-                .map(res -> {
-                    log.debug("Found restaurant: {}", res.getResturantName());
-                    return mapToDTO(res);
-                })
-                .orElseThrow(() -> {
-                    log.error("Restaurant lookup failed for ID: {}", id);
-                    return new RuntimeException("Restaurant not found with ID: " + id);
-                });
+                .map(this::mapToDTO)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found with ID: " + id));
     }
 }

@@ -1,25 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { restaurantApi } from '../services/api';
 import FoodCard from '../components/FoodCard/FoodCard';
-import { MapPin, Navigation, Search, Loader2, LayoutGrid, Map as MapIcon, Compass } from 'lucide-react';
-import axios from 'axios';
 import MapView from '../components/MapView/MapView';
+import { MapPin, Navigation, Search, LayoutGrid, Compass, SearchX } from 'lucide-react';
+import axios from 'axios';
+import { CardSkeleton } from '../components/Common/Skeleton';
 import './Dashboard.css';
-
-// Skeleton Component defined OUTSIDE the main component to prevent re-mounting issues
-const SkeletonCard = () => (
-    <div className="food-card glass-card flex-col skeleton-wrapper">
-        <div className="skeleton-image"></div>
-        <div className="food-details">
-            <div className="skeleton-line title"></div>
-            <div className="skeleton-line subtitle"></div>
-            <div style={{ marginTop: 'auto', paddingTop: '1rem', display: 'flex', gap: '10px' }}>
-                <div className="skeleton-btn"></div>
-                <div className="skeleton-btn"></div>
-            </div>
-        </div>
-    </div>
-);
 
 const Dashboard = () => {
     const [restaurants, setRestaurants] = useState([]);
@@ -27,30 +13,37 @@ const Dashboard = () => {
     const [locationStatus, setLocationStatus] = useState('Checking location...');
     const [coords, setCoords] = useState(null);
     const [searchQuery, setSearchQuery] = useState({ source: '', destination: '' });
-    const [sourceCoords, setSourceCoords] = useState(null);
-    const [destinationCoords, setDestinationCoords] = useState(null);
     const [activeCategory, setActiveCategory] = useState('All');
-    const [viewMode, setViewMode] = useState('grid');
     const [locationPermission, setLocationPermission] = useState('unknown');
-
+    const [nameSearch, setNameSearch] = useState('');
     const [hoveredRestId, setHoveredRestId] = useState(null);
+    const [routeFallbackWarning, setRouteFallbackWarning] = useState(false);
+    const [routeSourceCoords, setRouteSourceCoords] = useState(null);
+    const [routeDestCoords, setRouteDestCoords] = useState(null);
 
-    const defaultRestaurantImage = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop";
+    const fallbackImages = [
+        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1470&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=1470&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=1516&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1470&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1374&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1374&auto=format&fit=crop"
+    ];
 
-    // Dynamic filtering logic
     const filteredRestaurants = restaurants.filter(res => {
-        if (activeCategory === 'All') return true;
-        return (res.category || '').toLowerCase() === activeCategory.toLowerCase();
+        const matchesCategory = activeCategory === 'All' || (res.category || '').toLowerCase() === activeCategory.toLowerCase();
+        return matchesCategory;
     });
 
-    const categories = [
-        { name: 'All', icon: <LayoutGrid size={18} /> },
-        { name: 'Indian', icon: '🍲' },
-        { name: 'Fast Food', icon: '🍔' },
-        { name: 'Italian', icon: '🍕' },
-        { name: 'Chinese', icon: '🥡' },
-        { name: 'Beverages', icon: '☕' }
-    ];
+    const handleToggleLocation = () => {
+        if (coords) {
+            setCoords(null);
+            setLocationStatus('Showing all restaurants.');
+            fetchAllRestaurants();
+        } else {
+            getLocation();
+        }
+    };
 
     const getLocation = () => {
         if (!navigator.geolocation) {
@@ -77,21 +70,18 @@ const Dashboard = () => {
     };
 
     useEffect(() => {
-        // Try getting location gently without triggering prompt if not needed
         if (navigator.permissions) {
             navigator.permissions.query({ name: 'geolocation' }).then((result) => {
                 setLocationPermission(result.state);
                 if (result.state === 'granted') {
-                    getLocation(); // Will not prompt, just get
+                    getLocation();
                 } else {
                     setLocationStatus('Showing all restaurants.');
                     fetchAllRestaurants();
                 }
-                // Listen for permission changes
                 result.onchange = () => setLocationPermission(result.state);
             });
         } else {
-            // Safari fallback
             fetchAllRestaurants();
         }
     }, []);
@@ -100,8 +90,12 @@ const Dashboard = () => {
         setLoading(true);
         try {
             const response = await restaurantApi.getAll();
-            setRestaurants(response.data);
-            setLocationStatus('Showing all restaurants.');
+            const arr = Array.isArray(response) ? response : (response?.content || []);
+            const normalized = arr.map(r => ({
+                ...r,
+                isActive: r.isActive !== undefined ? r.isActive : r.active
+            }));
+            setRestaurants(normalized);
         } catch (err) {
             console.error("Failed to fetch restaurants", err);
         } finally {
@@ -112,8 +106,14 @@ const Dashboard = () => {
     const fetchNearbyRestaurants = async (lat, lon) => {
         setLoading(true);
         try {
-            const response = await restaurantApi.getNearby(lat, lon);
-            setRestaurants(response.data);
+            // Using 10000km radius to ensure dummy restaurants (New Delhi) are found anywhere from user's true location
+            const response = await restaurantApi.getNearby(lat, lon, 10000);
+            const arr = Array.isArray(response) ? response : (response?.content || []);
+            const normalized = arr.map(r => ({
+                ...r,
+                isActive: r.isActive !== undefined ? r.isActive : r.active
+            }));
+            setRestaurants(normalized);
         } catch (err) {
             console.error("Failed to fetch nearby restaurants", err);
             fetchAllRestaurants();
@@ -125,11 +125,9 @@ const Dashboard = () => {
     const getCoords = async (query) => {
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-            if (response.data && response.data.length > 0) {
-                return {
-                    lat: parseFloat(response.data[0].lat),
-                    lon: parseFloat(response.data[0].lon)
-                };
+            const data = response.data;
+            if (data && data.length > 0) {
+                return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
             }
             return null;
         } catch (err) {
@@ -138,25 +136,8 @@ const Dashboard = () => {
         }
     };
 
-    const [focusedHighwayId, setFocusedHighwayId] = useState(null);
-
     const handleRouteSearch = async (e) => {
-        e.preventDefault();
-        if (!searchQuery.source && !searchQuery.destination) return;
-
-        // Check if searching for a highway (e.g., "NH44")
-        const highwayMatch = (searchQuery.source + ' ' + searchQuery.destination).match(/NH\s?\d+/i);
-        if (highwayMatch) {
-            const hId = highwayMatch[0].toUpperCase().replace(/\s/g, '');
-            setFocusedHighwayId(hId);
-            setLocationStatus(`Visualizing ${hId}...`);
-            setViewMode('map');
-            // We still proceed with normal search if both source/destination are provided
-            // but the highway highlight takes priority for the view.
-        } else {
-            setFocusedHighwayId(null);
-        }
-
+        if (e) e.preventDefault();
         if (!searchQuery.source || !searchQuery.destination) return;
 
         setLoading(true);
@@ -165,20 +146,38 @@ const Dashboard = () => {
             const destCoord = await getCoords(searchQuery.destination);
 
             if (!srcCoord || !destCoord) {
-                if (!highwayMatch) setLocationStatus("Could not find locations. Please try again.");
+                setLocationStatus("Could not find locations.");
                 setLoading(false);
                 return;
             }
+            
+            // Set the route coordinates so the MapView can draw the road map
+            setRouteSourceCoords(srcCoord);
+            setRouteDestCoords(destCoord);
             
             const response = await restaurantApi.searchByRoute(
                 srcCoord.lat, srcCoord.lon, 
                 destCoord.lat, destCoord.lon
             );
-            setRestaurants(response.data);
-            setSourceCoords(srcCoord);
-            setDestinationCoords(destCoord);
-            if (!highwayMatch) setLocationStatus(`Showing restaurants between ${searchQuery.source} and ${searchQuery.destination}`);
-            setViewMode('map');
+            const arr = Array.isArray(response) ? response : (response?.content || []);
+            const normalized = arr.map(r => ({
+                ...r,
+                isActive: r.isActive !== undefined ? r.isActive : r.active
+            }));
+            if (normalized.length > 0) {
+                setRestaurants(normalized);
+                setRouteFallbackWarning(false);
+            } else {
+                // Professional Fallback
+                const fallbackResponse = await restaurantApi.getAll();
+                const fallbackArr = Array.isArray(fallbackResponse) ? fallbackResponse : (fallbackResponse?.content || []);
+                const fallbackNormalized = fallbackArr.map(r => ({
+                    ...r,
+                    isActive: r.isActive !== undefined ? r.isActive : r.active
+                }));
+                setRestaurants(fallbackNormalized);
+                setRouteFallbackWarning(true);
+            }
         } catch (err) {
             console.error("Search failed", err);
         } finally {
@@ -186,26 +185,19 @@ const Dashboard = () => {
         }
     };
 
-    const userName = localStorage.getItem('name');
-    const userPhone = localStorage.getItem('phone');
-    const userDisplay = userName || userPhone || 'Guest Traveller';
-    // Get first letter of name if available, otherwise first letter of Display string
-    const userInitial = (userName ? userName.charAt(0) : userDisplay.charAt(0)).toUpperCase();
-
     return (
         <div className="dashboard-page auth-page-global-bg">
             <div className="bg-mesh"></div>
-            <div className="bg-vignette"></div>
             
-            <div className="dashboard-layout container animate-fade-in">
-                <main className="dashboard-main-full">
-                    {/* Search and Filters Strip */}
-                    <div className="search-filter-strip">
-                        <form className="route-search-bar-unified glass-modern animate-slide-up" onSubmit={handleRouteSearch}>
+            <div className="dashboard-layout-elite animate-fade-in">
+                <main className="dashboard-container">
+                    {/* Centered Search Row */}
+                    <div className="search-row-pro">
+                        <form className="route-search-bar-unified glass-modern" onSubmit={handleRouteSearch}>
                             <div className="search-field">
                                 <MapPin className="search-field-icon source" size={20} />
                                 <div className="search-field-content">
-                                    <label>Source</label>
+                                    <label>SOURCE</label>
                                     <input 
                                         type="text" 
                                         placeholder="Starting location..." 
@@ -217,13 +209,12 @@ const Dashboard = () => {
                             
                             <div className="search-divider">
                                 <div className="divider-line"></div>
-                                <Navigation className="divider-nav-icon" size={16} />
                             </div>
 
                             <div className="search-field">
                                 <MapPin className="search-field-icon destination" size={20} />
                                 <div className="search-field-content">
-                                    <label>Destination</label>
+                                    <label>DESTINATION</label>
                                     <input 
                                         type="text" 
                                         placeholder="Where are you going?" 
@@ -233,98 +224,113 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            <button type="submit" className="search-submit-btn">
+                            <button type="submit" className="search-submit-btn-pro">
                                 <Search size={20} />
                                 <span>Find Route</span>
                             </button>
                         </form>
+                    </div>
 
-                        <div className="filter-pill-strip animate-fade-in">
-                            <button 
-                                type="button" 
-                                className={`filter-pill ${coords ? 'active' : ''}`} 
-                                onClick={getLocation}
-                            >
-                                <MapPin size={14} />
-                                <span>{coords ? 'Near Me Active' : 'Near Me'}</span>
-                                {coords && <div className="pulse-dot"></div>}
-                            </button>
+                    {/* Elite Filter Bar */}
+                    <div className="filter-bar-elite">
+                        <button 
+                            className={`filter-pill-status ${coords ? 'active' : ''}`}
+                            onClick={handleToggleLocation}
+                        >
+                            <MapPin size={14} className={coords ? 'text-orange-glow' : ''} />
+                            <span>{coords ? 'Near Me Active' : 'Near Me'}</span>
+                            {coords && <div className="status-indicator"></div>}
+                        </button>
 
-                            <div className="filter-divider"></div>
+                        <div className="v-divider"></div>
 
-                            <div className="filter-group">
-                                <select className="filter-select-pill">
-                                    <option>Cuisine</option>
-                                    <option>Indian</option>
-                                    <option>Fast Food</option>
-                                    <option>Italian</option>
-                                </select>
-                                <select className="filter-select-pill">
-                                    <option>Price</option>
-                                    <option>$ Low</option>
-                                    <option>$$ Mid</option>
-                                    <option>$$$ High</option>
-                                </select>
-                                <select className="filter-select-pill">
-                                    <option>Rating</option>
-                                    <option>4.0+</option>
-                                    <option>3.0+</option>
-                                </select>
-                            </div>
+                        <div className="dropdown-filter-group">
+                            <select className="elite-dropdown" value={activeCategory} onChange={(e) => setActiveCategory(e.target.value)}>
+                                <option value="All">Cuisine</option>
+                                <option value="Indian">Indian</option>
+                                <option value="Fast Food">Fast Food</option>
+                            </select>
 
-                            {locationPermission !== 'granted' && (
-                                <button className="location-request-pill" onClick={getLocation}>
-                                    <Compass size={14} className="animate-spin-slow" />
-                                    <span>Enable GPS for Nearby</span>
-                                </button>
-                            )}
+                            <select className="elite-dropdown">
+                                <option value="">Price</option>
+                                <option value="low">Budget</option>
+                                <option value="mid">Premium</option>
+                            </select>
+
+                            <select className="elite-dropdown">
+                                <option value="">Rating</option>
+                                <option value="4">4.0+</option>
+                                <option value="4.5">4.5+</option>
+                            </select>
                         </div>
                     </div>
 
-
-
-            <div className="dashboard-content-split">
-                <div className="restaurant-grid-container">
-                    <div className="restaurant-grid">
-                        {loading ? (
-                            // Render 6 Skeletons while loading
-                            Array.from({ length: 6 }).map((_, idx) => <SkeletonCard key={idx} />)
-                        ) : filteredRestaurants.length > 0 ? (
-                            filteredRestaurants.map((res, index) => (
-                                <FoodCard 
-                                    key={res._id || res.id} 
-                                    id={res._id || res.id}
-                                    name={res.resturantName || res.restaurantName} 
-                                    restaurant={res.resturantName || res.restaurantName} 
-                                    address={res.address}
-                                    price="$$" 
-                                    rating={res.rating || 0} 
-                                    image={res.imageUrl || defaultRestaurantImage}
-                                    distance={res.distance}
-                                    onHover={(id) => setHoveredRestId(id)}
-                                    onLeave={() => setHoveredRestId(null)}
-                                />
-                            ))
-                        ) : (
-                            <div className="empty-state glass">
-                                <h3>No restaurants found in this area</h3>
-                                <p>Try searching for a different route or expanding your search radius.</p>
-                                <button className="btn-secondary" onClick={fetchAllRestaurants}>Show All Restaurants</button>
+                    {/* Split View Container */}
+                    <div className="dashboard-split-view">
+                        <div className="restaurant-grid-container scroll-pro">
+                            {routeFallbackWarning && !loading && (
+                                <div className="glass-modern" style={{margin: '0 0 1rem 0', padding: '1rem 1.5rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#fcd34d'}}>
+                                    <MapPin size={20} />
+                                    <div>
+                                        <strong>No restaurants found exactly on this route.</strong> 
+                                        <span style={{opacity: 0.8, marginLeft: '5px', fontSize: '0.9rem'}}>Showing top recommended restaurants instead.</span>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="restaurant-grid-elite">
+                                {loading ? (
+                                    Array.from({ length: 4 }).map((_, idx) => <CardSkeleton key={idx} />)
+                                ) : filteredRestaurants.length > 0 ? (
+                                    filteredRestaurants.map((res, index) => (
+                                        <FoodCard 
+                                            key={res._id || res.id} 
+                                            id={res._id || res.id}
+                                            name={res.restaurantName} 
+                                            restaurant={res.restaurantName} 
+                                            address={res.address}
+                                            rating={res.rating || 4.2} 
+                                            image={res.imageUrl || fallbackImages[index % fallbackImages.length]}
+                                            distance={res.distance}
+                                            isActive={res.isActive !== false}
+                                            onHover={(id) => setHoveredRestId(id)}
+                                            onLeave={() => setHoveredRestId(null)}
+                                        />
+                                    ))
+                                ) : (
+                                    <div className="empty-state-card glass-modern animate-fade-in">
+                                        <div className="empty-state-icon-wrapper">
+                                            <SearchX size={54} strokeWidth={1.5} />
+                                            <div className="icon-pulse"></div>
+                                        </div>
+                                        <h3>No Restaurants Found</h3>
+                                        <p>We couldn't find any results matching your current filters or route.</p>
+                                        <button 
+                                            className="btn-primary-slim mt-4" 
+                                            onClick={() => {
+                                                setCoords(null);
+                                                setRouteSourceCoords(null);
+                                                setRouteDestCoords(null);
+                                                setRouteFallbackWarning(false);
+                                                setActiveCategory('All');
+                                                fetchAllRestaurants();
+                                            }}
+                                        >
+                                            Reset All Filters
+                                        </button>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        </div>
+
+                        <div className="map-view-container-pro">
+                            <MapView 
+                                restaurants={restaurants} 
+                                sourceCoords={routeSourceCoords} 
+                                destinationCoords={routeDestCoords} 
+                                hoveredRestId={hoveredRestId}
+                            />
+                        </div>
                     </div>
-                </div>
-                <div className="map-container-side">
-                    {/* Always show map, even while loading */}
-                    <MapView 
-                        restaurants={restaurants} 
-                        sourceCoords={sourceCoords} 
-                        destinationCoords={destinationCoords} 
-                        hoveredRestId={hoveredRestId}
-                        focusedHighwayId={focusedHighwayId}
-                    />
-                </div>
-            </div>
                 </main>
             </div>
         </div>
@@ -332,4 +338,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

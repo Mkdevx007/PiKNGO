@@ -1,12 +1,14 @@
 package com.pikngo.user_service.service.impl;
 
 import com.pikngo.user_service.service.SmsService;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
 public class SmsServiceImpl implements SmsService {
+
+    private static final Logger log = LoggerFactory.getLogger(SmsServiceImpl.class);
 
     @Override
     public void sendSms(String phoneNumber, String message) {

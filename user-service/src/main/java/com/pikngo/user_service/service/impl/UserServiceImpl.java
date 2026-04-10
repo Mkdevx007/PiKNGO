@@ -1,40 +1,49 @@
 package com.pikngo.user_service.service.impl;
 
-import com.pikngo.user_service.dto.UserRegistrationRequest;
+import com.pikngo.user_service.dto.AddressDto;
 import com.pikngo.user_service.dto.ProfileUpdateRequest;
+import com.pikngo.user_service.dto.UserDto;
+import com.pikngo.user_service.dto.UserRegistrationRequest;
 import com.pikngo.user_service.entity.User;
-import com.pikngo.user_service.entity.Address;
 import com.pikngo.user_service.exception.UserAlreadyExistsException;
 import com.pikngo.user_service.exception.UserNotFoundException;
-import com.pikngo.user_service.repository.AddressRepository;
 import com.pikngo.user_service.repository.UserRepository;
+import com.pikngo.user_service.service.EmailService;
 import com.pikngo.user_service.service.UserService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
-@Transactional
 public class UserServiceImpl implements UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
     private final UserRepository userRepository;
-    private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+    }
 
     @Override
+    @Transactional
     public User registerUser(UserRegistrationRequest request) {
-        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new UserAlreadyExistsException("User with phone number already exists");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already exists");
         }
-        if (request.getEmail() != null && userRepository.existsByEmail(request.getEmail())) {
-            throw new UserAlreadyExistsException("User with email already exists");
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new RuntimeException("Phone number already exists");
         }
 
         User user = User.builder()
@@ -48,27 +57,20 @@ public class UserServiceImpl implements UserService {
                 .city(request.getCity())
                 .state(request.getState())
                 .pincode(request.getPincode())
-                .profileImageUrl(request.getProfileImageUrl())
+                .role(User.UserRole.USER)
                 .isActive(true)
+                .isDeleted(false)
                 .build();
-
-        log.info("REGISTERING USER: Phone: {}, City: {}, State: {}, Pincode: {}", 
-                user.getPhoneNumber(), user.getCity(), user.getState(), user.getPincode());
 
         User savedUser = userRepository.save(user);
 
-        // Also save to the separate addresses table as common practice for multiple addresses
-        if (request.getAddressLine1() != null && !request.getAddressLine1().isBlank()) {
-            Address address = Address.builder()
-                    .addressLine1(request.getAddressLine1())
-                    .addressLine2(request.getAddressLine2())
-                    .city(request.getCity())
-                    .state(request.getState())
-                    .pincode(request.getPincode())
-                    .user(savedUser)
-                    .build();
-            addressRepository.save(address);
-        }
+        // Send Welcome Email
+        String subject = "Welcome to PikNGo Premium!";
+        String body = "Hi " + request.getFirstName() + ",\n\n" +
+                "Thank you for registering with PikNGo. Your account has been successfully created.\n" +
+                "Enjoy exploring top-tier restaurants and premium delivery services!\n\n" +
+                "Best Regards,\nThe PikNGo Team";
+        emailService.sendEmail(savedUser.getEmail(), subject, body);
 
         return savedUser;
     }
@@ -76,91 +78,47 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User getUserByPhoneNumber(String phoneNumber) {
-        log.info("Searching for user with phone number: '{}'", phoneNumber);
         return userRepository.findByPhoneNumber(phoneNumber)
-                .filter(user -> !user.isDeleted())
-                .orElseThrow(() -> new UserNotFoundException(
-                        "User with phone number " + phoneNumber + " not found or deleted"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phoneNumber));
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getUserById(UUID id) {
         return userRepository.findById(id)
-                .filter(user -> !user.isDeleted())
-                .orElseThrow(() -> new UserNotFoundException("User with id " + id + " not found or deleted"));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 
     @Override
+    @Transactional
     public User updateUserProfile(String phoneNumber, ProfileUpdateRequest request) {
         User user = getUserByPhoneNumber(phoneNumber);
-
-        if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
-        }
-        if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
-        }
-
-        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
-            if (userRepository.existsByEmail(request.getEmail())) {
-                throw new UserAlreadyExistsException("Email already in use by another user");
+        
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        
+        if (request.getEmail() != null) {
+            if (!request.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+                throw new UserAlreadyExistsException("Email already in use");
             }
             user.setEmail(request.getEmail());
         }
-
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
-            user.setUserPassword(passwordEncoder.encode(request.getPassword()));
-        }
-
-        // Sync address in User entity
-        boolean addressChanged = false;
-        if (request.getAddressLine1() != null) { user.setAddressLine1(request.getAddressLine1()); addressChanged = true; }
-        if (request.getAddressLine2() != null) { user.setAddressLine2(request.getAddressLine2()); addressChanged = true; }
-        if (request.getCity() != null) { user.setCity(request.getCity()); addressChanged = true; }
-        if (request.getState() != null) { user.setState(request.getState()); addressChanged = true; }
-        if (request.getPincode() != null) { user.setPincode(request.getPincode()); addressChanged = true; }
-        if (request.getProfileImageUrl() != null) { user.setProfileImageUrl(request.getProfileImageUrl()); }
-
-        log.info("UPDATING USER PROFILE: Phone: {}, City: {}, State: {}, Pincode: {}", 
-                user.getPhoneNumber(), user.getCity(), user.getState(), user.getPincode());
-
-        User updatedUser = userRepository.save(user);
-
-        // SYNC: Update the first address in the addresses table if it exists
-        if (addressChanged) {
-            List<Address> addresses = addressRepository.findByUserAndIsDeletedFalse(user);
-            if (!addresses.isEmpty()) {
-                Address primary = addresses.get(0);
-                primary.setAddressLine1(user.getAddressLine1());
-                primary.setAddressLine2(user.getAddressLine2());
-                primary.setCity(user.getCity());
-                primary.setState(user.getState());
-                primary.setPincode(user.getPincode());
-                addressRepository.save(primary);
-            }
-        }
-
-        return updatedUser;
+        
+        if (request.getAddressLine1() != null) user.setAddressLine1(request.getAddressLine1());
+        if (request.getAddressLine2() != null) user.setAddressLine2(request.getAddressLine2());
+        if (request.getCity() != null) user.setCity(request.getCity());
+        if (request.getState() != null) user.setState(request.getState());
+        if (request.getPincode() != null) user.setPincode(request.getPincode());
+        
+        return userRepository.save(user);
     }
 
     @Override
-    public void updateProfilePhoto(String phoneNumber, byte[] photoBytes) {
-        log.info("Attempting to update profile photo for user: {}", phoneNumber);
-        if (photoBytes == null) {
-            log.error("Photo bytes are null for user: {}", phoneNumber);
-            return;
-        }
-        log.info("Photo size: {} bytes", photoBytes.length);
+    @Transactional
+    public void updateProfilePhoto(String phoneNumber, byte[] photo) {
         User user = getUserByPhoneNumber(phoneNumber);
-        user.setProfilePhoto(photoBytes);
-        try {
-            userRepository.save(user);
-            log.info("Profile photo saved successfully for user: {}", phoneNumber);
-        } catch (Exception e) {
-            log.error("Error saving profile photo for user: {}", phoneNumber, e);
-            throw e;
-        }
+        user.setProfilePhoto(photo);
+        userRepository.save(user);
     }
 
     @Override
@@ -172,7 +130,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(UUID userId, boolean softDelete) {
+        log.info("Deleting user {}. Soft delete: {}", userId, softDelete);
         User user = getUserById(userId);
         if (softDelete) {
             user.setDeleted(true);
@@ -185,9 +145,59 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAll().stream()
-                .filter(u -> !u.isDeleted())
-                .collect(java.util.stream.Collectors.toList());
+    public Page<UserDto> getAllUsers(Pageable pageable) {
+        log.info("Fetching a page of users (admin access)");
+        return userRepository.findAll(pageable).map(this::convertToDto);
+    }
+
+    @Override
+    @Transactional
+    public User updateUserStatus(UUID userId, boolean active) {
+        log.info("Admin Action: Updating status for user {} to {}", userId, active);
+        User user = getUserById(userId);
+        user.setActive(active);
+        if (active && user.isDeleted()) {
+            user.setDeleted(false);
+        }
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User updateUserRole(UUID userId, String role) {
+        log.info("Admin Action: Updating role for user {} to {}", userId, role);
+        User user = getUserById(userId);
+        try {
+            user.setRole(User.UserRole.valueOf(role.toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid role name: {}", role);
+            throw new RuntimeException("Invalid role name: " + role);
+        }
+        return userRepository.save(user);
+    }
+
+    private UserDto convertToDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .profileImageUrl(user.getProfileImageUrl())
+                .isActive(user.isActive())
+                .isDeleted(user.isDeleted())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .addresses(user.getAddresses() != null ? user.getAddresses().stream().map(addr -> AddressDto.builder()
+                        .id(addr.getId())
+                        .type(addr.getType())
+                        .addressLine1(addr.getAddressLine1())
+                        .addressLine2(addr.getAddressLine2())
+                        .city(addr.getCity())
+                        .state(addr.getState())
+                        .pincode(addr.getPincode())
+                        .isDefault(addr.isDefault())
+                        .build()).collect(Collectors.toList()) : null)
+                .build();
     }
 }

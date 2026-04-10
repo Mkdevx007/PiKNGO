@@ -2,7 +2,10 @@ package com.pikngo.user_service.controller;
 
 import com.pikngo.user_service.entity.MenuItem;
 import com.pikngo.user_service.service.MenuItemService;
-import lombok.RequiredArgsConstructor;
+import com.pikngo.user_service.dto.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,32 +14,38 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/restaurants/{restaurantId}/menu")
-@RequiredArgsConstructor
 public class MenuItemController {
 
+    private static final Logger log = LoggerFactory.getLogger(MenuItemController.class);
     private final MenuItemService menuItemService;
 
+    public MenuItemController(MenuItemService menuItemService) {
+        this.menuItemService = menuItemService;
+    }
+
     @GetMapping
-    public ResponseEntity<List<MenuItem>> getMenu(@PathVariable UUID restaurantId) {
-        System.out.println("Fetching menu for restaurant: " + restaurantId);
+    public ResponseEntity<ApiResponse<List<MenuItem>>> getMenu(@PathVariable UUID restaurantId) {
+        log.info("Fetching menu for restaurant: {}", restaurantId);
         List<MenuItem> items = menuItemService.getMenuItemsByRestaurant(restaurantId);
-        System.out.println("Found " + items.size() + " items");
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(ApiResponse.success("Menu fetched successfully", items));
     }
 
     @PostMapping
-    public ResponseEntity<MenuItem> addMenuItem(@PathVariable UUID restaurantId, @RequestBody MenuItem menuItem) {
-        return ResponseEntity.ok(menuItemService.addMenuItem(restaurantId, menuItem));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable UUID restaurantId, @RequestBody MenuItem menuItem) {
+        return ResponseEntity.ok(ApiResponse.success("Menu item added successfully", menuItemService.addMenuItem(restaurantId, menuItem)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MenuItem> updateMenuItem(@PathVariable UUID restaurantId, @PathVariable UUID id, @RequestBody MenuItem menuItem) {
-        return ResponseEntity.ok(menuItemService.updateMenuItem(id, menuItem));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<MenuItem>> updateMenuItem(@PathVariable UUID id, @RequestBody MenuItem menuItem) {
+        return ResponseEntity.ok(ApiResponse.success("Menu item updated successfully", menuItemService.updateMenuItem(id, menuItem)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMenuItem(@PathVariable UUID restaurantId, @PathVariable UUID id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteMenuItem(@PathVariable UUID id) {
         menuItemService.deleteMenuItem(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success("Menu item deleted successfully", null));
     }
 }

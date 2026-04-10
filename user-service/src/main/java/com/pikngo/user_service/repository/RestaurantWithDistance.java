@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public interface RestaurantWithDistance {
     UUID getId();
-    String getResturantName();
+    String getRestaurantName();
     String getAddress();
     Double getLatitude();
     Double getLongitude();

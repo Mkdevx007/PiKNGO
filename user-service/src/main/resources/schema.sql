@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 CREATE TABLE IF NOT EXISTS users (
     _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     first_name VARCHAR(50) NOT NULL,
@@ -33,20 +35,22 @@ CREATE TABLE IF NOT EXISTS otp_verifications (
 
 CREATE TABLE IF NOT EXISTS addresses (
     _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    type VARCHAR(50),
     address_line_1 VARCHAR(255) NOT NULL,
     address_line_2 VARCHAR(255),
     city VARCHAR(100) NOT NULL,
     state VARCHAR(100) NOT NULL,
     pincode VARCHAR(20) NOT NULL,
     user_id UUID REFERENCES users(_id) ON DELETE CASCADE,
+    is_default BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
     created_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    modified_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    is_deleted BOOLEAN DEFAULT FALSE
+    modified_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS restaurants (
     _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    resturant_name VARCHAR(255) NOT NULL,
+    restaurant_name VARCHAR(100) NOT NULL,
     address TEXT NOT NULL,
     latitude DOUBLE PRECISION NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
@@ -89,4 +93,13 @@ CREATE TABLE IF NOT EXISTS order_items (
     menu_item_id UUID REFERENCES menu_items(id),
     quantity INTEGER NOT NULL,
     price DOUBLE PRECISION NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS promotions (
+    _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(20) UNIQUE NOT NULL,
+    discount_percent DOUBLE PRECISION,
+    is_active BOOLEAN DEFAULT TRUE,
+    expiry_date TIMESTAMP WITH TIME ZONE,
+    created_ts TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

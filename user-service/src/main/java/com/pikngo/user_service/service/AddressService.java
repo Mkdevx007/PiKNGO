@@ -9,6 +9,6 @@ import java.util.UUID;
 public interface AddressService {
     Address addAddress(UUID userId, Address address);
     List<Address> getUserAddresses(UUID userId);
-    Address updateAddress(UUID addressId, Address address);
-    void deleteAddress(UUID addressId);
+    Address updateAddress(UUID userId, UUID addressId, Address updatedAddress);
+    void deleteAddress(UUID userId, UUID addressId);
 }

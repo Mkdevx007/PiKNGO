@@ -5,14 +5,31 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
+    const getCartKey = () => {
+        const userId = localStorage.getItem('userId');
+        return userId ? `cart_${userId}` : 'cart_guest';
+    };
+
     const [cartItems, setCartItems] = useState(() => {
-        const savedCart = localStorage.getItem('cart');
+        const savedCart = localStorage.getItem(getCartKey());
         return savedCart ? JSON.parse(savedCart) : [];
     });
 
     useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(cartItems));
+        localStorage.setItem(getCartKey(), JSON.stringify(cartItems));
     }, [cartItems]);
+
+    useEffect(() => {
+        // Keep cart isolated per logged-in user to avoid cross-account carryover.
+        const syncCartForCurrentUser = () => {
+            const savedCart = localStorage.getItem(getCartKey());
+            setCartItems(savedCart ? JSON.parse(savedCart) : []);
+        };
+
+        syncCartForCurrentUser();
+        window.addEventListener('storage', syncCartForCurrentUser);
+        return () => window.removeEventListener('storage', syncCartForCurrentUser);
+    }, []);
 
     const addToCart = (item, restaurantId, restaurantName) => {
         setCartItems(prev => {

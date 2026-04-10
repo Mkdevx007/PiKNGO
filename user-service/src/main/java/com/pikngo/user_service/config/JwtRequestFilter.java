@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -13,13 +12,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 @Component
-@RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
+
+    public JwtRequestFilter(JwtUtils jwtUtils) {
+        this.jwtUtils = jwtUtils;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -53,12 +54,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (jwtUtils.validateToken(jwt, username)) {
                 String role = (String) jwtUtils.getClaimFromToken(jwt, claims -> claims.get("role"));
                 logger.debug("JWT Token validated for user: " + username + " with role: " + role);
-                
+
                 java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new java.util.ArrayList<>();
                 if (role != null) {
-                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
+                    authorities.add(
+                            new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
                 }
-                
+
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         username, null, authorities);
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

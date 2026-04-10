@@ -4,12 +4,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import com.pikngo.user_service.dto.ApiResponse;
 import com.pikngo.user_service.dto.JwtResponse;
 import com.pikngo.user_service.entity.User;
 import com.pikngo.user_service.repository.UserRepository;
 import com.pikngo.user_service.utils.JwtUtils;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
-@Slf4j
 public class GoogleAuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(GoogleAuthController.class);
 
     @Value("${google.client.id}")
     private String googleClientId;
@@ -33,24 +33,29 @@ public class GoogleAuthController {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
+    public GoogleAuthController(UserRepository userRepository, JwtUtils jwtUtils) {
+        this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
+    }
+
     @PostMapping("/google")
-    public ResponseEntity<?> authenticateGoogleUser(@RequestBody Map<String, String> payload, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<JwtResponse>> authenticateGoogleUser(@RequestBody Map<String, String> payload, HttpServletResponse response) {
         String idTokenString = payload.get("idToken");
         
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
                     .setAudience(Collections.singletonList(googleClientId))
                     .build();
-
+ 
             GoogleIdToken idToken = verifier.verify(idTokenString);
             if (idToken != null) {
                 GoogleIdToken.Payload googlePayload = idToken.getPayload();
                 String email = googlePayload.getEmail();
                 String firstName = (String) googlePayload.get("given_name");
                 String lastName = (String) googlePayload.get("family_name");
-
+ 
                 log.info("Google login attempt for email: {}", email);
-
+ 
                 User user = userRepository.findByEmail(email).orElseGet(() -> {
                     log.info("Creating new user for Google login: {}", email);
                     User newUser = User.builder()
@@ -62,7 +67,7 @@ public class GoogleAuthController {
                             .build();
                     return userRepository.save(newUser);
                 });
-
+ 
                 String token = jwtUtils.generateToken(user.getPhoneNumber(), user.getRole().name());
                 
                 Cookie cookie = new Cookie("token", token);
@@ -71,19 +76,20 @@ public class GoogleAuthController {
                 cookie.setPath("/");
                 cookie.setMaxAge(86400);
                 response.addCookie(cookie);
-
-                return ResponseEntity.ok(JwtResponse.builder()
+ 
+                JwtResponse jwtResponse = JwtResponse.builder()
                         .token("protected")
                         .phoneNumber(user.getPhoneNumber())
                         .userId(user.getId())
                         .role(user.getRole().name())
-                        .build());
+                        .build();
+                return ResponseEntity.ok(ApiResponse.success("Google authentication successful", jwtResponse));
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid ID token.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid ID token."));
             }
         } catch (Exception e) {
             log.error("Google authentication failed: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication failed.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error("Authentication failed."));
         }
     }
 }

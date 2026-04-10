@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
+import { addressApi, orderApi, paymentApi } from '../services/api';
+import AddressModal from '../components/AddressModal/AddressModal.jsx';
 import { 
     ChevronLeft, Trash2, CreditCard, ShieldCheck, 
-    MapPin, Plus, CheckCircle2, Wallet, Smartphone, Banknote
+    MapPin, Plus, CheckCircle2, Wallet, Smartphone, Banknote,
+    AlertTriangle, Loader2
 } from 'lucide-react';
-import { addressApi, orderApi } from '../services/api';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
-    const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+    const { showToast } = useToast();
+    const { cartItems: realCartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+    const cartItems = realCartItems.length > 0 ? realCartItems : [{ id: 1, name: 'Mock Meal', price: 299, quantity: 1, restaurantName: 'Mock Cafe' }];
     const navigate = useNavigate();
 
     const [addresses, setAddresses] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
+    const [serviceType, setServiceType] = useState('delivery'); // 'delivery' or 'pickup'
     const [paymentMethod, setPaymentMethod] = useState('card');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
     const [cardDetails, setCardDetails] = useState({
         number: '', expiry: '', cvc: '', name: ''
@@ -24,46 +31,131 @@ const CheckoutPage = () => {
 
     useEffect(() => {
         fetchAddresses();
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
     }, []);
 
     const fetchAddresses = async () => {
         try {
             const res = await addressApi.getAll();
-            setAddresses(res.data || []);
-            if (res.data && res.data.length > 0) {
-                setSelectedAddress(res.data[0]);
+            const arrRaw = Array.isArray(res) ? res : (res?.content || []);
+            const arr = arrRaw.map((addr) => ({
+                ...addr,
+                id: addr.id || addr._id
+            }));
+            setAddresses(arr);
+            if (arr.length > 0 && !selectedAddress) {
+                setSelectedAddress(arr[0]);
             }
         } catch (err) {
             console.error("Failed to fetch addresses:", err);
-            // Fallback for demo if no addresses found
-            setAddresses([
-                { id: '1', addressLine1: 'Gawala Express Highway', city: 'Mumbai', state: 'MH', pincode: '400001' }
-            ]);
-            setSelectedAddress({ id: '1', addressLine1: 'Gawala Express Highway', city: 'Mumbai', state: 'MH', pincode: '400001' });
+            if (addresses.length === 0) {
+                setAddresses([
+                    { id: '1', addressLine1: 'Gawala Express Highway', city: 'Mumbai', state: 'MH', pincode: '400001' }
+                ]);
+                setSelectedAddress({ id: '1', addressLine1: 'Gawala Express Highway', city: 'Mumbai', state: 'MH', pincode: '400001' });
+            }
+        }
+    };
+
+    const handleSaveAddress = async (newAddress) => {
+        try {
+            await addressApi.create(newAddress);
+            await fetchAddresses(); 
+            showToast('Address saved successfully', 'success');
+            setIsAddressModalOpen(false);
+        } catch (err) {
+            showToast('Failed to save address', 'error');
         }
     };
 
     const handlePlaceOrder = async () => {
-        if (!selectedAddress) {
-            alert("Please select a delivery address.");
+        if (serviceType === 'delivery' && !selectedAddress) {
+            showToast("Please select a delivery address.", "error");
             return;
         }
 
         const restaurantId = cartItems[0]?.restaurantId;
         if (!restaurantId) {
-            alert("Error: Restaurant information missing from cart.");
+            showToast("Error: Restaurant information missing from cart.", "error");
+            return;
+        }
+
+        if (paymentMethod === 'cash') {
+            await finalizeOrder();
             return;
         }
 
         setIsProcessing(true);
+        try {
+            const response = await paymentApi.createOrder(finalTotal);
+            const orderData = response.data || response; // fallback incase not handled by interceptor
+            
+            if (!window.Razorpay) {
+                showToast("Razorpay failed to load. Check your internet.", "error");
+                setIsProcessing(false);
+                return;
+            }
+
+            const options = {
+                key: orderData.keyId,
+                amount: orderData.amount,
+                currency: "INR",
+                name: "PikNGo",
+                description: "Premium Food Delivery",
+                image: "https://cdn-icons-png.flaticon.com/512/3448/3448609.png",
+                order_id: orderData.razorpayOrderId,
+                handler: async function (response) {
+                    try {
+                        const verifyPayload = {
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpaySignature: response.razorpay_signature
+                        };
+                        
+                        await paymentApi.verifyPayment(verifyPayload);
+                        await finalizeOrder();
+                    } catch (err) {
+                        showToast("Payment verification failed.", "error");
+                        setIsProcessing(false);
+                    }
+                },
+                prefill: {
+                    name: "User",
+                    email: "user@example.com",
+                    contact: "9999999999"
+                },
+                theme: { color: "#f59e0b" },
+                modal: { ondismiss: () => setIsProcessing(false) }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', (resp) => {
+                showToast(`Payment failed: ${resp.error.description}`, 'error');
+                setIsProcessing(false);
+            });
+            rzp.open();
+
+        } catch (err) {
+            showToast("Could not initiate payment. Please check your network.", "error");
+            setIsProcessing(false);
+        }
+    };
+
+    const finalizeOrder = async () => {
+        setIsProcessing(true);
+        const restaurantId = cartItems[0]?.restaurantId;
         
         const orderRequest = {
             restaurantId: restaurantId,
             totalAmount: finalTotal,
-            deliveryAddress: `${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}`,
+            deliveryAddress: serviceType === 'pickup' ? "SELF_PICKUP" : `${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}`,
+            isSelfPickup: serviceType === 'pickup',
             paymentMethod: paymentMethod,
             items: cartItems.map(item => ({
-                menuItemId: item.id,
+                menuItemId: item.id || item._id,
                 quantity: item.quantity,
                 price: item.price
             }))
@@ -71,21 +163,21 @@ const CheckoutPage = () => {
 
         try {
             await orderApi.placeOrder(orderRequest);
+            clearCart();
+            showToast('Order placed successfully!', 'success');
             setIsSuccess(true);
             setTimeout(() => {
-                clearCart();
-                navigate('/dashboard');
+                navigate('/orders');
             }, 3000);
         } catch (err) {
-            console.error("Failed to place order:", err);
-            alert("Payment failed or order could not be placed. Please try again.");
+            showToast("Order could not be saved. Please contact support.", "error");
         } finally {
             setIsProcessing(false);
         }
     };
 
     const total = getCartTotal();
-    const flatFee = 45;
+    const flatFee = serviceType === 'pickup' ? 0 : 45;
     const finalTotal = total + flatFee;
 
     if (cartItems.length === 0 && !isSuccess) {
@@ -115,23 +207,26 @@ const CheckoutPage = () => {
                     <h1>Order Placed <span className="gradient-text">Successfully!</span></h1>
                     <p>Your meal is being prepared and will be delivered shortly.</p>
                     <div className="success-loader-bar"></div>
-                    <p className="redirect-text">Redirecting to Dashboard...</p>
+                    <p className="redirect-text">Redirecting to Orders...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="checkout-page animate-fade-in">
+        <div className="checkout-page auth-page-global-bg animate-fade-in">
+            <div className="bg-mesh"></div>
             {isProcessing && (
                 <div className="processing-overlay">
-                    <div className="loader-ring"></div>
-                    <p>Processing Secure Payment...</p>
+                    <div className="standard-loader">
+                        <Loader2 className="animate-spin" size={48} />
+                        <p>Processing Secure Payment...</p>
+                    </div>
                 </div>
             )}
             
             <div className="container">
-                <header className="checkout-header">
+                <header className="checkout-header animate-slide-up">
                     <button className="back-btn glass" onClick={() => navigate(-1)}>
                         <ChevronLeft size={20} />
                         <span>Back</span>
@@ -141,31 +236,85 @@ const CheckoutPage = () => {
 
                 <div className="checkout-grid">
                     <div className="checkout-main">
-                        {/* 1. Delivery Section */}
-                        <section className="checkout-section glass-card">
-                            <div className="section-header">
-                                <MapPin size={22} className="section-icon" />
-                                <h3>Select Delivery Address</h3>
-                            </div>
-                            <div className="address-list">
-                                {addresses.map((addr) => (
-                                    <div 
-                                        key={addr.id} 
-                                        className={`address-item glass ${selectedAddress?.id === addr.id ? 'active' : ''}`}
-                                        onClick={() => setSelectedAddress(addr)}
-                                    >
-                                        <div className="address-radio"></div>
-                                        <div className="address-info">
-                                            <p className="addr-line">{addr.addressLine1}</p>
-                                            <p className="addr-city">{addr.city}, {addr.state} - {addr.pincode}</p>
-                                        </div>
+                        {/* 0. Service Type Toggle */}
+                        <section className="service-type-selector animate-slide-up">
+                            <div className="toggle-container">
+                                <div 
+                                    className="toggle-slider" 
+                                    style={{ 
+                                        transform: `translateX(${serviceType === 'delivery' ? '0%' : '100%'})`,
+                                        width: '50%'
+                                    }}
+                                ></div>
+                                <button 
+                                    className={`toggle-btn ${serviceType === 'delivery' ? 'active' : ''}`}
+                                    onClick={() => setServiceType('delivery')}
+                                    type="button"
+                                >
+                                    <MapPin size={18} />
+                                    <div className="btn-text">
+                                        <span>Delivery</span>
+                                        <small>To Doorstep</small>
                                     </div>
-                                ))}
-                                <button className="add-address-btn glass-pill">
-                                    <Plus size={16} /> Add New Address
+                                </button>
+                                <button 
+                                    className={`toggle-btn ${serviceType === 'pickup' ? 'active' : ''}`}
+                                    onClick={() => setServiceType('pickup')}
+                                    type="button"
+                                >
+                                    <Smartphone size={18} />
+                                    <div className="btn-text">
+                                        <span>Self-Pickup</span>
+                                        <small>Pick it up</small>
+                                    </div>
                                 </button>
                             </div>
                         </section>
+
+                        {/* 1. Delivery Section (Conditional) */}
+                        {serviceType === 'delivery' ? (
+                            <section className="checkout-section glass-card animate-fade-in">
+                                <div className="section-header">
+                                    <MapPin size={22} className="section-icon" />
+                                    <h3>Select Delivery Address</h3>
+                                </div>
+                                <div className="address-list">
+                                    {addresses.map((addr) => (
+                                        <div 
+                                            key={addr.id} 
+                                            className={`address-item glass ${selectedAddress?.id === addr.id ? 'active' : ''}`}
+                                            onClick={() => setSelectedAddress(addr)}
+                                        >
+                                            <div className="address-radio"></div>
+                                            <div className="address-info">
+                                                <p className="addr-line">{addr.addressLine1}</p>
+                                                <p className="addr-city">{addr.city}, {addr.state} - {addr.pincode}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button 
+                                        className="add-address-btn glass-pill"
+                                        onClick={() => setIsAddressModalOpen(true)}
+                                    >
+                                        <Plus size={16} /> Add New Address
+                                    </button>
+                                </div>
+                            </section>
+                        ) : (
+                            <section className="checkout-section glass-card animate-fade-in pickup-summary">
+                                <div className="pickup-notice">
+                                    <div className="notice-icon">🏪</div>
+                                    <div className="notice-content">
+                                        <h3>Pick up from Restaurant</h3>
+                                        <p>You'll save on delivery fees! Please reach the restaurant within 20-30 mins once ready.</p>
+                                        <div className="restaurant-mini-card glass">
+                                            <strong>{cartItems[0]?.restaurantName}</strong>
+                                            <span>Location tracking available in orders.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        )}
 
                         {/* 2. Payment Section */}
                         <section className="checkout-section glass-card">
@@ -301,6 +450,12 @@ const CheckoutPage = () => {
                     </aside>
                 </div>
             </div>
+            
+            <AddressModal 
+                isOpen={isAddressModalOpen} 
+                onClose={() => setIsAddressModalOpen(false)}
+                onSave={handleSaveAddress}
+            />
         </div>
     );
 };

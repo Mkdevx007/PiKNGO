@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Navigation, ArrowRight } from 'lucide-react';
+import { CITY_COORDS } from '../../utils/geoUtils';
 import './Hero.css';
 
 const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
     const navigate = useNavigate();
+    const [showSourceSuggestions, setShowSourceSuggestions] = useState(false);
+    const [showDestSuggestions, setShowDestSuggestions] = useState(false);
+
+    const cities = Object.keys(CITY_COORDS).map(city => city.charAt(0).toUpperCase() + city.slice(1));
+
+    const filteredSourceCities = cities.filter(city => 
+        city.toLowerCase().includes(source.toLowerCase()) && city.toLowerCase() !== source.toLowerCase()
+    );
+
+    const filteredDestCities = cities.filter(city => 
+        city.toLowerCase().includes(destination.toLowerCase()) && city.toLowerCase() !== destination.toLowerCase()
+    );
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -13,7 +26,7 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
 
     return (
         <section className="hero">
-            {/* Floating Decorative Elements */}
+            {/* ... (floating elements same as before) */}
             <div className="floating-elements">
                 <div className="float-item food-1">
                     <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300&auto=format&fit=crop" alt="Burger" />
@@ -62,8 +75,19 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
                                     type="text" 
                                     placeholder="Entry City" 
                                     value={source}
-                                    onChange={(e) => setSource(e.target.value)}
+                                    onChange={(e) => { setSource(e.target.value); setShowSourceSuggestions(true); }}
+                                    onFocus={() => setShowSourceSuggestions(true)}
+                                    onBlur={() => setTimeout(() => setShowSourceSuggestions(false), 200)}
                                 />
+                                {showSourceSuggestions && filteredSourceCities.length > 0 && (
+                                    <div className="autocomplete-dropdown glass">
+                                        {filteredSourceCities.map(city => (
+                                            <div key={city} className="suggestion-item" onMouseDown={() => { setSource(city); setShowSourceSuggestions(false); }}>
+                                                <MapPin size={14} /> <span>{city}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="search-divider"></div>
@@ -75,8 +99,19 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
                                     type="text" 
                                     placeholder="Destination" 
                                     value={destination}
-                                    onChange={(e) => setDestination(e.target.value)}
+                                    onChange={(e) => { setDestination(e.target.value); setShowDestSuggestions(true); }}
+                                    onFocus={() => setShowDestSuggestions(true)}
+                                    onBlur={() => setTimeout(() => setShowDestSuggestions(false), 200)}
                                 />
+                                {showDestSuggestions && filteredDestCities.length > 0 && (
+                                    <div className="autocomplete-dropdown glass">
+                                        {filteredDestCities.map(city => (
+                                            <div key={city} className="suggestion-item" onMouseDown={() => { setDestination(city); setShowDestSuggestions(false); }}>
+                                                <Navigation size={14} /> <span>{city}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <button type="submit" className="search-action-btn">
@@ -95,6 +130,28 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
                     </div>
                     <div className="feature-pill">
                         <span>📍</span> Route Tracked
+                    </div>
+                </div>
+
+                <div className="popular-routes animate-fade-in" style={{animationDelay: '0.4s'}}>
+                    <span className="routes-label">Popular Routes:</span>
+                    <div className="routes-chips">
+                        {[
+                            {s: 'Delhi', d: 'Jaipur'},
+                            {s: 'Delhi', d: 'Shimla'},
+                            {s: 'Mumbai', d: 'Pune'}
+                        ].map((route, i) => (
+                            <button 
+                                key={i} 
+                                className="route-chip glass-pill"
+                                onClick={() => {
+                                    setSource(route.s);
+                                    setDestination(route.d);
+                                }}
+                            >
+                                {route.s} ➔ {route.d}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>

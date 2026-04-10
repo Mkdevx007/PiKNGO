@@ -110,6 +110,16 @@ const restaurantIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
+const hoveredRestaurantIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+    shadowUrl: iconShadow,
+    iconSize: [35, 51],
+    iconAnchor: [17, 51],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: 'hovered-marker-animate'
+});
+
 const MapAutoCenter = ({ coords, focusedHighwayPath }) => {
     const map = useMap();
     useEffect(() => {
@@ -151,10 +161,9 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                     </Marker>
                 )}
 
-                {/* National Highway Routes Layer - Only show if focused */}
-                {HIGHWAYS.map(highway => {
+                {/* National Highway Routes Layer - Show only during search to keep map clean */}
+                {sourceCoords && HIGHWAYS.map(highway => {
                     const isFocused = highway.id === focusedHighwayId;
-                    if (!isFocused) return null; // HIDDEN BY DEFAULT
 
                     return (
                         <Polyline
@@ -185,25 +194,32 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                     
                     if (!lat || !lon) return null;
 
+                    const isHovered = (res._id || res.id) === hoveredRestId;
+
                     return (
                         <Marker 
                             key={res._id || res.id} 
                             position={[lat, lon]} 
-                            icon={L.divIcon({
-                                className: `custom-div-icon ${hoveredRestId === (res._id || res.id) ? 'marker-hovered' : ''}`,
-                                html: `<div class="marker-pin"></div>`,
-                                iconSize: [30, 42],
-                                iconAnchor: [15, 42]
-                            })}
+                            icon={isHovered ? hoveredRestaurantIcon : restaurantIcon}
+                            zIndexOffset={isHovered ? 1000 : 0}
+                            ref={(r) => {
+                                if (r) {
+                                    if (isHovered) {
+                                        r.openPopup();
+                                    } else {
+                                        r.closePopup();
+                                    }
+                                }
+                            }}
                         >
                             <Popup className="premium-popup">
                                 <div className="map-popup">
                                     <div className="popup-header">
-                                        <h4>{res.resturantName || res.restaurantName}</h4>
+                                        <h4>{res.restaurantName}</h4>
                                     </div>
                                     <p className="popup-address">{res.address}</p>
                                     <div className="popup-footer">
-                                        <span className="rating">⭐ 4.5</span>
+                                        <span className="rating">⭐ {res.rating || '4.5'}</span>
                                         <button className="book-btn">View Menu</button>
                                     </div>
                                 </div>

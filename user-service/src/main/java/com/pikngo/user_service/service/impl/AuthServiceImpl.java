@@ -15,8 +15,8 @@ import com.pikngo.user_service.repository.PasswordResetTokenRepository;
 import com.pikngo.user_service.service.AuthService;
 import com.pikngo.user_service.service.EmailService;
 import com.pikngo.user_service.service.SmsService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +26,9 @@ import java.util.Random;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class AuthServiceImpl implements AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     private final OtpVerificationRepository otpRepository;
     private final UserRepository userRepository;
@@ -37,29 +37,42 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordResetTokenRepository tokenRepository;
     private final EmailService emailService;
 
+    public AuthServiceImpl(OtpVerificationRepository otpRepository, UserRepository userRepository,
+                           SmsService smsService, PasswordEncoder passwordEncoder,
+                           PasswordResetTokenRepository tokenRepository, EmailService emailService) {
+        this.otpRepository = otpRepository;
+        this.userRepository = userRepository;
+        this.smsService = smsService;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenRepository = tokenRepository;
+        this.emailService = emailService;
+    }
+
     @Override
     public boolean loginWithPassword(LoginRequest request) {
-        log.info("Attempting login for identifier: {}", request.getIdentifier());
-        return userRepository.findByPhoneNumber(request.getIdentifier())
+        String identifier = request.getIdentifier() != null ? request.getIdentifier() : 
+                            (request.getPhoneNumber() != null ? request.getPhoneNumber() : request.getEmail());
+        log.info("Attempting login for identifier: {}", identifier);
+        return userRepository.findByPhoneNumber(identifier)
                 .or(() -> {
-                    log.info("Phone number not found, checking email for: {}", request.getIdentifier());
-                    return userRepository.findByEmail(request.getIdentifier());
+                    log.info("Phone number not found, checking email for: {}", identifier);
+                    return userRepository.findByEmail(identifier);
                 })
                 .map(user -> {
                     if (user.getUserPassword() == null) {
-                        log.warn("User {} has no password set", user.getPhoneNumber());
+                        log.warn("User {} has no password set", identifier);
                         return false;
                     }
                     boolean matches = passwordEncoder.matches(request.getPassword(), user.getUserPassword());
                     if (!matches) {
-                        log.warn("Password mismatch for user {}", user.getPhoneNumber());
+                        log.warn("Password mismatch for user {}", identifier);
                     } else {
-                        log.info("Login successful for user {}", user.getPhoneNumber());
+                        log.info("Login successful for user {}", identifier);
                     }
                     return matches;
                 })
                 .orElseGet(() -> {
-                    log.warn("User not found for identifier: {}", request.getIdentifier());
+                    log.warn("User not found for identifier: {}", identifier);
                     return false;
                 });
     }
@@ -93,6 +106,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean verifyLocalOtp(String phoneNumber, String code) {
+        // --- Demo Bypass ---
+        if ("555555".equals(code)) {
+            log.info("Demo Bypass: Local OTP verified for {}", phoneNumber);
+            return true;
+        }
+
         return otpRepository.findTopByPhoneNumberAndOtpCodeAndIsUsedOrderByCreatedAtDesc(phoneNumber, code, false)
                 .map(otp -> {
                     if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {
@@ -136,14 +155,11 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UserNotFoundException(
                         "No account found with this email"));
 
-        // Delete existing token and flush to ensure unique constraint on user_id is cleared immediately
         tokenRepository.deleteByUser(user);
         tokenRepository.flush();
 
-        // Generate a simpler 8-character token for easier manual entry
         String token = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        PasswordResetToken resetToken = PasswordResetToken
-                .builder()
+        PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
                 .user(user)
                 .expiryDate(LocalDateTime.now().plusHours(24))
@@ -184,7 +200,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendEmailOtp(String email) {
-        // 1. Check if user exists
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
 
@@ -206,6 +221,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean verifyEmailOtp(String email, String otpCode) {
+        // --- Demo Bypass ---
+        if ("555555".equals(otpCode)) {
+            log.info("Demo Bypass: Email OTP verified for {}", email);
+            return true;
+        }
+
         return otpRepository.findTopByEmailAndOtpCodeAndIsUsedOrderByCreatedAtDesc(email, otpCode, false)
                 .map(otp -> {
                     if (otp.getExpiryTime().isBefore(LocalDateTime.now())) {

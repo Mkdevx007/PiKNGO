@@ -1,6 +1,7 @@
 package com.pikngo.user_service.interceptor;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -14,8 +15,9 @@ import java.util.UUID;
  * Tracks: method, URI, user, status code, response time
  */
 @Component
-@Slf4j
 public class AuditInterceptor implements HandlerInterceptor {
+
+    private static final Logger log = LoggerFactory.getLogger(AuditInterceptor.class);
 
     private static final String REQUEST_START_TIME = "requestStartTime";
     private static final String REQUEST_ID = "requestId";
@@ -51,34 +53,38 @@ public class AuditInterceptor implements HandlerInterceptor {
      */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, 
-                                Object handler, Exception ex) {
+                                 Object handler, Exception ex) {
         String requestId = (String) request.getAttribute(REQUEST_ID);
-        long startTime = (long) request.getAttribute(REQUEST_START_TIME);
-        long duration = System.currentTimeMillis() - startTime;
+        Object startTimeAttr = request.getAttribute(REQUEST_START_TIME);
+        
+        if (requestId != null && startTimeAttr != null) {
+            long startTime = (long) startTimeAttr;
+            long duration = System.currentTimeMillis() - startTime;
 
-        if (ex != null) {
-            log.error("=== REQUEST ERROR === [RequestID: {}] {} {} | Status: {} | Duration: {}ms | Exception: {}",
-                    requestId,
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    response.getStatus(),
-                    duration,
-                    ex.getMessage(), ex);
-        } else {
-            if (response.getStatus() >= 400) {
-                log.warn("=== RESPONSE ERROR === [RequestID: {}] {} {} | Status: {} | Duration: {}ms",
+            if (ex != null) {
+                log.error("=== REQUEST ERROR === [RequestID: {}] {} {} | Status: {} | Duration: {}ms | Exception: {}",
                         requestId,
                         request.getMethod(),
                         request.getRequestURI(),
                         response.getStatus(),
-                        duration);
+                        duration,
+                        ex.getMessage(), ex);
             } else {
-                log.info("=== RESPONSE SUCCESS === [RequestID: {}] {} {} | Status: {} | Duration: {}ms",
-                        requestId,
-                        request.getMethod(),
-                        request.getRequestURI(),
-                        response.getStatus(),
-                        duration);
+                if (response.getStatus() >= 400) {
+                    log.warn("=== RESPONSE ERROR === [RequestID: {}] {} {} | Status: {} | Duration: {}ms",
+                            requestId,
+                            request.getMethod(),
+                            request.getRequestURI(),
+                            response.getStatus(),
+                            duration);
+                } else {
+                    log.info("=== RESPONSE SUCCESS === [RequestID: {}] {} {} | Status: {} | Duration: {}ms",
+                            requestId,
+                            request.getMethod(),
+                            request.getRequestURI(),
+                            response.getStatus(),
+                            duration);
+                }
             }
         }
     }

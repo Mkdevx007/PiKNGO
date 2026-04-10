@@ -1,5 +1,8 @@
 package com.pikngo.user_service;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -7,24 +10,20 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @org.springframework.scheduling.annotation.EnableScheduling
 public class UserServiceApplication {
 
-	public static void main(String[] args) {
-		System.out.println("Starting UserServiceApplication...");
-		System.out.println("Current Working Directory: " + System.getProperty("user.dir"));
+    private static final Logger log = LoggerFactory.getLogger(UserServiceApplication.class);
 
-		io.github.cdimascio.dotenv.Dotenv dotenv = io.github.cdimascio.dotenv.Dotenv.configure()
-				.directory("./")
-				.ignoreIfMissing()
-				.load();
-		
-		System.out.println("Loading environment variables from .env...");
-		dotenv.entries().forEach(entry -> {
-			if (System.getProperty(entry.getKey()) == null && System.getenv(entry.getKey()) == null) {
-				System.setProperty(entry.getKey(), entry.getValue());
-				System.out.println("Loaded: " + entry.getKey());
-			}
-		});
+    public static void main(String[] args) {
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        dotenv.entries().forEach(entry -> {
+            if (System.getProperty(entry.getKey()) == null && System.getenv(entry.getKey()) == null) {
+                System.setProperty(entry.getKey(), entry.getValue());
+                log.debug("Loaded: {}", entry.getKey());
+            }
+        });
 
-		SpringApplication.run(UserServiceApplication.class, args);
-	}
+        log.info("Starting UserServiceApplication...");
+        log.info("Current Working Directory: {}", System.getProperty("user.dir"));
 
+        SpringApplication.run(UserServiceApplication.class, args);
+    }
 }

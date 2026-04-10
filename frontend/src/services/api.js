@@ -3,14 +3,32 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    baseURL: API_BASE_URL || 'http://localhost:8081/api/v1',
     withCredentials: true,
 });
 
 // Token in cookie is handled automatically by the browser withCredentials: true
+api.interceptors.response.use(
+    (response) => {
+        // If the response follows the ApiResponse format { success, message, data }
+        if (response.data && Object.prototype.hasOwnProperty.call(response.data, 'success')) {
+            if (response.data.success) {
+                return response.data.data; // Return just the data part to the caller
+            } else {
+                return Promise.reject(new Error(response.data.message || 'API Error'));
+            }
+        }
+        return response.data;
+    },
+    (error) => {
+        // Extract backend error message if available
+        const backendMessage = error.response?.data?.message || error.response?.data?.error;
+        if (backendMessage) {
+            return Promise.reject(new Error(backendMessage));
+        }
+        return Promise.reject(error);
+    }
+);
 
 export const authApi = {
     register: (userData) => api.post('/users/register', userData),
@@ -26,6 +44,9 @@ export const authApi = {
     deleteProfile: (softDelete = true) => api.delete(`/users/delete?softDelete=${softDelete}`),
     logout: () => api.post('/users/logout'),
     getUsers: () => api.get('/users/all'),
+    updateStatus: (userId, active) => api.patch(`/users/${userId}/status?active=${active}`),
+    updateRole: (userId, role) => api.patch(`/users/${userId}/role?role=${role}`),
+    adminDeleteUser: (userId) => api.delete(`/users/admin/${userId}`),
 };
 
 export const restaurantApi = {
@@ -58,9 +79,28 @@ export const orderApi = {
     placeOrder: (data) => api.post('/orders', data),
     getMyOrders: () => api.get('/orders/my-orders'),
     getRestaurantOrders: (restaurantId) => api.get(`/orders/restaurant/${restaurantId}`),
-    getAllOrders: () => api.get('/orders/all'),
+    getAllOrders: (page = 0, size = 10) => api.get(`/orders/all?page=${page}&size=${size}`),
     updateStatus: (orderId, status) => api.patch(`/orders/${orderId}/status?status=${status}`),
+    updateAddress: (orderId, address) => api.patch(`/orders/${orderId}/address?address=${address}`),
+    getTrending: (limit = 30) => api.get(`/orders/trending?limit=${limit}`),
+};
+
+export const adminSettingsApi = {
+    getGlobalSettings: () => api.get('/admin/settings/global'),
+    updateGlobalSettings: (data) => api.put('/admin/settings/global', data),
+    getPromotions: () => api.get('/admin/settings/promotions'),
+    createPromotion: (data) => api.post('/admin/settings/promotions', data),
+    updatePromotion: (id, data) => api.put(`/admin/settings/promotions/${id}`, data),
+    deletePromotion: (id) => api.delete(`/admin/settings/promotions/${id}`),
+};
+
+export const adminAnalyticsApi = {
+    getDashboardStats: () => api.get('/admin/analytics/dashboard'),
+};
+
+export const paymentApi = {
+    createOrder: (amount) => api.post('/payment/create-order', { amount }),
+    verifyPayment: (paymentData) => api.post('/payment/verify', paymentData),
 };
 
 export default api;
-

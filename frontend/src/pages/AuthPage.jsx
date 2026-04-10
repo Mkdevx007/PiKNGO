@@ -18,14 +18,9 @@ const AuthPage = ({ onLogin }) => {
 
     const [isFlipped, setIsFlipped] = useState(location.pathname === '/register');
     const [showForgot, setShowForgot] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
     useEffect(() => {
         setIsFlipped(location.pathname === '/register');
-        setError('');
-        setSuccess('');
         setShowForgot(false);
     }, [location.pathname]);
 
@@ -88,25 +83,15 @@ const AuthPage = ({ onLogin }) => {
                 <div className="auth-form-side">
                     <div className="auth-flip-inner">
                         <div className="auth-card-front">
-                            {error && !isFlipped && <div className="error-message">{error}</div>}
-                            {success && <div className="success-message">{success}</div>}
-                            
                             {showForgot ? (
                                 <ForgotPasswordForm 
-                                    onSuccess={setSuccess} 
-                                    onError={setError} 
-                                    loading={loading} 
-                                    setLoading={setLoading} 
-                                    onBack={() => { setShowForgot(false); setSuccess(''); setError(''); }} 
+                                    onBack={() => setShowForgot(false)} 
                                 />
                             ) : (
                                 <div className="auth-card-content">
                                     <LoginForm 
                                         onLogin={completeAuth} 
-                                        onError={setError} 
-                                        loading={loading} 
-                                        setLoading={setLoading} 
-                                        onForgot={() => { setShowForgot(true); setSuccess(''); setError(''); }}
+                                        onForgot={() => setShowForgot(true)}
                                     />
                                     <p className="auth-footer">New here? <a href="#" onClick={toggleAuth}>Sign Up Now</a></p>
                                 </div>
@@ -115,13 +100,8 @@ const AuthPage = ({ onLogin }) => {
 
                         <div className="auth-card-back">
                             <RegisterForm 
-                                onSuccess={(msg) => { setSuccess(msg); setTimeout(() => navigate('/login'), 2000); }} 
-                                onError={setError} 
-                                loading={loading} 
-                                setLoading={setLoading} 
+                                onSuccess={() => navigate('/login')} 
                             />
-                            {error && isFlipped && <div className="error-message">{error}</div>}
-                            {success && isFlipped && <div className="success-message">{success}</div>}
                             <p className="auth-footer">Member? <a href="#" onClick={toggleAuth}>Login Here</a></p>
                         </div>
                     </div>

@@ -2,56 +2,73 @@ import React, { useState } from 'react';
 import { Mail, User, Phone, MapPin, Lock, ArrowRight, ChevronLeft, Eye, EyeOff } from 'lucide-react';
 import { authApi } from '../../services/api';
 
-const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
+import { useToast } from '../../context/ToastContext';
+import { useForm } from '../../hooks/useForm';
+
+const RegisterForm = ({ onSuccess }) => {
+    const { showToast } = useToast();
     const [regStep, setRegStep] = useState(1);
-    const [registerData, setRegisterData] = useState({
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const { values, handleChange } = useForm({
         firstName: '', lastName: '', email: '', phoneNumber: '', 
         addressLine1: '', addressLine2: '', city: '', state: '', pincode: '',
         password: '', confirmPassword: ''
     });
-    const [showPassword, setShowPassword] = useState(false);
 
     const handleRegister = async (e) => {
         e.preventDefault();
 
         if (regStep === 1) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(registerData.email)) {
-                onError('Please enter a valid email address');
+            if (!emailRegex.test(values.email)) {
+                showToast('Please enter a valid email address', 'error');
                 return;
             }
-            if (registerData.phoneNumber.length < 10) {
-                onError('Please enter a valid 10-digit phone number');
+            // Strict 10-digit phone validation
+            const phoneRegex = /^[6-9]\d{9}$/;
+            if (!phoneRegex.test(values.phoneNumber)) {
+                showToast('Enter a valid 10-digit mobile number starting with 6-9', 'error');
                 return;
             }
             setRegStep(2);
-            onError('');
             return;
         }
 
         if (regStep === 2) {
-            if (!registerData.addressLine1 || !registerData.city || !registerData.state || !registerData.pincode) {
-                onError('Please fill in all required address fields');
+            if (!values.addressLine1 || !values.city || !values.state || !values.pincode) {
+                showToast('Please fill in all required address fields', 'error');
+                return;
+            }
+            if (values.pincode.length !== 6) {
+                showToast('Pincode must be exactly 6 digits', 'error');
                 return;
             }
             setRegStep(3);
-            onError('');
             return;
         }
 
-        if (registerData.password !== registerData.confirmPassword) {
-            onError('Passwords do not match');
+        // Strict Password Validation: Min 8 chars, 1 upper, 1 special
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
+        if (!passwordRegex.test(values.password)) {
+            showToast('Password must be 8+ chars with 1 uppercase & 1 special character', 'error');
+            return;
+        }
+
+        if (values.password !== values.confirmPassword) {
+            showToast('Passwords do not match', 'error');
             return;
         }
 
         setLoading(true);
-        onError('');
         try {
-            const { confirmPassword, ...backendData } = registerData;
+            const { confirmPassword, ...backendData } = values;
             await authApi.register(backendData);
-            onSuccess('Registration successful! Please login.');
+            showToast('Account created! Please login to continue.', 'success');
+            onSuccess();
         } catch (err) {
-            onError(err.response?.data?.message || 'Registration failed.');
+            showToast(err.message || 'Registration failed', 'error');
         } finally { setLoading(false); }
     };
 
@@ -72,106 +89,107 @@ const RegisterForm = ({ onSuccess, onError, loading, setLoading }) => {
             <form className="auth-form" onSubmit={handleRegister}>
                 {regStep === 1 && (
                     <div className="step-content animate-slide-in">
-                        <div className="grid-2">
-                            <div className="form-group">
-                                <label>First Name</label>
-                                <div className="input-wrapper">
-                                    <User size={18} className="input-icon" />
-                                    <input type="text" placeholder="John" value={registerData.firstName} onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })} required />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Last Name</label>
-                                <div className="input-wrapper">
-                                    <User size={18} className="input-icon" />
-                                    <input type="text" placeholder="Doe" value={registerData.lastName} onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })} required />
-                                </div>
+                    <div className="grid-2">
+                        <div className="form-group">
+                            <label>First Name</label>
+                            <div className="input-wrapper">
+                                <User size={18} className="input-icon" />
+                                <input type="text" name="firstName" placeholder="John" value={values.firstName} onChange={handleChange} required />
                             </div>
                         </div>
                         <div className="form-group">
-                            <label>Email Address</label>
+                            <label>Last Name</label>
                             <div className="input-wrapper">
-                                <Mail size={18} className="input-icon" />
-                                <input type="email" placeholder="john@example.com" value={registerData.email} onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })} required />
+                                <User size={18} className="input-icon" />
+                                <input type="text" name="lastName" placeholder="Doe" value={values.lastName} onChange={handleChange} required />
                             </div>
                         </div>
-                        <div className="form-group">
-                            <label>Mobile Number</label>
-                            <div className="input-wrapper">
-                                <Phone size={18} className="input-icon" />
-                                <input
-                                    type="tel"
-                                    value={registerData.phoneNumber}
-                                    onChange={(e) => setRegisterData({ ...registerData, phoneNumber: e.target.value.replace(/\D/g, '').slice(0, 10) })}
-                                    placeholder="10 digit number"
-                                    required
-                                />
-                            </div>
+                    </div>
+                    <div className="form-group">
+                        <label>Email Address</label>
+                        <div className="input-wrapper">
+                            <Mail size={18} className="input-icon" />
+                            <input type="email" name="email" placeholder="john@example.com" value={values.email} onChange={handleChange} required />
                         </div>
+                    </div>
+                    <div className="form-group">
+                        <label>Mobile Number</label>
+                        <div className="input-wrapper">
+                            <Phone size={18} className="input-icon" />
+                            <input
+                                type="tel"
+                                name="phoneNumber"
+                                value={values.phoneNumber}
+                                onChange={handleChange}
+                                placeholder="10 digit number"
+                                required
+                            />
+                        </div>
+                    </div>
                     </div>
                 )}
 
                 {regStep === 2 && (
                     <div className="step-content animate-slide-in">
-                        <div className="grid-2">
-                            <div className="form-group">
-                                <label>Street Address</label>
-                                <div className="input-wrapper">
-                                    <MapPin size={18} className="input-icon" />
-                                    <input type="text" placeholder="House No, Street" value={registerData.addressLine1} onChange={(e) => setRegisterData({ ...registerData, addressLine1: e.target.value })} required />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Area / Landmark</label>
-                                <div className="input-wrapper">
-                                    <input type="text" placeholder="Society, Area" value={registerData.addressLine2} onChange={(e) => setRegisterData({ ...registerData, addressLine2: e.target.value })} />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="grid-2">
-                            <div className="form-group">
-                                <label>City</label>
-                                <div className="input-wrapper">
-                                    <input type="text" placeholder="City" value={registerData.city} onChange={(e) => setRegisterData({ ...registerData, city: e.target.value })} required />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>State</label>
-                                <div className="input-wrapper">
-                                    <input type="text" placeholder="State" value={registerData.state} onChange={(e) => setRegisterData({ ...registerData, state: e.target.value })} required />
-                                </div>
+                    <div className="grid-2">
+                        <div className="form-group">
+                            <label>Street Address</label>
+                            <div className="input-wrapper">
+                                <MapPin size={18} className="input-icon" />
+                                <input type="text" name="addressLine1" placeholder="House No, Street" value={values.addressLine1} onChange={handleChange} required />
                             </div>
                         </div>
                         <div className="form-group">
-                            <label>Pincode</label>
+                            <label>Area / Landmark</label>
                             <div className="input-wrapper">
-                                <input type="text" placeholder="6 Digits" value={registerData.pincode} onChange={(e) => setRegisterData({ ...registerData, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} required />
+                                <input type="text" name="addressLine2" placeholder="Society, Area" value={values.addressLine2} onChange={handleChange} />
                             </div>
                         </div>
+                    </div>
+                    <div className="grid-2">
+                        <div className="form-group">
+                            <label>City</label>
+                            <div className="input-wrapper">
+                                <input type="text" name="city" placeholder="City" value={values.city} onChange={handleChange} required />
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label>State</label>
+                            <div className="input-wrapper">
+                                <input type="text" name="state" placeholder="State" value={values.state} onChange={handleChange} required />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <label>Pincode</label>
+                        <div className="input-wrapper">
+                            <input type="text" name="pincode" placeholder="6 Digits" value={values.pincode} onChange={handleChange} required />
+                        </div>
+                    </div>
                     </div>
                 )}
 
                 {regStep === 3 && (
                     <div className="step-content animate-slide-in">
-                        <div className="grid-2">
-                            <div className="form-group">
-                                <label>Password</label>
-                                <div className="input-wrapper">
-                                    <Lock size={18} className="input-icon" />
-                                    <input type={showPassword ? "text" : "password"} placeholder="••••••••" value={registerData.password} onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })} required />
-                                    <button type="button" className="password-toggle-btn" onClick={() => setShowPassword(!showPassword)}>
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Confirm</label>
-                                <div className="input-wrapper">
-                                    <Lock size={18} className="input-icon" />
-                                    <input type={showPassword ? "text" : "password"} placeholder="••••••••" value={registerData.confirmPassword} onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })} required />
-                                </div>
+                    <div className="grid-2">
+                        <div className="form-group">
+                            <label>Password</label>
+                            <div className="input-wrapper">
+                                <Lock size={18} className="input-icon" />
+                                <input type={showPassword ? "text" : "password"} name="password" placeholder="••••••••" value={values.password} onChange={handleChange} required />
+                                <button type="button" className="password-toggle-btn" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
                             </div>
                         </div>
+                        <div className="form-group">
+                            <label>Confirm</label>
+                            <div className="input-wrapper">
+                                <Lock size={18} className="input-icon" />
+                                <input type={showPassword ? "text" : "password"} name="confirmPassword" placeholder="••••••••" value={values.confirmPassword} onChange={handleChange} required />
+                            </div>
+                        </div>
+                    </div>
                     </div>
                 )}
 

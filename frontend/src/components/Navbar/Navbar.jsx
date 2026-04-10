@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
     User, LogIn, Menu, X, ChevronDown, LogOut, Settings, 
     Sun, Moon, ShoppingCart, LayoutDashboard, 
-    Home, Utensils, Info, ShoppingBag, Users
+    Home, Utensils, Info, ShoppingBag, Users, Flame
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useCart } from '../../context/CartContext';
@@ -39,8 +39,8 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
     // Determine if navbar should be glassy/scrolled
     const isNavbarScrolled = scrolled || isAuthPage;
 
-    // Hide Navbar on Login and Register pages
-    if (location.pathname === '/login' || location.pathname === '/register') {
+    // Hide Navbar on Login, Register, and all Admin pages
+    if (location.pathname === '/login' || location.pathname === '/register' || location.pathname.startsWith('/admin')) {
         return null;
     }
 
@@ -63,7 +63,7 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
                         </NavLink>
                     )}
                     <NavLink to="/trending" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
-                        <Utensils size={16} /> <span>Food</span>
+                        <Flame size={16} /> <span>Trending</span>
                     </NavLink>
 
                     {isLoggedIn && (
@@ -117,16 +117,10 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
                                         <span>Profile</span>
                                     </NavLink>
                                     {userRole === 'ADMIN' && (
-                                        <>
-                                            <NavLink to="/admin/restaurants" className="dropdown-item">
-                                                <Utensils size={16} />
-                                                <span>Manage Restaurants</span>
-                                            </NavLink>
-                                            <NavLink to="/admin/users" className="dropdown-item">
-                                                <Users size={16} />
-                                                <span>Manage Users</span>
-                                            </NavLink>
-                                        </>
+                                        <NavLink to="/admin/dashboard" className="dropdown-item admin-link">
+                                            <LayoutDashboard size={16} />
+                                            <span>Admin Dashboard</span>
+                                        </NavLink>
                                     )}
                                     <div className="dropdown-divider"></div>
                                     <button className="dropdown-item logout-item" onClick={onLogout}>
@@ -138,8 +132,8 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
                         </div>
                     ) : (
                         <div className="auth-btns">
-                            <NavLink to="/login" className="btn-secondary-slim">Login</NavLink>
-                            <NavLink to="/register" className="btn-primary-slim">Sign Up</NavLink>
+                            <NavLink to="/login" className="btn-nav-secondary">Login</NavLink>
+                            <NavLink to="/register" className="btn-nav-primary">Sign Up</NavLink>
                         </div>
                     )}
                     <button className="mobile-menu-btn" onClick={() => setIsOpen(!isOpen)}>

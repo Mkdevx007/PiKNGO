@@ -3,7 +3,8 @@ package com.pikngo.user_service.config;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,14 +13,20 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @Configuration
-@Slf4j
 public class FirebaseConfig {
 
-    @Value("${firebase.config.path}")
+    private static final Logger log = LoggerFactory.getLogger(FirebaseConfig.class);
+
+    @Value("${firebase.config.path:}")
     private String configPath;
 
     @PostConstruct
     public void initialize() {
+        if (configPath == null || configPath.isEmpty()) {
+            log.warn("Firebase config path is NOT configured. Firebase features will be disabled.");
+            return;
+        }
+
         try {
             FileInputStream serviceAccount = new FileInputStream(configPath);
 
@@ -32,8 +39,8 @@ public class FirebaseConfig {
                 log.info("Firebase has been initialized successfully");
             }
         } catch (IOException e) {
-            log.error("Failed to initialize Firebase: {}", e.getMessage());
-            log.warn("Firebase features will be disabled until service-account.json is provided");
+            log.error("Failed to initialize Firebase from {}: {}", configPath, e.getMessage());
+            log.warn("Firebase features will be disabled until valid service-account.json is provided");
         }
     }
 }

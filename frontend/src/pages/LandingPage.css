@@ -7,7 +7,7 @@
     transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
-.container {
+.landing-page .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 5rem;
@@ -19,7 +19,7 @@
     padding: 180px 0;
 }
 
-.section-header {
+.landing-page .section-header {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,10 +28,10 @@
     width: 100%;
 }
 
-.section-title {
-    font-size: 4.8rem;
+.landing-page .section-title {
+    font-size: clamp(2.5rem, 5vw, 4.8rem);
     font-weight: 900;
-    letter-spacing: -3px;
+    letter-spacing: -1.5px;
     line-height: 1.1;
     margin-bottom: 0;
     text-align: center;
@@ -62,11 +62,13 @@
 
 .step-number {
     position: absolute;
-    top: 2rem;
-    right: 3rem;
-    font-size: 5rem;
-    font-weight: 900;
-    opacity: 0.08;
+    top: -1rem;
+    right: -1rem;
+    font-size: 7rem;
+    font-weight: 950;
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .step-icon-wrapper {
@@ -79,6 +81,8 @@
     align-items: center;
     justify-content: center;
     margin: 0 auto 2.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .step-card h3 {
@@ -99,7 +103,7 @@
     transition: background-color var(--transition-speed);
 }
 
-.section-header.flex-row {
+.landing-page .section-header.flex-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -115,7 +119,7 @@
 
 /* CTA Section Professional Look */
 .cta-section {
-    padding: 120px 0 200px;
+    padding: 120px 0 80px;
 }
 
 .cta-card {
@@ -172,6 +176,7 @@
     font-size: 1.1rem;
     cursor: pointer;
     margin-left: 1.5rem;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 
@@ -335,9 +340,9 @@
 }
 
 @media (max-width: 768px) {
-    .container { padding: 0 2rem; }
+    .landing-page .container { padding: 0 2rem; }
     .steps-grid { grid-template-columns: 1fr; }
     .section-header.flex-row { flex-direction: column; align-items: flex-start; gap: 2rem; }
     .footer-bottom { flex-direction: column-reverse; gap: 2rem; align-items: flex-start; }
     .legal-links { width: 100%; justify-content: space-between; gap: 0; }
-}
+}

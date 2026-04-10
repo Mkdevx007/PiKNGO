@@ -1,26 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
 :root {
-  /* Premium Light Mode — Sunset Highway Theme */
-  --bg-deep: #fff8f0;
-  /* Soft dawn peach/sand */
-  --bg-navy: #f4ece4;
-  /* Slightly deeper warm sand */
-  --bg-glass: rgba(255, 255, 255, 0.9);
-  --accent-orange: #e64a19;
-  /* Rich vermilion sunset orange */
-  --accent-orange-deep: #bf360c;
-  --accent-orange-glow: rgba(230, 74, 25, 0.15);
-  --text-primary: #2d241e;
-  /* Deep roasted brown/slate */
-  --text-secondary: #5d4e41;
-  /* Medium warm grey/brown */
-  --text-muted: #8d7b68;
-  --glass-border: rgba(230, 74, 25, 0.1);
-  /* Subtle warm border */
-  --shadow-premium: 0 4px 24px rgba(230, 74, 25, 0.04), 0 1px 4px rgba(45, 36, 30, 0.04);
-  --shadow-float: 0 8px 32px rgba(230, 74, 25, 0.08), 0 2px 8px rgba(45, 36, 30, 0.05);
-  --shadow-card: 0 20px 60px rgba(45, 36, 30, 0.06), 0 4px 16px rgba(45, 36, 30, 0.03);
+  /* Premium Elite Light Mode — Ivory & Sunset Theme */
+  --bg-deep: #fdfcfb;
+  /* Crisp Ivory */
+  --bg-navy: #f7f0e9;
+  /* Warm Linen Sand */
+  --bg-glass: rgba(255, 255, 255, 0.95);
+  --accent-orange: #f97316;
+  /* Pure Sunset Orange */
+  --accent-orange-deep: #ea580c;
+  --accent-orange-glow: rgba(249, 115, 22, 0.12);
+  --text-primary: #1e293b;
+  /* Deep Slate Professional */
+  --text-secondary: #475569;
+  /* Slate Grey */
+  --text-muted: #94a3b8;
+  --glass-border: rgba(249, 115, 22, 0.15);
+  --shadow-premium: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(0, 0, 0, 0.03),
+    0 20px 25px -5px rgba(0, 0, 0, 0.02);
+  --shadow-float: 
+    0 20px 25px -5px rgba(249, 115, 22, 0.08),
+    0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
 
   /* Fonts */
   --font-main: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;

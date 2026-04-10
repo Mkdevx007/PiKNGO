@@ -1,43 +1,75 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShoppingCart, MapPin } from 'lucide-react';
+import { Star, MapPin, Navigation, Clock } from 'lucide-react';
+import SafeImage from '../Common/SafeImage';
 import './FoodCard.css';
 
-const FoodCard = ({ id, image, name, price, rating, restaurant, address, distance, onHover, onLeave }) => {
-
+const FoodCard = ({ id, image, name, rating, address, distance, isActive, onHover, onLeave }) => {
+    // Treat null/undefined as true (Active)
+    const active = isActive !== false;
     const navigate = useNavigate();
 
+    const handleCardClick = () => {
+        if (!isActive) return; // Prevent navigation if closed
+        navigate(`/menu/${id}`);
+    };
 
     return (
         <div
-            className="food-card glass-card flex-col animate-fade-in"
-            onClick={() => navigate(`/menu/${id}`)}
+            className={`restaurant-portal-card glass-modern animate-fade-in ${!active ? 'closed-card' : ''}`}
+            onClick={handleCardClick}
             onMouseEnter={() => onHover && id && onHover(id)}
             onMouseLeave={() => onLeave && onLeave()}
-            style={{ cursor: 'pointer' }}
         >
-            <div className="food-image-wrapper">
-                <img src={image} alt={name} className="food-img" />
-                {distance != null && (
-                    <div className="distance-badge-overlay right-aligned">
-                        <span>{distance < 1 ? `${Math.round(distance * 1000)}m away` : `${distance.toFixed(1)} km away`}</span>
+            <div className="card-media">
+                <SafeImage src={image} alt={name} className="media-image" />
+                <div className="media-overlay"></div>
+                
+                {distance !== undefined && distance !== null && distance !== '' && !isNaN(parseFloat(distance)) && (
+                    <div className="proximity-badge-overlay-elite">
+                        <span>{parseFloat(distance) < 1 ? `${Math.round(parseFloat(distance) * 1000)}m` : `${parseFloat(distance).toFixed(1)} KM`} AWAY</span>
+                    </div>
+                )}
+
+                {!active && (
+                    <div className="closed-overlay animate-fade-in">
+                        <div className="closed-badge-main">
+                            <Clock size={16} />
+                            <span>Temporarily Closed</span>
+                        </div>
                     </div>
                 )}
             </div>
-            <div className="food-details">
-                <div className="food-header">
-                    <div className="title-rating-row">
-                        <h3 className="food-title">{name}</h3>
-                        <div className="card-rating">
-                            <Star size={14} fill="currentColor" />
-                            <span>{rating}</span>
+
+            <div className="card-content">
+                <div className="content-header-block">
+                    <div className="header-main-row">
+                        <h3 className="restaurant-name">{name}</h3>
+                        <div className="rating-pill-inline">
+                            <Star size={14} fill="#FF6B00" color="#FF6B00" />
+                            <span>{rating || '4.0'}</span>
                         </div>
                     </div>
-                    <p className="food-vendor">{address || restaurant}</p>
+                    <div className="location-info-muted">
+                        <span title={address}>{address || 'Highway Service Area, NH4'}</span>
+                    </div>
                 </div>
-                <div className="food-action-row">
-                    <button className="btn-outline">View Menu</button>
-                    <button className="btn-solid" onClick={(e) => { e.stopPropagation(); navigate(`/menu/${id}`); }}>Order Now</button>
+
+                <div className="card-footer-actions">
+                    <button 
+                        className={`btn-outline-text ${!active ? 'disabled' : ''}`} 
+                        onClick={(e) => { e.stopPropagation(); if(active) navigate(`/menu/${id}`); }}
+                        disabled={!active}
+                    >
+                        VIEW MENU
+                    </button>
+                    <button 
+                        className={`btn-solid-orange ${!active ? 'disabled' : ''}`} 
+                        onClick={(e) => { e.stopPropagation(); if(active) navigate(`/menu/${id}`); }}
+                        disabled={!active}
+                    >
+                        {active ? 'ORDER NOW' : 'CLOSED'}
+                    </button>
                 </div>
             </div>
         </div>

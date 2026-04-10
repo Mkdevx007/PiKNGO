@@ -1,7 +1,6 @@
 package com.pikngo.user_service.config;
 
 import com.pikngo.user_service.interceptor.AuditInterceptor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -12,10 +11,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * concerns
  */
 @Configuration
-@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
     private final AuditInterceptor auditInterceptor;
+
+    public WebConfig(AuditInterceptor auditInterceptor) {
+        this.auditInterceptor = auditInterceptor;
+    }
 
     /**
      * Register the audit interceptor to log all API requests and responses

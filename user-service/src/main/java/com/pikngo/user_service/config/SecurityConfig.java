@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpMethod;
-import lombok.RequiredArgsConstructor;
 
 /**
  * Developer 1: Security & Auth
@@ -19,10 +18,13 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
+
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
+        this.jwtRequestFilter = jwtRequestFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,9 +46,13 @@ public class SecurityConfig {
                                 "/api/v1/users/forgot-password",
                                 "/api/v1/users/reset-password",
                                 "/api/v1/auth/google",
-                                "/api/v1/users/profile/photo/**")
+                                "/api/v1/users/all/**",
+                                "/api/v1/users/profile/photo/**",
+                                "/api/v1/payment/**",
+                                "/ws-orders/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/restaurants/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/trending").permitAll()
                         .requestMatchers("/api/v1/restaurants/**").authenticated()
 
                         .anyRequest().authenticated());

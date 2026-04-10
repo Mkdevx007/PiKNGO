@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X, Loader2, CheckCircle, AlertCircle, LayoutDashboard, Store, ClipboardList } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X, Loader2, CheckCircle, AlertCircle, LayoutDashboard, Store, ClipboardList, ArrowUpRight } from 'lucide-react';
 import { authApi, addressApi } from '../services/api';
+import { useToast } from '../context/ToastContext';
 import './Profile.css';
 
 const ProfileScreen = ({ onProfileUpdate }) => {
+    const { showToast } = useToast();
     const [user, setUser] = useState(null);
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const fileInputRef = useRef(null);
 
     const [editData, setEditData] = useState({ 
@@ -24,9 +24,7 @@ const ProfileScreen = ({ onProfileUpdate }) => {
         if (user?.profileImageUrl) return user.profileImageUrl;
         if (!userId) return '';
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
-        const url = `${baseUrl}/users/profile/photo/${userId}?t=${new Date().getTime()}`;
-        console.log("Photo URL generated:", url);
-        return url;
+        return `${baseUrl}/users/profile/photo/${userId}?t=${new Date().getTime()}`;
     };
 
     const handlePhotoUpload = async (e) => {
@@ -37,44 +35,43 @@ const ProfileScreen = ({ onProfileUpdate }) => {
         formData.append('file', file);
 
         setUploadingPhoto(true);
-        setError('');
-        setSuccess('');
         try {
             await authApi.uploadProfilePhoto(formData);
-            setSuccess('Profile photo updated successfully!');
-            // Refresh profile
+            showToast('Profile photo updated successfully!', 'success');
             const response = await authApi.getProfile();
-            setUser(response.data);
-            if (onProfileUpdate) onProfileUpdate(response.data);
+            setUser(response);
+            if (onProfileUpdate) onProfileUpdate(response);
         } catch (err) {
-            setError('Failed to upload photo. Please try again.');
+            showToast('Failed to upload photo', 'error');
         } finally {
             setUploadingPhoto(false);
         }
     };
 
     const [showAddressForm, setShowAddressForm] = useState(false);
-    const [newAddress, setNewAddress] = useState({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
+    const [newAddress, setNewAddress] = useState({ 
+        addressLine1: '', addressLine2: '', city: '', state: '', pincode: '', type: 'Home' 
+    });
 
     const fetchProfile = async () => {
         try {
             const response = await authApi.getProfile();
-            setUser(response.data);
+            setUser(response);
             setEditData({
-                firstName: response.data.firstName || '',
-                lastName: response.data.lastName || '',
-                email: response.data.email || '',
-                addressLine1: response.data.addressLine1 || '',
-                addressLine2: response.data.addressLine2 || '',
-                city: response.data.city || '',
-                state: response.data.state || '',
-                pincode: response.data.pincode || '',
-                profileImageUrl: response.data.profileImageUrl || '',
+                firstName: response.firstName || '',
+                lastName: response.lastName || '',
+                email: response.email || '',
+                addressLine1: response.addressLine1 || '',
+                addressLine2: response.addressLine2 || '',
+                city: response.city || '',
+                state: response.state || '',
+                pincode: response.pincode || '',
+                profileImageUrl: response.profileImageUrl || '',
             });
-            fetchAddresses();
+            await fetchAddresses();
         } catch (err) {
-            console.error('Profile fetch error:', err);
-            setError('Failed to load profile');
+            showToast('Failed to load profile', 'error');
+        } finally {
             setLoading(false);
         }
     };
@@ -82,11 +79,11 @@ const ProfileScreen = ({ onProfileUpdate }) => {
     const fetchAddresses = async () => {
         try {
             const response = await addressApi.getAll();
-            setAddresses(response.data);
+            const normalized = Array.isArray(response) ? response : (response?.content || []);
+            setAddresses(normalized);
         } catch (err) {
             console.error('Failed to fetch addresses:', err);
-        } finally {
-            setLoading(false);
+            setAddresses([]);
         }
     };
 
@@ -97,17 +94,15 @@ const ProfileScreen = ({ onProfileUpdate }) => {
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
-        setSuccess('');
         try {
             const response = await authApi.updateProfile(editData);
-            setUser(response.data);
-            if (onProfileUpdate) onProfileUpdate(response.data);
-            fetchAddresses(); // Refresh saved addresses list to sync with profile change
-            setSuccess('Profile updated successfully!');
+            setUser(response);
+            if (onProfileUpdate) onProfileUpdate(response);
+            await fetchAddresses(); 
+            showToast('Profile updated successfully!', 'success');
             setIsEditing(false);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update profile');
+            showToast(err.response?.data?.message || 'Failed to update profile', 'error');
         } finally {
             setLoading(false);
         }
@@ -118,24 +113,25 @@ const ProfileScreen = ({ onProfileUpdate }) => {
         setLoading(true);
         try {
             await addressApi.create(newAddress);
-            setSuccess('Address added successfully!');
+            showToast('Address added successfully!', 'success');
             setShowAddressForm(false);
-            setNewAddress({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
-            fetchAddresses();
+            setNewAddress({ addressLine1: '', addressLine2: '', city: '', state: '', pincode: '', type: 'Home' });
+            await fetchAddresses();
         } catch (err) {
-            setError('Failed to add address');
+            showToast('Failed to add address', 'error');
         } finally {
             setLoading(false);
         }
     };
 
     const handleDeleteAddress = async (id) => {
-        if (!window.confirm('Delete this address?')) return;
+        // Elite deletion feedback
         try {
             await addressApi.delete(id);
-            fetchAddresses();
+            showToast('Address removed', 'success');
+            await fetchAddresses();
         } catch (err) {
-            setError('Failed to delete address');
+            showToast('Failed to delete address', 'error');
         }
     };
 
@@ -144,16 +140,17 @@ const ProfileScreen = ({ onProfileUpdate }) => {
         if (!window.confirm(`Are you sure you want to ${type} delete your account? This cannot be undone.`)) return;
         try {
             await authApi.deleteProfile(soft);
+            showToast('Account deleted. Goodbye!', 'info');
             localStorage.clear();
             window.location.href = '/login';
         } catch (err) {
-            setError('Failed to delete account');
+            showToast('Failed to delete account', 'error');
         }
     };
 
     if (loading && !user) return (
-        <div className="loading-container">
-            <div className="loader"></div>
+        <div className="checkout-page processing-overlay">
+            <div className="loader-ring"></div>
             <p>Loading your elite profile...</p>
         </div>
     );
@@ -214,9 +211,6 @@ const ProfileScreen = ({ onProfileUpdate }) => {
             </div>
 
             <div className="profile-content container">
-                {error && <div className="error-message mb-4">{error}</div>}
-                {success && <div className="success-message mb-4">{success}</div>}
-
                 <div className="profile-grid">
                     <div className="profile-card glass animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                         <div className="card-header">
@@ -245,23 +239,16 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                         <div className="profile-card glass admin-card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
                             <div className="card-header">
                                 <ShieldCheck size={20} />
-                                <h3>Admin Control Center</h3>
+                                <h3>Administrative Access</h3>
                             </div>
-                            <p className="text-sm opacity-80 mb-4">You have administrative privileges. Access management tools below.</p>
-                            <div className="admin-actions-grid">
-                                <NavLink to="/admin/restaurants" className="admin-action-btn">
-                                    <Store size={24} />
-                                    <span>Manage Restaurants</span>
-                                </NavLink>
-                                <NavLink to="/orders" className="admin-action-btn">
-                                    <ClipboardList size={24} />
-                                    <span>Manage Orders</span>
-                                </NavLink>
-                                <NavLink to="/dashboard" className="admin-action-btn">
-                                    <LayoutDashboard size={24} />
-                                    <span>Main Dashboard</span>
-                                </NavLink>
-                            </div>
+                            <p className="text-sm opacity-80 mb-6">You are signed in as an administrator. Manage restaurants, users, and platform settings from the command center.</p>
+                            <NavLink to="/admin/dashboard" className="admin-dashboard-link">
+                                <div className="link-content">
+                                    <LayoutDashboard size={20} />
+                                    <span>Enter Admin Dashboard</span>
+                                </div>
+                                <ArrowUpRight size={18} />
+                            </NavLink>
                         </div>
                     )}
 
@@ -299,6 +286,18 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                                         <label>Pincode</label>
                                         <input type="text" value={newAddress.pincode} onChange={e => setNewAddress({ ...newAddress, pincode: e.target.value })} required />
                                     </div>
+                                    <div className="form-group">
+                                        <label>Address Type</label>
+                                        <select 
+                                            value={newAddress.type} 
+                                            onChange={e => setNewAddress({ ...newAddress, type: e.target.value })}
+                                            className="address-type-select"
+                                        >
+                                            <option value="Home">Home</option>
+                                            <option value="Work">Work</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <button type="submit" className="btn-primary w-full mt-4" disabled={loading}>
                                     {loading ? 'Adding...' : 'Save New Address'}
@@ -311,7 +310,10 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                                 addresses.map((addr) => (
                                     <div key={addr._id || addr.id} className="address-item glass animate-fade-in">
                                         <div className="address-content">
-                                            <p className="font-bold">{addr.addressLine1}</p>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className="font-bold">{addr.addressLine1}</p>
+                                                <span className="address-type-tag">{addr.type || 'Home'}</span>
+                                            </div>
                                             {addr.addressLine2 && <p className="text-sm opacity-80">{addr.addressLine2}</p>}
                                             <p className="text-sm opacity-80">{addr.city}, {addr.state} - {addr.pincode}</p>
                                         </div>

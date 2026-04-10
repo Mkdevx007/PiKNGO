@@ -1,12 +1,18 @@
 # OS files
 Thumbs.db
 Desktop.ini
+.DS_Store
 
 # IDE files
 .idea/
 .vscode/
 *.swp
 *.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # Build & Dependency folders
 node_modules/
@@ -14,23 +20,40 @@ target/
 build/
 bin/
 out/
+dist/
+dist-ssr/
+.mvn/
+.gradle/
 
-# Environment & Secrets
+# Environment & Secrets (CRITICAL SECURITY)
 .env
 .env.local
+.env.*
 *.jks
-src/main/resources/service-account.json
-credentials.json
+*.p12
+*.pem
+*.key
+application-secrets.yml
+secrets.properties
+**/service-account.json
+**/credentials.json
+firebase-key.json
+firebase-adminsdk.json
+OTP_DEBUG.txt
 
 # Logs
 *.log
 logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Temp
 temp/
-OTP_DEBUG.txt
-
-# Spring Boot temporary files
-.mvn/wrapper/maven-wrapper.jar
-
-# Secrets
-**/service-account.json
-**/credentials.json
+/nbproject/private/
+/nbbuild/
+/.nb-gradle/
+.sts4-cache
+.apt_generated
+.factorypath

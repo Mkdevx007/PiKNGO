@@ -1,0 +1,144 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.review-modal {
+    position: relative;
+    width: 100%;
+    max-width: 450px;
+    padding: 3rem 2rem;
+    background: var(--bg-glass);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    border-radius: 32px;
+    box-shadow: var(--shadow-float);
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    color: var(--accent-orange);
+    transform: rotate(90deg);
+}
+
+.review-header {
+    margin-bottom: 2.5rem;
+}
+
+.icon-badge {
+    width: 64px;
+    height: 64px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.icon-badge .text-orange {
+    font-size: 2rem;
+}
+
+.review-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.review-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.star-rating-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.star-btn {
+    color: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 0;
+}
+
+.star-btn.active {
+    color: var(--accent-orange);
+    filter: drop-shadow(0 0 10px var(--accent-orange-glow));
+    transform: scale(1.1);
+}
+
+.comment-box {
+    text-align: left;
+}
+
+.comment-box label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+}
+
+.textarea-wrapper {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.textarea-wrapper textarea {
+    background: none;
+    border: none;
+    width: 100%;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+}
+
+.success-state {
+    padding: 2rem 0;
+}
+
+.success-icon {
+    margin-bottom: 2rem;
+}
+
+.success-state h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.success-state p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
