@@ -4,6 +4,7 @@
     background: #020617;
     position: relative;
     overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 /* Elite Terminal Header */
@@ -17,11 +18,13 @@
 }
 
 .checkout-page .container {
-    max-width: 1200px;
+    max-width: 1280px;
+    width: 100%;
     margin: 0 auto;
-    padding: 0 3rem;
+    padding: 0 4rem;
     position: relative;
     z-index: 10;
+    box-sizing: border-box;
 }
 
 .terminal-header h1 {
@@ -63,21 +66,31 @@
 /* Layout Grid */
 .terminal-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 380px;
-    gap: 3rem;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 2.5rem;
     align-items: flex-start;
+    width: 100%;
 }
 
 .terminal-main-deck {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .terminal-section {
-    padding: 1.8rem 2.2rem;
+    padding: 1.8rem 2rem;
     border-radius: 24px;
     position: relative;
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.terminal-sidebar {
+    min-width: 0;
 }
 
 .section-title-hud {

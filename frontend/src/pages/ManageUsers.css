@@ -6,43 +6,45 @@
 .users-table-wrapper {
     margin-top: 2rem;
     overflow-x: auto;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 2px solid rgba(255, 107, 0, 0.3);
 }
 
 .users-table {
     width: 100%;
     border-collapse: collapse;
-    background: rgba(15, 15, 20, 0.6);
-    backdrop-filter: blur(12px);
+    background: rgba(10, 15, 30, 0.55);
+    backdrop-filter: blur(20px);
     color: white;
 }
 
 .users-table th {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
     text-align: left;
-    padding: 1.25rem 1.5rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.6);
+    padding: 1.2rem 1.8rem;
+    font-size: 0.65rem;
+    font-weight: 950;
+    color: rgba(255, 255, 255, 0.3);
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .users-table td {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.2rem 1.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .users-table tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 107, 0, 0.03);
+    transform: translateX(2px);
 }
 
 .user-info-cell {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.2rem;
 }
 
 .user-avatar {
