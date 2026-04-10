@@ -7,7 +7,7 @@ import AddressModal from '../components/AddressModal/AddressModal.jsx';
 import { 
     ChevronLeft, Trash2, CreditCard, ShieldCheck, 
     MapPin, Plus, CheckCircle2, Wallet, Smartphone, Banknote,
-    AlertTriangle, Loader2
+    AlertTriangle, Loader2, Search, Navigation
 } from 'lucide-react';
 import './CheckoutPage.css';
 
@@ -91,7 +91,7 @@ const CheckoutPage = () => {
         setIsProcessing(true);
         try {
             const response = await paymentApi.createOrder(finalTotal);
-            const orderData = response.data || response; // fallback incase not handled by interceptor
+            const orderData = response.data || response;
             
             if (!window.Razorpay) {
                 showToast("Razorpay failed to load. Check your internet.", "error");
@@ -127,7 +127,7 @@ const CheckoutPage = () => {
                     email: "user@example.com",
                     contact: "9999999999"
                 },
-                theme: { color: "#f59e0b" },
+                theme: { color: "#ff6b00" },
                 modal: { ondismiss: () => setIsProcessing(false) }
             };
 
@@ -176,21 +176,25 @@ const CheckoutPage = () => {
         }
     };
 
-    const total = getCartTotal();
+    const total = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const flatFee = serviceType === 'pickup' ? 0 : 45;
     const finalTotal = total + flatFee;
 
     if (cartItems.length === 0 && !isSuccess) {
         return (
-            <div className="checkout-page empty-checkout animate-fade-in">
+            <div className="checkout-page empty-checkout-hub animate-fade-in">
+                <div className="bg-mesh"></div>
                 <div className="container">
-                    <div className="glass-card empty-card">
-                        <div className="empty-icon-wrapper">
-                            <Plus size={40} />
+                    <div className="elite-empty-card glass-modern">
+                        <div className="empty-radar-glow">
+                            <Plus size={40} className="pulse-icon" />
                         </div>
-                        <h2>Your cart is empty</h2>
-                        <p>Add some delicious meals from our premium selected restaurants to proceed.</p>
-                        <button className="btn-primary" onClick={() => navigate('/dashboard')}>Explore Restaurants</button>
+                        <h2>Your Cart is <span className="gradient-text">Empty</span></h2>
+                        <p>Deploy your hunger signals and discover nearby restaurant hubs to proceed.</p>
+                        <button className="btn-solid-orange" onClick={() => navigate('/dashboard')}>
+                            <Search size={18} />
+                            <span>Scan Restaurants</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -199,252 +203,230 @@ const CheckoutPage = () => {
 
     if (isSuccess) {
         return (
-            <div className="checkout-page success-overlay animate-fade-in">
-                <div className="success-content">
-                    <div className="success-icon-lottie">
-                        <CheckCircle2 size={100} color="#4ade80" strokeWidth={1} />
+            <div className="checkout-page success-terminal-overlay animate-fade-in">
+                <div className="bg-mesh"></div>
+                <div className="success-terminal-content">
+                    <div className="terminal-radiant-glow">
+                        <CheckCircle2 size={80} color="#10b981" className="radiant-icon" />
                     </div>
-                    <h1>Order Placed <span className="gradient-text">Successfully!</span></h1>
-                    <p>Your meal is being prepared and will be delivered shortly.</p>
-                    <div className="success-loader-bar"></div>
-                    <p className="redirect-text">Redirecting to Orders...</p>
+                    <h1>Order <span className="gradient-text">Transmitted!</span></h1>
+                    <div className="terminal-status-badge">COMMAND RECEIVED • NH-44 HUB</div>
+                    <p>Your culinary request has been synced with the restaurant terminal. Redirecting to tracking station...</p>
+                    <div className="terminal-progress-conduit">
+                        <div className="conduit-fill"></div>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="checkout-page auth-page-global-bg animate-fade-in">
+        <div className="checkout-page elite-terminal-layout animate-fade-in">
             <div className="bg-mesh"></div>
+            
             {isProcessing && (
-                <div className="processing-overlay">
-                    <div className="standard-loader">
-                        <Loader2 className="animate-spin" size={48} />
-                        <p>Processing Secure Payment...</p>
+                <div className="processing-terminal-overlay">
+                    <div className="terminal-loader-hub">
+                        <div className="loader-ring-elite"></div>
+                        <div className="loader-info">
+                            <h3>Processing Secure Encryption</h3>
+                            <p>Authorizing Payment Terminal...</p>
+                        </div>
                     </div>
                 </div>
             )}
             
             <div className="container">
-                <header className="checkout-header animate-slide-up">
-                    <button className="back-btn glass" onClick={() => navigate(-1)}>
-                        <ChevronLeft size={20} />
-                        <span>Back</span>
+                <header className="terminal-header animate-slide-up">
+                    <button className="terminal-back-btn glass-pill" onClick={() => navigate(-1)}>
+                        <ChevronLeft size={18} />
+                        <span>CANCEL</span>
                     </button>
-                    <h1>Secure <span className="gradient-text">Checkout</span></h1>
+                    <div className="h-group">
+                        <h1>Terminal <span className="gradient-text">Checkout</span></h1>
+                        <div className="security-status"><ShieldCheck size={14} /> 256-BIT ENCRYPTED</div>
+                    </div>
                 </header>
 
-                <div className="checkout-grid">
-                    <div className="checkout-main">
-                        {/* 0. Service Type Toggle */}
-                        <section className="service-type-selector animate-slide-up">
-                            <div className="toggle-container">
+                <div className="terminal-grid">
+                    <div className="terminal-main-deck">
+                        {/* 0. Route Intel Toggle */}
+                        <section className="terminal-section route-intel animate-slide-up">
+                            <div className="section-title-hud">
+                                <Navigation size={18} />
+                                <span>ROUTE INTELLIGENCE</span>
+                            </div>
+                            <div className="terminal-toggle-hub glass-modern">
                                 <div 
-                                    className="toggle-slider" 
-                                    style={{ 
-                                        transform: `translateX(${serviceType === 'delivery' ? '0%' : '100%'})`,
-                                        width: '50%'
-                                    }}
+                                    className="toggle-glider" 
+                                    style={{ transform: `translateX(${serviceType === 'delivery' ? '0%' : '100%'})` }}
                                 ></div>
                                 <button 
-                                    className={`toggle-btn ${serviceType === 'delivery' ? 'active' : ''}`}
+                                    className={`toggle-node ${serviceType === 'delivery' ? 'active' : ''}`}
                                     onClick={() => setServiceType('delivery')}
-                                    type="button"
                                 >
-                                    <MapPin size={18} />
-                                    <div className="btn-text">
-                                        <span>Delivery</span>
-                                        <small>To Doorstep</small>
-                                    </div>
+                                    <MapPin size={20} />
+                                    <span>DOORSTEP HUB</span>
                                 </button>
                                 <button 
-                                    className={`toggle-btn ${serviceType === 'pickup' ? 'active' : ''}`}
+                                    className={`toggle-node ${serviceType === 'pickup' ? 'active' : ''}`}
                                     onClick={() => setServiceType('pickup')}
-                                    type="button"
                                 >
-                                    <Smartphone size={18} />
-                                    <div className="btn-text">
-                                        <span>Self-Pickup</span>
-                                        <small>Pick it up</small>
-                                    </div>
+                                    <Smartphone size={20} />
+                                    <span>SELF TERMINAL</span>
                                 </button>
                             </div>
                         </section>
 
-                        {/* 1. Delivery Section (Conditional) */}
+                        {/* 1. Target Destination Section */}
                         {serviceType === 'delivery' ? (
-                            <section className="checkout-section glass-card animate-fade-in">
-                                <div className="section-header">
-                                    <MapPin size={22} className="section-icon" />
-                                    <h3>Select Delivery Address</h3>
+                            <section className="terminal-section destination-vault glass-modern animate-slide-up" style={{animationDelay: '0.1s'}}>
+                                <div className="section-header-hud">
+                                    <MapPin size={22} className="accent-icon" />
+                                    <h3>Target Destination</h3>
                                 </div>
-                                <div className="address-list">
+                                <div className="address-intel-list">
                                     {addresses.map((addr) => (
                                         <div 
                                             key={addr.id} 
-                                            className={`address-item glass ${selectedAddress?.id === addr.id ? 'active' : ''}`}
+                                            className={`address-node glass-modern ${selectedAddress?.id === addr.id ? 'active' : ''}`}
                                             onClick={() => setSelectedAddress(addr)}
                                         >
-                                            <div className="address-radio"></div>
-                                            <div className="address-info">
-                                                <p className="addr-line">{addr.addressLine1}</p>
-                                                <p className="addr-city">{addr.city}, {addr.state} - {addr.pincode}</p>
+                                            <div className="node-indicator"></div>
+                                            <div className="node-content">
+                                                <p className="addr-main">{addr.addressLine1}</p>
+                                                <p className="addr-sub">{addr.city}, {addr.state} • {addr.pincode}</p>
                                             </div>
                                         </div>
                                     ))}
                                     <button 
-                                        className="add-address-btn glass-pill"
+                                        className="add-node-btn glass-pill"
                                         onClick={() => setIsAddressModalOpen(true)}
                                     >
-                                        <Plus size={16} /> Add New Address
+                                        <Plus size={16} /> DEPLOY NEW HUB
                                     </button>
                                 </div>
                             </section>
                         ) : (
-                            <section className="checkout-section glass-card animate-fade-in pickup-summary">
-                                <div className="pickup-notice">
-                                    <div className="notice-icon">🏪</div>
-                                    <div className="notice-content">
-                                        <h3>Pick up from Restaurant</h3>
-                                        <p>You'll save on delivery fees! Please reach the restaurant within 20-30 mins once ready.</p>
-                                        <div className="restaurant-mini-card glass">
+                            <section className="terminal-section pickup-hub glass-modern animate-slide-up" style={{animationDelay: '0.1s'}}>
+                                <div className="pickup-intel-card">
+                                    <div className="intel-visual">🏪</div>
+                                    <div className="intel-data">
+                                        <h3>Terminal Handover</h3>
+                                        <p>Intercept your order at the restaurant hub. Zero delivery overhead synced.</p>
+                                        <div className="intel-ref glass-modern">
                                             <strong>{cartItems[0]?.restaurantName}</strong>
-                                            <span>Location tracking available in orders.</span>
+                                            <span>Hub location is pinned on your dashboard.</span>
                                         </div>
                                     </div>
                                 </div>
                             </section>
                         )}
 
-                        {/* 2. Payment Section */}
-                        <section className="checkout-section glass-card">
-                            <div className="section-header">
-                                <CreditCard size={22} className="section-icon" />
-                                <h3>Payment Method</h3>
+                        {/* 2. Secure Vault Section */}
+                        <section className="terminal-section secure-vault glass-modern animate-slide-up" style={{animationDelay: '0.2s'}}>
+                            <div className="section-header-hud">
+                                <CreditCard size={22} className="accent-icon" />
+                                <h3>Secure Vault Access</h3>
                             </div>
                             
-                            <div className="payment-methods">
+                            <div className="vault-method-hub">
                                 <button 
-                                    className={`pay-method-btn glass ${paymentMethod === 'card' ? 'active' : ''}`}
+                                    className={`vault-node glass-modern ${paymentMethod === 'card' ? 'active' : ''}`}
                                     onClick={() => setPaymentMethod('card')}
                                 >
                                     <CreditCard size={20} />
-                                    <span>Card</span>
+                                    <span>CRYPTO/CARD</span>
                                 </button>
                                 <button 
-                                    className={`pay-method-btn glass ${paymentMethod === 'upi' ? 'active' : ''}`}
+                                    className={`vault-node glass-modern ${paymentMethod === 'upi' ? 'active' : ''}`}
                                     onClick={() => setPaymentMethod('upi')}
                                 >
                                     <Smartphone size={20} />
-                                    <span>UPI / GPay</span>
+                                    <span>DIGITAL UPI</span>
                                 </button>
                                 <button 
-                                    className={`pay-method-btn glass ${paymentMethod === 'cash' ? 'active' : ''}`}
+                                    className={`vault-node glass-modern ${paymentMethod === 'cash' ? 'active' : ''}`}
                                     onClick={() => setPaymentMethod('cash')}
                                 >
                                     <Banknote size={20} />
-                                    <span>COD</span>
+                                    <span>CASH TERMINAL</span>
                                 </button>
                             </div>
 
                             {paymentMethod === 'card' && (
-                                <div className="card-input-form animate-slide-in">
-                                    <div className="input-group">
-                                        <label>Card Number</label>
+                                <div className="vault-input-arena animate-fade-in">
+                                    <div className="tech-input-group">
+                                        <label>VAULT IDENTIFIER (CARD NUMBER)</label>
                                         <input 
                                             type="text" 
-                                            placeholder="XXXX XXXX XXXX XXXX" 
+                                            placeholder="0000 0000 0000 0000" 
                                             value={cardDetails.number}
                                             onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})}
                                         />
                                     </div>
-                                    <div className="input-row">
-                                        <div className="input-group">
-                                            <label>Expiry Date</label>
-                                            <input 
-                                                type="text" 
-                                                placeholder="MM/YY" 
-                                                value={cardDetails.expiry}
-                                                onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
-                                            />
+                                    <div className="tech-input-row">
+                                        <div className="tech-input-group">
+                                            <label>EXPIRY</label>
+                                            <input type="text" placeholder="MM/YY" />
                                         </div>
-                                        <div className="input-group">
-                                            <label>CVC</label>
-                                            <input 
-                                                type="text" 
-                                                placeholder="123" 
-                                                value={cardDetails.cvc}
-                                                onChange={(e) => setCardDetails({...cardDetails, cvc: e.target.value})}
-                                            />
+                                        <div className="tech-input-group">
+                                            <label>AUTH CODE (CVC)</label>
+                                            <input type="password" placeholder="***" />
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </section>
+                    </div>
 
-                        {/* 3. Review Items */}
-                        <section className="checkout-section glass-card">
-                            <div className="section-header">
-                                <ShieldCheck size={22} className="section-icon" />
-                                <h3>Order Summary</h3>
+                    <aside className="terminal-sidebar">
+                        <section className="terminal-invoice glass-modern animate-slide-up" style={{animationDelay: '0.3s'}}>
+                            <div className="invoice-header">
+                                <ShieldCheck size={18} className="accent-icon" />
+                                <h3>Terminal Invoice</h3>
                             </div>
-                            <div className="checkout-items-list">
+                            
+                            <div className="invoice-items-hub">
                                 {cartItems.map((item) => (
-                                    <div key={item.id} className="checkout-item">
-                                        <div className="item-details">
-                                            <p className="item-name">{item.name}</p>
-                                            <p className="item-rest">{item.restaurantName}</p>
+                                    <div key={item.id} className="invoice-item">
+                                        <div className="item-info">
+                                            <span className="qty">{item.quantity}x</span>
+                                            <span className="name">{item.name}</span>
                                         </div>
-                                        <div className="item-qty-price">
-                                            <div className="qty-control">
-                                                <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>-</button>
-                                                <span>{item.quantity}</span>
-                                                <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                                            </div>
-                                            <span className="item-p">₹{item.price * item.quantity}</span>
-                                            <button className="del-btn" onClick={() => removeFromCart(item.id)}>
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
+                                        <span className="price">₹{item.price * item.quantity}</span>
                                     </div>
                                 ))}
                             </div>
-                        </section>
-                    </div>
 
-                    <aside className="checkout-sidebar">
-                        <section className="glass-card bill-details">
-                            <h3>Bill Details</h3>
-                            <div className="bill-row">
-                                <span>Item Total</span>
-                                <span>₹{total}</span>
-                            </div>
-                            <div className="bill-row">
-                                <span>Convenience Fee</span>
-                                <span className="fee">₹{flatFee}</span>
-                            </div>
-                            <div className="bill-divider"></div>
-                            <div className="bill-row total">
-                                <span>Amount Payable</span>
-                                <span>₹{finalTotal}</span>
+                            <div className="invoice-calculus">
+                                <div className="calc-row">
+                                    <span>Subtotal</span>
+                                    <span>₹{total}</span>
+                                </div>
+                                <div className="calc-row">
+                                    <span>Handover/Logistics</span>
+                                    <span className="accent-text">₹{flatFee}</span>
+                                </div>
+                                <div className="calc-divider"></div>
+                                <div className="calc-row grand-total">
+                                    <span>Total Transmission</span>
+                                    <span className="total-val">₹{finalTotal}</span>
+                                </div>
                             </div>
                             
                             <button 
-                                className="confirm-pay-btn btn-primary" 
+                                className="terminal-pay-btn btn-solid-orange" 
                                 onClick={handlePlaceOrder}
                                 disabled={isProcessing}
                             >
                                 <ShieldCheck size={20} />
-                                <span>Place Order • ₹{finalTotal}</span>
+                                <span>AUTHORIZE PAYMENT • ₹{finalTotal}</span>
                             </button>
                             
-                            <p className="secure-text">
-                                <ShieldCheck size={14} /> 100% Safe & Secure Payments
-                            </p>
-                            
-                            <div className="trust-badges">
-                                <span className="badge">🔒 SSL Encrypted</span>
-                                <span className="badge">✓ PCI DSS Compliant</span>
+                            <div className="terminal-trust-footer">
+                                <div className="trust-node"><ShieldCheck size={12} /> SECURE VAULT</div>
+                                <div className="trust-node"><ShieldCheck size={12} /> PCI COMPLIANT</div>
                             </div>
                         </section>
                     </aside>
@@ -459,5 +441,6 @@ const CheckoutPage = () => {
         </div>
     );
 };
+
 
 export default CheckoutPage;

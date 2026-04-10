@@ -1,168 +1,259 @@
-.map-view-container {
+.map-view-container-pro {
     height: 100%;
     width: 100%;
-    border-radius: 16px;
+    border-radius: 24px;
     overflow: hidden;
     position: relative;
-    background: #f1f1f1;
+    background: #020617;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.premium-popup .leaflet-popup-content-wrapper {
-    background: rgba(15, 15, 15, 0.85) !important;
-    backdrop-filter: blur(15px);
+/* Technical HUD Grid & Vignette */
+.map-hud-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px, 20px 20px, 20px 20px;
+    pointer-events: none;
+    z-index: 400;
+}
+
+.map-hud-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 40%, rgba(2, 6, 23, 0.4) 100%);
+    pointer-events: none;
+    z-index: 401;
+}
+
+/* Live Proximity HUD Intel */
+.map-proximity-hud {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    z-index: 1000;
+    width: 260px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
+    padding: 1.2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+}
+
+.hud-intel-header {
+    font-size: 0.6rem;
+    font-weight: 950;
+    color: var(--accent-orange);
+    letter-spacing: 2px;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.intel-name {
+    font-size: 1.1rem;
+    font-weight: 900;
     color: white;
-    padding: 10px;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.intel-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 700;
+}
+
+.intel-meta .dist { color: #3b82f6; }
+.intel-meta .divider { opacity: 0.2; }
+.intel-meta .rating { color: #fbbf24; }
+
+.hud-pulse-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent-orange);
+    width: 100%;
+    animation: hud-health-pulse 2s infinite ease-in-out;
+    box-shadow: 0 0 10px var(--accent-orange);
+}
+
+@keyframes hud-health-pulse {
+    0%, 100% { opacity: 0.3; width: 30%; left: 0; }
+    50% { opacity: 1; width: 100%; left: 0; }
+}
+
+/* Elite Div Icons (Radiant Markers) */
+.elite-div-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.elite-marker-core {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    z-index: 2;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.elite-marker-ring {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid white;
+    opacity: 0.3;
+}
+
+.elite-marker-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+    animation: elite-radar-pulse 2s infinite ease-out;
+}
+
+@keyframes elite-radar-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+/* Marker Types */
+.elite-div-icon.restaurant { color: var(--accent-orange); }
+.elite-div-icon.restaurant .elite-marker-core { background: var(--accent-orange); }
+.elite-div-icon.restaurant .elite-marker-ring { border-color: var(--accent-orange); }
+
+.elite-div-icon.source { color: #10b981; }
+.elite-div-icon.source .elite-marker-core { background: #10b981; }
+.elite-div-icon.source .elite-marker-ring { border-color: #10b981; }
+
+.elite-div-icon.destination { color: #f43f5e; }
+.elite-div-icon.destination .elite-marker-core { background: #f43f5e; }
+.elite-div-icon.destination .elite-marker-ring { border-color: #f43f5e; }
+
+/* Hovered State */
+.elite-div-icon.hovered .elite-marker-core {
+    transform: scale(1.5);
+    background: #fff;
+    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+}
+
+/* Neon Route Conduit */
+.moving-conduit-pulse {
+    animation: conduit-flow 1s infinite linear;
+    stroke-linecap: round;
+}
+
+@keyframes conduit-flow {
+    from { stroke-dashoffset: 30; }
+    to { stroke-dashoffset: 0; }
+}
+
+/* Crystal Glass Popups */
+.premium-popup .leaflet-popup-content-wrapper {
+    background: rgba(15, 23, 42, 0.9) !important;
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: white;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
 
 .premium-popup .leaflet-popup-tip {
-    background: rgba(15, 15, 15, 0.85);
+    background: rgba(15, 23, 42, 0.9);
+}
+
+.map-popup {
+    padding: 1.2rem;
 }
 
 .map-popup h4 {
     margin: 0 0 8px 0;
-    color: #ff6b00;
+    color: var(--accent-orange);
     font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+}
+
+.map-popup .popup-address {
+    margin: 0 0 15px 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1.4;
     font-weight: 600;
 }
 
-.map-popup p {
-    margin: 0 0 12px 0;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.4;
-}
-
-.popup-footer {
+.premium-popup .popup-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-    padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1rem;
 }
 
-.book-btn {
-    background: #ff6b00;
+.premium-popup .rating {
+    font-weight: 900;
+    color: #fbbf24;
+    font-size: 0.9rem;
+}
+
+.premium-popup .book-btn {
+    background: var(--accent-orange);
     color: white;
     border: none;
-    padding: 5px 12px;
-    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
     font-size: 0.75rem;
+    font-weight: 800;
     cursor: pointer;
-    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: all 0.3s ease;
 }
 
-.book-btn:hover {
+.premium-popup .book-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
+    box-shadow: 0 10px 20px var(--accent-orange-glow);
 }
 
-/* Fix for Leaflet controls on dark mode if needed */
-.leaflet-control-zoom-in,
-.leaflet-control-zoom-out {
-    background: rgba(255, 255, 255, 0.1) !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-.leaflet-bar a {
-    background-color: white;
-}
-
-/* Custom Div Icon Styles */
-.custom-div-icon {
-    background: transparent;
-    border: none;
-}
-
-.marker-pin {
-    width: 24px;
-    height: 24px;
-    border-radius: 50% 50% 50% 0;
-    background: #ff6b00;
-    position: absolute;
-    transform: rotate(-45deg);
-    left: 50%;
-    top: 50%;
-    margin: -15px 0 0 -15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    border: 2px solid white;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.marker-pin::after {
-    content: '';
-    width: 10px;
-    height: 10px;
-    margin: 5px 0 0 5px;
-    background: white;
-    position: absolute;
-    border-radius: 50%;
-}
-
-.custom-div-icon.marker-hovered .marker-pin {
-    background: #fff;
-    border-color: #ff6b00;
-    transform: rotate(-45deg) scale(1.4);
-    box-shadow: 0 0 20px #ff6b00, 0 0 40px #ff6b00;
-    z-index: 1000 !important;
-}
-
-.custom-div-icon.marker-hovered .marker-pin::after {
-    background: #ff6b00;
-}
-
-/* Highway Tooltip Styles */
+/* Highway Tooltip */
 .highway-tooltip {
-    background: rgba(15, 15, 15, 0.9) !important;
-    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
-    padding: 12px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    max-width: 250px;
+    padding: 1rem;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    min-width: 200px;
 }
 
 .h-badge {
     display: inline-block;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 900;
     color: white;
-    margin-bottom: 8px;
+    margin-bottom: 0.8rem;
     text-transform: uppercase;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-.highway-tooltip strong {
-    display: block;
-    font-size: 0.95rem;
-    margin-bottom: 4px;
-    color: #fff;
-}
-
-.highway-tooltip p {
-    margin: 0;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.4;
-}
-
-/* Leaflet Tooltip Overrides */
-.leaflet-tooltip-top:before, 
-.leaflet-tooltip-bottom:before, 
-.leaflet-tooltip-left:before, 
-.leaflet-tooltip-right:before {
-    border: none !important;
-}
-
-.leaflet-tooltip {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
 }

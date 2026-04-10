@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { restaurantApi } from '../services/api';
 import FoodCard from '../components/FoodCard/FoodCard';
 import MapView from '../components/MapView/MapView';
-import { MapPin, Navigation, Search, LayoutGrid, Compass, SearchX } from 'lucide-react';
+import { MapPin, Navigation, Search, LayoutGrid, Compass, SearchX, Star } from 'lucide-react';
 import axios from 'axios';
 import { CardSkeleton } from '../components/Common/Skeleton';
+import { CITY_COORDS } from '../utils/geoUtils';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -17,6 +18,18 @@ const Dashboard = () => {
     const [locationPermission, setLocationPermission] = useState('unknown');
     const [nameSearch, setNameSearch] = useState('');
     const [hoveredRestId, setHoveredRestId] = useState(null);
+    const [showSourceSuggestions, setShowSourceSuggestions] = useState(false);
+    const [showDestSuggestions, setShowDestSuggestions] = useState(false);
+
+    const cities = Object.keys(CITY_COORDS).map(city => city.charAt(0).toUpperCase() + city.slice(1));
+
+    const filteredSourceCities = cities.filter(city => 
+        city.toLowerCase().includes(searchQuery.source.toLowerCase()) && city.toLowerCase() !== searchQuery.source.toLowerCase()
+    );
+
+    const filteredDestCities = cities.filter(city => 
+        city.toLowerCase().includes(searchQuery.destination.toLowerCase()) && city.toLowerCase() !== searchQuery.destination.toLowerCase()
+    );
     const [routeFallbackWarning, setRouteFallbackWarning] = useState(false);
     const [routeSourceCoords, setRouteSourceCoords] = useState(null);
     const [routeDestCoords, setRouteDestCoords] = useState(null);
@@ -191,82 +204,117 @@ const Dashboard = () => {
             
             <div className="dashboard-layout-elite animate-fade-in">
                 <main className="dashboard-container">
-                    {/* Centered Search Row */}
+                    {/* Elite Navigation Terminal */}
                     <div className="search-row-pro">
-                        <form className="route-search-bar-unified glass-modern" onSubmit={handleRouteSearch}>
-                            <div className="search-field">
-                                <MapPin className="search-field-icon source" size={20} />
-                                <div className="search-field-content">
-                                    <label>SOURCE</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Starting location..." 
-                                        value={searchQuery.source}
-                                        onChange={(e) => setSearchQuery({ ...searchQuery, source: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            
-                            <div className="search-divider">
-                                <div className="divider-line"></div>
-                            </div>
+                        <div className="nav-terminal-frame">
+                            <form className="route-search-bar-unified glass-modern" onSubmit={handleRouteSearch}>
+                                <div className="search-field">
+                                    <MapPin className="search-field-icon source" size={18} />
+                                    <div className="search-field-content">
+                                        <label>ORIGIN</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Detecting starting hub..." 
+                                                value={searchQuery.source}
+                                                onChange={(e) => { setSearchQuery({ ...searchQuery, source: e.target.value }); setShowSourceSuggestions(true); }}
+                                                onFocus={() => setShowSourceSuggestions(true)}
+                                                onBlur={() => setTimeout(() => setShowSourceSuggestions(false), 200)}
+                                            />
+                                            {showSourceSuggestions && filteredSourceCities.length > 0 && (
+                                                <div className="terminal-autocomplete glass-modern">
+                                                    <div className="autocomplete-header">POPULAR HUBS</div>
+                                                    {filteredSourceCities.map(city => (
+                                                        <div key={city} className="terminal-suggestion" onMouseDown={() => { setSearchQuery({ ...searchQuery, source: city }); setShowSourceSuggestions(false); }}>
+                                                            <MapPin size={12} className="source-icon" /> <span>{city}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="terminal-divider">
+                                        <Navigation size={14} className="terminal-pulse" />
+                                    </div>
 
-                            <div className="search-field">
-                                <MapPin className="search-field-icon destination" size={20} />
-                                <div className="search-field-content">
-                                    <label>DESTINATION</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Where are you going?" 
-                                        value={searchQuery.destination}
-                                        onChange={(e) => setSearchQuery({ ...searchQuery, destination: e.target.value })}
-                                    />
-                                </div>
-                            </div>
+                                    <div className="search-field">
+                                        <MapPin className="search-field-icon destination" size={18} />
+                                        <div className="search-field-content">
+                                            <label>DESTINATION</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="Awaiting target coordinates..." 
+                                                value={searchQuery.destination}
+                                                onChange={(e) => { setSearchQuery({ ...searchQuery, destination: e.target.value }); setShowDestSuggestions(true); }}
+                                                onFocus={() => setShowDestSuggestions(true)}
+                                                onBlur={() => setTimeout(() => setShowDestSuggestions(false), 200)}
+                                            />
+                                            {showDestSuggestions && filteredDestCities.length > 0 && (
+                                                <div className="terminal-autocomplete glass-modern">
+                                                    <div className="autocomplete-header">TARGET COORDINATES</div>
+                                                    {filteredDestCities.map(city => (
+                                                        <div key={city} className="terminal-suggestion" onMouseDown={() => { setSearchQuery({ ...searchQuery, destination: city }); setShowDestSuggestions(false); }}>
+                                                            <Navigation size={12} className="dest-icon" /> <span>{city}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
 
-                            <button type="submit" className="search-submit-btn-pro">
-                                <Search size={20} />
-                                <span>Find Route</span>
-                            </button>
-                        </form>
-                    </div>
-
-                    {/* Elite Filter Bar */}
-                    <div className="filter-bar-elite">
-                        <button 
-                            className={`filter-pill-status ${coords ? 'active' : ''}`}
-                            onClick={handleToggleLocation}
-                        >
-                            <MapPin size={14} className={coords ? 'text-orange-glow' : ''} />
-                            <span>{coords ? 'Near Me Active' : 'Near Me'}</span>
-                            {coords && <div className="status-indicator"></div>}
-                        </button>
-
-                        <div className="v-divider"></div>
-
-                        <div className="dropdown-filter-group">
-                            <select className="elite-dropdown" value={activeCategory} onChange={(e) => setActiveCategory(e.target.value)}>
-                                <option value="All">Cuisine</option>
-                                <option value="Indian">Indian</option>
-                                <option value="Fast Food">Fast Food</option>
-                            </select>
-
-                            <select className="elite-dropdown">
-                                <option value="">Price</option>
-                                <option value="low">Budget</option>
-                                <option value="mid">Premium</option>
-                            </select>
-
-                            <select className="elite-dropdown">
-                                <option value="">Rating</option>
-                                <option value="4">4.0+</option>
-                                <option value="4.5">4.5+</option>
-                            </select>
+                                <button type="submit" className="terminal-submit-btn">
+                                    <Search size={18} />
+                                    <span>Sync Route</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
 
-                    {/* Split View Container */}
-                    <div className="dashboard-split-view">
+                    {/* Elite Capsule Filters */}
+                    <div className="filter-shelf-elite">
+                        <button 
+                            className={`location-hub-pill ${coords ? 'active' : ''}`}
+                            onClick={handleToggleLocation}
+                        >
+                            <Compass size={16} className={coords ? 'animate-spin-slow' : ''} />
+                            <span>{coords ? 'Hyper-Local Active' : 'Scan Nearby'}</span>
+                            {coords && <div className="hub-pulse-dot"></div>}
+                        </button>
+
+                        <div className="technical-divider-vertical"></div>
+
+                        <div className="filter-capsule-group">
+                            {['All', 'Indian', 'Fast Food'].map(cat => (
+                                <button 
+                                    key={cat}
+                                    className={`filter-capsule ${activeCategory === cat ? 'active' : ''}`}
+                                    onClick={() => setActiveCategory(cat)}
+                                >
+                                    {cat === 'All' ? 'Cuisine' : cat}
+                                </button>
+                            ))}
+                            
+                            <div className="filter-capsule-secondary">
+                                <span className="capsule-label">Price Range</span>
+                                <div className="capsule-options">
+                                    <button className="option-btn">Budget</button>
+                                    <button className="option-btn">Premium</button>
+                                </div>
+                            </div>
+
+                            <button className="filter-capsule top-rated">
+                                <Star size={14} fill="currentColor" />
+                                <span>Top Rated</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Elite Terminal HUD Split View */}
+                    <div className="dashboard-split-view technical-hub-frame">
+                        <div className="hud-corner top-left"></div>
+                        <div className="hud-corner top-right"></div>
+                        <div className="hud-corner bottom-left"></div>
+                        <div className="hud-corner bottom-right"></div>
                         <div className="restaurant-grid-container scroll-pro">
                             {routeFallbackWarning && !loading && (
                                 <div className="glass-modern" style={{margin: '0 0 1rem 0', padding: '1rem 1.5rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#fcd34d'}}>

@@ -136,13 +136,52 @@ const MapAutoCenter = ({ coords, focusedHighwayPath }) => {
 
 const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, focusedHighwayId }) => {
     const focusedHighway = HIGHWAYS.find(h => h.id === focusedHighwayId);
+    const mapRef = useRef();
+
+    // Proximity logic: Find the nearest stop based on the map center or current location
+    const nearestStop = restaurants.length > 0 ? restaurants.sort((a, b) => (parseFloat(a.distance || 999)) - (parseFloat(b.distance || 999)))[0] : null;
+
+    // Custom Elite Pulsing Icon Creator
+    const createEliteIcon = (type, isHovered = false) => {
+        return L.divIcon({
+            className: `elite-div-icon ${type} ${isHovered ? 'hovered' : ''}`,
+            html: `
+                <div class="elite-marker-ring"></div>
+                <div class="elite-marker-core"></div>
+                <div class="elite-marker-pulse"></div>
+            `,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+    };
 
     return (
-        <div className="map-view-container glass">
+        <div className="map-view-container-pro tech-hud-frame">
+            {/* Technical Grid Overlay */}
+            <div className="map-hud-grid"></div>
+            <div className="map-hud-vignette"></div>
+
+            {/* Live Proximity HUD Intel */}
+            {nearestStop && (
+                <div className="map-proximity-hud animate-fade-in">
+                    <div className="hud-intel-header">LIVE INTEL: NEXT BEST STOP</div>
+                    <div className="hud-intel-content">
+                        <div className="intel-name">{nearestStop.restaurantName}</div>
+                        <div className="intel-meta">
+                            <span className="dist">{nearestStop.distance ? `${parseFloat(nearestStop.distance).toFixed(1)} KM` : 'Calculating...'}</span>
+                            <span className="divider">|</span>
+                            <span className="rating">⭐ {nearestStop.rating || '4.5'}</span>
+                        </div>
+                    </div>
+                    <div className="hud-pulse-bar"></div>
+                </div>
+            )}
+
             <MapContainer 
                 center={[20.5937, 78.9629]} 
                 zoom={5} 
-                style={{ height: '100%', width: '100%', borderRadius: '16px' }}
+                style={{ height: '100%', width: '100%', borderRadius: '24px' }}
+                ref={mapRef}
             >
                 <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -150,43 +189,64 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                 />
 
                 {sourceCoords && (
-                    <Marker position={[sourceCoords.lat, sourceCoords.lon]} icon={sourceIcon}>
-                        <Popup>Starting Point</Popup>
+                    <Marker position={[sourceCoords.lat, sourceCoords.lon]} icon={createEliteIcon('source')}>
+                        <Popup className="premium-popup">Starting Point</Popup>
                     </Marker>
                 )}
 
                 {destinationCoords && (
-                    <Marker position={[destinationCoords.lat, destinationCoords.lon]} icon={destIcon}>
-                        <Popup>Destination</Popup>
+                    <Marker position={[destinationCoords.lat, destinationCoords.lon]} icon={createEliteIcon('destination')}>
+                        <Popup className="premium-popup">Destination</Popup>
                     </Marker>
                 )}
 
-                {/* National Highway Routes Layer - Show only during search to keep map clean */}
+                {/* Neon Route Conduit - Double Layered */}
+                {sourceCoords && destinationCoords && (
+                    <>
+                        <RoutingEngine sourceCoords={sourceCoords} destinationCoords={destinationCoords} />
+                        {/* The logic inside RoutingEngine handles the detailed route lines, 
+                            but we can add a visual neon glow conduit for specific highways below */}
+                    </>
+                )}
+
+                {/* Highway Routes Layer with Neon Pulse */}
                 {sourceCoords && HIGHWAYS.map(highway => {
                     const isFocused = highway.id === focusedHighwayId;
 
                     return (
-                        <Polyline
-                            key={highway.id}
-                            positions={highway.path}
-                            pathOptions={{ 
-                                color: highway.color, 
-                                weight: 8, 
-                                opacity: 1
-                            }}
-                        >
-                            <Tooltip sticky>
-                                <div className="highway-tooltip">
-                                    <span className="h-badge" style={{ backgroundColor: highway.color }}>{highway.id}</span>
-                                    <strong>{highway.name}</strong>
-                                    <p>{highway.description}</p>
-                                </div>
-                            </Tooltip>
-                        </Polyline>
+                        <React.Fragment key={highway.id}>
+                            {/* Outer Glow Layer */}
+                            <Polyline
+                                positions={highway.path}
+                                pathOptions={{ 
+                                    color: highway.color, 
+                                    weight: 12, 
+                                    opacity: 0.15,
+                                    lineCap: 'round'
+                                }}
+                            />
+                            {/* Inner Conduit Layer */}
+                            <Polyline
+                                positions={highway.path}
+                                pathOptions={{ 
+                                    color: highway.color, 
+                                    weight: 3, 
+                                    opacity: 1,
+                                    dashArray: '10, 20',
+                                    className: 'moving-conduit-pulse'
+                                }}
+                            >
+                                <Tooltip sticky>
+                                    <div className="highway-tooltip">
+                                        <span className="h-badge" style={{ backgroundColor: highway.color }}>{highway.id}</span>
+                                        <strong>{highway.name}</strong>
+                                        <p>{highway.description}</p>
+                                    </div>
+                                </Tooltip>
+                            </Polyline>
+                        </React.Fragment>
                     );
                 })}
-
-                <RoutingEngine sourceCoords={sourceCoords} destinationCoords={destinationCoords} />
 
                 {restaurants.map((res) => {
                     const lat = res.latitude || (res.location && res.location.lat);
@@ -200,7 +260,7 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                         <Marker 
                             key={res._id || res.id} 
                             position={[lat, lon]} 
-                            icon={isHovered ? hoveredRestaurantIcon : restaurantIcon}
+                            icon={createEliteIcon('restaurant', isHovered)}
                             zIndexOffset={isHovered ? 1000 : 0}
                             ref={(r) => {
                                 if (r) {
