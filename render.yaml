@@ -1,7 +1,7 @@
 services:
   - type: web
     name: pikngo-user-service
-    env: java
+    env: maven
     rootDir: user-service
     buildCommand: ./mvnw clean install -DskipTests
     startCommand: java -jar target/*.jar
