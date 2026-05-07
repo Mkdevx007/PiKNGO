@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: pikngo-user-service
+    env: java
+    rootDir: user-service
+    buildCommand: ./mvnw clean install -DskipTests
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: DB_URL
+        fromDatabase:
+          name: pikngo-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: pikngo-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: pikngo-db
+          property: password
+      - key: MAIL_USERNAME
+        value: welcomedevil006@gmail.com
+      - key: MAIL_PASSWORD
+        sync: false # You will set this manually in Render dashboard for safety
+
+databases:
+  - name: pikngo-db
+    databaseName: pikngo_db
+    user: pikngo_db_user
+    plan: free
