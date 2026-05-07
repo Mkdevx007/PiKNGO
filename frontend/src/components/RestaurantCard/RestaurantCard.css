@@ -174,3 +174,40 @@
 .icon-gold {
     color: #ffaa00;
 }
+
+@media (max-width: 768px) {
+    .restaurant-card {
+        border-radius: 24px;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-image-wrapper {
+        height: 180px;
+    }
+
+    .card-content {
+        padding: 16px;
+    }
+
+    .restaurant-name {
+        font-size: 1.15rem;
+        letter-spacing: -0.5px;
+    }
+
+    .rating-badge {
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        backdrop-filter: blur(8px);
+    }
+
+    .card-footer {
+        padding-top: 12px;
+    }
+
+    .view-btn {
+        font-size: 0.85rem;
+        color: var(--accent-orange);
+    }
+}

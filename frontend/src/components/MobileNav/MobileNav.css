@@ -1,0 +1,196 @@
+/* ============================================================
+   PIKNGO — ELITE HUD Mobile Navigation Bar
+   Design: Floating Futuristic Pill | Ultra-Glassmorphism | Neon Glow
+   ============================================================ */
+
+/* ── Base Nav Container ── */
+.mobile-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 440px;
+    height: 72px;
+    display: none; /* Show via media query */
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 12px;
+    z-index: 9999;
+
+    /* Elite Glass Morphism */
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(32px) saturate(210%);
+    -webkit-backdrop-filter: blur(32px) saturate(210%);
+
+    /* Pill Shape & Technical Border */
+    border-radius: 35px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    /* Ultra-Premium Shadow Stack */
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 12px 48px rgba(0, 0, 0, 0.65),
+        0 0 40px rgba(249, 115, 22, 0.12);
+}
+
+/* ── Nav Item ── */
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: rgba(203, 213, 225, 0.5);
+    text-decoration: none;
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    flex: 1;
+    height: 100%;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ── Icon Wrapper ── */
+.mobile-nav-item .nav-icon-wrap {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ── Label ── */
+.mobile-nav-item span {
+    transition: all 0.4s ease;
+    opacity: 0.6;
+    transform: translateY(0px);
+    line-height: 1;
+}
+
+/* ── SVG Icon ── */
+.mobile-nav-item svg {
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+    z-index: 2;
+    stroke-width: 2.2;
+}
+
+/* ── Active State — Neon HUD Activation ── */
+.mobile-nav-item.active {
+    color: #fff;
+}
+
+.mobile-nav-item.active span {
+    opacity: 1;
+    color: #fff;
+    font-weight: 950;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.mobile-nav-item.active .nav-icon-wrap {
+    background: linear-gradient(
+        135deg,
+        rgba(249, 115, 22, 0.35) 0%,
+        rgba(249, 115, 22, 0.15) 100%
+    );
+    transform: translateY(-8px) scale(1.1);
+    border: 1px solid rgba(249, 115, 22, 0.4);
+    box-shadow:
+        0 8px 24px rgba(249, 115, 22, 0.4),
+        0 0 0 4px rgba(249, 115, 22, 0.05);
+}
+
+.mobile-nav-item.active svg {
+    color: #fff;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+    animation: icon-float 3s infinite ease-in-out;
+}
+
+@keyframes icon-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+/* ── Cart Badge — Tactical Alert ── */
+.mobile-cart-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #f97316;
+    color: white;
+    font-size: 0.55rem;
+    font-weight: 950;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.6);
+    border: 1.5px solid rgba(15, 23, 42, 0.8);
+    animation: badge-pulse 2s infinite;
+}
+
+@keyframes badge-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 10px rgba(249, 115, 22, 0.6); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(249, 115, 22, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 10px rgba(249, 115, 22, 0.6); }
+}
+
+/* ── Media Query — Show on Mobile ── */
+@media (max-width: 768px) {
+    .mobile-nav {
+        display: flex;
+    }
+}
+
+/* ── Entrance Animation ── */
+.mobile-nav {
+    animation: nav-entrance 0.8s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes nav-entrance {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(40px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+/* ── Safe Area Support ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .mobile-nav {
+        bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+}
+
+/* ── Light Theme Override (Keeping Elite feel) ── */
+body:not(.dark-theme) .mobile-nav {
+    background: rgba(255, 255, 255, 0.88);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 12px 48px rgba(0, 0, 0, 0.15),
+        0 0 40px rgba(249, 115, 22, 0.08);
+}
+
+body:not(.dark-theme) .mobile-nav-item.active .nav-icon-wrap {
+    background: var(--mobile-accent-gradient);
+    border-color: transparent;
+}
+
+body:not(.dark-theme) .mobile-nav-item.active span {
+    color: var(--accent-orange);
+    text-shadow: none;
+}

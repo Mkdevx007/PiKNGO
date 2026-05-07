@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X, Loader2, CheckCircle, AlertCircle, LayoutDashboard, Store, ClipboardList, ArrowUpRight } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Camera, Edit2, Shield, Trash2, Lock, ShieldCheck, Plus, X, Loader2, CheckCircle, AlertCircle, LayoutDashboard, Store, ClipboardList, ArrowUpRight, Trophy, Award } from 'lucide-react';
 import { authApi, addressApi } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import './Profile.css';
@@ -229,7 +229,10 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                                 {user?.firstName} {user?.lastName}
                                 <span className="premium-status-ring active ml-4"></span>
                             </h1>
-                            <p className="user-membership">💎 Elite Member</p>
+                            <p className="user-membership">
+                                {user?.vaultTier === 'ELITE' ? '👑' : user?.vaultTier === 'GOLD' ? '💎' : '🛡️'} 
+                                {user?.vaultTier || 'SILVER'} Member
+                            </p>
                         </div>
                         <div className="profile-header-actions">
                             <button
@@ -247,24 +250,18 @@ const ProfileScreen = ({ onProfileUpdate }) => {
                 <div className="profile-grid">
                     <div className="profile-card glass animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
                         <div className="card-header">
-                            <User size={20} />
-                            <h3>Profile Details</h3>
+                            <Trophy size={20} className="text-orange" />
+                            <h3>Elite Vault</h3>
                         </div>
-                        <div className="info-list">
-                            <div className="info-row">
-                                <Mail size={16} />
-                                <div className="info-details">
-                                    <label>Email Address</label>
-                                    <p>{user?.email}</p>
-                                </div>
+                        <div className="vault-preview-elite">
+                            <div className="points-stat">
+                                <span className="stat-val">{(user?.loyaltyPoints || 0).toLocaleString()}</span>
+                                <span className="stat-label">AVAILABLE XP</span>
                             </div>
-                            <div className="info-row">
-                                <Phone size={16} />
-                                <div className="info-details">
-                                    <label>Phone Number</label>
-                                    <p>{user?.phoneNumber}</p>
-                                </div>
-                            </div>
+                            <NavLink to="/vault" className="vault-link-btn">
+                                <span>MANAGE VAULT</span>
+                                <ArrowUpRight size={16} />
+                            </NavLink>
                         </div>
                     </div>
                     

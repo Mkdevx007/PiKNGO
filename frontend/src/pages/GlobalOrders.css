@@ -225,6 +225,11 @@
     outline: none;
 }
 
+.status-dropdown option {
+    background: #1e293b;
+    color: white;
+}
+
 .status-dropdown.pending { border-color: #facc15; color: #facc15; }
 .status-dropdown.preparing { border-color: #3b82f6; color: #3b82f6; }
 .status-dropdown.ready { border-color: #a855f7; color: #a855f7; }
@@ -650,4 +655,49 @@
 
 .animate-slide-in-right {
     animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.restaurant-filter-box {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    width: fit-content;
+}
+
+.restaurant-select {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+    outline: none;
+    cursor: pointer;
+}
+
+.restaurant-select option {
+    background: #0f172a;
+    color: white;
+}
+
+.view-menu-mini-btn {
+    background: rgba(255, 107, 0, 0.1);
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    color: #ff6b00;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 0.8rem;
+}
+
+.view-menu-mini-btn:hover {
+    background: #ff6b00;
+    color: white;
 }

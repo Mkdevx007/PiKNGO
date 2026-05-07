@@ -1,0 +1,185 @@
+.star-rating-hub {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.star-btn.active {
+    color: var(--accent-orange);
+    filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.5));
+    transform: scale(1.1);
+}
+
+.star-btn:hover {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.form-group-elite label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 0.8rem;
+}
+
+.btn-solid-orange-elite {
+    background: var(--accent-orange);
+    color: black;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.btn-solid-orange-elite:hover {
+    background: #ff8c3a;
+    box-shadow: 0 10px 30px rgba(255, 107, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-text-elite {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.btn-text-elite:hover {
+    color: white;
+}
+
+/* Review List Styling */
+.review-card {
+    padding: 2rem;
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 24px;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.user-blob {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+}
+
+.avatar-mini {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.avatar-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.elite-badge-icon {
+    color: var(--accent-orange);
+    filter: drop-shadow(0 0 5px rgba(255, 107, 0, 0.4));
+}
+
+.elite-badge-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    margin-left: 0.5rem;
+}
+
+.elite-badge-wrapper span {
+    font-size: 0.55rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: var(--accent-orange);
+}
+
+.review-date {
+    font-size: 0.75rem;
+    opacity: 0.5;
+    font-weight: 600;
+}
+
+.rating-hub-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.4rem 0.8rem;
+    border-radius: 100px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rating-val {
+    font-weight: 900;
+    font-size: 0.9rem;
+}
+
+.comment-text {
+    line-height: 1.6;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.review-photo-box {
+    border-radius: 16px;
+    overflow: hidden;
+    max-width: 200px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.review-photo {
+    width: 100%;
+    display: block;
+}
+
+.success-state {
+    text-align: center;
+    padding: 4rem;
+}
+
+.success-animation {
+    margin-bottom: 2rem;
+}

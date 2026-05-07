@@ -1,0 +1,96 @@
+.otp-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 1.5rem 0;
+}
+
+.otp-field {
+    width: 50px;
+    height: 60px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(12px);
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: normal; /* Better for centering with flex or padding */
+    box-sizing: border-box;
+}
+
+/* Hide arrow for number input if changed to type="number" (keeping text for now) */
+.otp-field::-webkit-inner-spin-button,
+.otp-field::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.otp-field::placeholder {
+    color: rgba(255, 255, 255, 0.15);
+    font-weight: 300;
+}
+
+.otp-field:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-orange);
+    box-shadow: 
+        0 0 0 4px rgba(255, 77, 41, 0.15),
+        0 10px 30px rgba(255, 77, 41, 0.2);
+    transform: translateY(-2px);
+}
+
+.otp-field.active {
+    border-color: rgba(255, 77, 41, 0.6);
+    background: rgba(255, 77, 41, 0.08);
+    color: var(--accent-orange);
+}
+
+/* Elite Animation on digit entry - triggered by not seeing placeholder */
+.otp-field:not(:placeholder-shown) {
+    animation: digitPop 0.2s ease-out forwards;
+}
+
+@keyframes digitPop {
+    from { 
+        transform: scale(0.9) translateY(4px); 
+        opacity: 0.5; 
+    }
+    to { 
+        transform: scale(1) translateY(0); 
+        opacity: 1; 
+    }
+}
+
+/* Light Theme Adjustments */
+body:not(.dark-theme) .otp-field {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    color: #0f172a;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+body:not(.dark-theme) .otp-field:focus {
+    background: #ffffff;
+    border-color: var(--accent-orange);
+    box-shadow: 0 8px 20px rgba(255, 77, 41, 0.15);
+}
+
+@media (max-width: 480px) {
+    .otp-container {
+        gap: 8px;
+    }
+    .otp-field {
+        width: 42px;
+        height: 54px;
+        font-size: 1.5rem;
+    }
+}

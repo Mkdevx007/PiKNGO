@@ -27,15 +27,17 @@ public class OrderServiceImpl implements OrderService {
     private final RestaurantRepository restaurantRepository;
     private final MenuItemRepository menuItemRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final com.pikngo.user_service.service.LoyaltyService loyaltyService;
 
     public OrderServiceImpl(OrderRepository orderRepository, UserRepository userRepository, 
                             RestaurantRepository restaurantRepository, MenuItemRepository menuItemRepository,
-                            SimpMessagingTemplate messagingTemplate) {
+                            SimpMessagingTemplate messagingTemplate, com.pikngo.user_service.service.LoyaltyService loyaltyService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
         this.menuItemRepository = menuItemRepository;
         this.messagingTemplate = messagingTemplate;
+        this.loyaltyService = loyaltyService;
     }
 
     @Override
@@ -72,6 +74,11 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList()) : null;
 
         order.setItems(orderItems);
+        
+        // Calculate and award loyalty points
+        Long pointsEarned = loyaltyService.awardPoints(order);
+        order.setPointsEarned(pointsEarned);
+
         Order savedOrder = orderRepository.save(order);
         OrderResponseDTO response = mapToDTO(savedOrder);
         
@@ -149,6 +156,7 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryAddress(order.getDeliveryAddress())
                 .isSelfPickup(order.isSelfPickup())
                 .paymentMethod(order.getPaymentMethod())
+                .pointsEarned(order.getPointsEarned())
                 .createdTs(order.getCreatedTs());
 
         if (order.getUser() != null) {

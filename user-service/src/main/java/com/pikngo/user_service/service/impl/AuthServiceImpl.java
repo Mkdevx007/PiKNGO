@@ -160,7 +160,9 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.deleteByUser(user);
         tokenRepository.flush();
 
-        String token = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        // Standardize to 6-digit numeric OTP for better Elite UX
+        String token = String.format("%06d", new Random().nextInt(999999));
+        
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .token(token)
                 .user(user)
@@ -169,13 +171,10 @@ public class AuthServiceImpl implements AuthService {
 
         tokenRepository.save(resetToken);
 
-        log.info("Password reset token generated for {}: {}", email, token);
-        emailService.sendEmail(email, "PikNGo Password Reset",
-                "Hello " + user.getFirstName() + ",\n\n" +
-                        "A password reset was requested for your PikNGo account.\n" +
-                        "Your reset token is: " + token + "\n\n" +
-                        "This token will expire in 24 hours.\n\n" +
-                        "If you did not request this, please ignore this email.");
+        log.info("Password reset OTP generated for {}: {}", email, token);
+        
+        // Use the new professional HTML email template
+        emailService.sendOtpEmail(email, token);
     }
 
     @Override

@@ -79,6 +79,13 @@ const ManageRestaurants = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Basic validation: Ensure coordinates are set (not at default Pune location if creating new)
+        if (!formData.latitude || !formData.longitude || (formData.latitude === 18.5204 && formData.longitude === 73.8567 && !editingRes)) {
+            showToast('Please pick a specific location on the map', 'warning');
+            return;
+        }
+
         setSubmitting(true);
         try {
             const dataToSave = {
@@ -207,6 +214,11 @@ const ManageRestaurants = () => {
                                                 <Star size={12} fill="currentColor" />
                                                 <span>{res.rating || '4.5'}</span>
                                             </div>
+                                            {(!res.latitude || !res.longitude) && (
+                                                <div className="location-warning-badge">
+                                                    MISSING GPS
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="card-body">
                                             <div className="card-title-row">

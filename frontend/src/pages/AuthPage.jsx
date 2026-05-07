@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, NavLink } from 'react-router-dom';
-import { ChevronLeft, Star, Shield, ArrowRight } from 'lucide-react';
+import { ChevronLeft, Star, Shield, ArrowRight, X } from 'lucide-react';
 import Logo from '../components/Logo/Logo.jsx';
 import LoginForm from '../components/Auth/LoginForm.jsx';
 import RegisterForm from '../components/Auth/RegisterForm.jsx';
@@ -9,8 +9,8 @@ import './Auth.css';
 
 
 
-const LOGIN_IMAGE = "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop";
-const REGISTER_IMAGE = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop";
+const LOGIN_IMAGE = "/assets/login-hero.png";
+const REGISTER_IMAGE = "/assets/login-hero.png";
 
 const AuthPage = ({ onLogin }) => {
     const location = useLocation();
@@ -73,7 +73,7 @@ const AuthPage = ({ onLogin }) => {
                     <div className="auth-visual-overlay"></div>
                     <div className="auth-brand-content">
                         <div className="logo-container">
-                            <Logo size={80} />
+                            <Logo size={180} />
                         </div>
                         <h2>Premium Highway <br /><span>Dining Experience</span></h2>
                         <p>Join the elite community of travelers. Pre-order meals from the best rest stops along your route.</p>
@@ -81,6 +81,9 @@ const AuthPage = ({ onLogin }) => {
                 </div>
 
                 <div className="auth-form-side">
+                    <NavLink to="/" className="auth-close-btn" title="Back to Home">
+                        <X size={20} />
+                    </NavLink>
                     <div className="auth-flip-inner">
                         <div className="auth-card-front">
                             {showForgot ? (

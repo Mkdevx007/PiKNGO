@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, Lock, ArrowRight, ShieldCheck, Mail } from 'lucide-react';
+import { User, Phone, Lock, ArrowRight, ShieldCheck, Mail, Eye, EyeOff, ChevronLeft, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { authApi } from '../../services/api';
+import OtpInput from './OtpInput';
 
 import { useToast } from '../../context/ToastContext';
 import { useForm } from '../../hooks/useForm';
@@ -11,6 +13,7 @@ const LoginForm = ({ onLogin, onForgot }) => {
     const [loginStep, setLoginStep] = useState(1);
     const [otpTimer, setOtpTimer] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const { values, handleChange, resetForm } = useForm({
         identifier: '',
@@ -146,12 +149,15 @@ const LoginForm = ({ onLogin, onForgot }) => {
                                 <div className="input-wrapper">
                                     <Lock size={18} className="input-icon" />
                                     <input 
-                                        type="password" 
+                                        type={showPassword ? "text" : "password"} 
                                         name="password"
                                         value={values.password} 
                                         onChange={handleChange} 
                                         required 
                                     />
+                                    <button type="button" className="password-toggle-btn" onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -174,18 +180,12 @@ const LoginForm = ({ onLogin, onForgot }) => {
                                     )}
                                 </button>
                             </div>
-                            <div className="input-wrapper">
-                                <ShieldCheck size={18} className="input-icon" />
-                                <input 
-                                    type="text" 
-                                    name="otpCode"
-                                    maxLength={6} 
-                                    placeholder="000000" 
-                                    value={values.otpCode} 
-                                    onChange={handleChange} 
-                                    required 
-                                />
-                            </div>
+                            <OtpInput 
+                                length={6} 
+                                value={values.otpCode} 
+                                onChange={(val) => handleChange({ target: { name: 'otpCode', value: val } })}
+                                disabled={loading}
+                            />
                         </div>
                     </div>
                 )}

@@ -27,31 +27,44 @@ const OrderStatusStepper = ({ currentStatus }) => {
     }
 
     return (
-        <div className="order-stepper-container">
-            <div className="stepper-track">
-                {statuses.map((step, index) => {
-                    const Icon = step.icon;
-                    const isCompleted = index < currentIndex;
-                    const isActive = index === currentIndex;
-                    const isLast = index === statuses.length - 1;
+        <div className="order-stepper-container glass-modern">
+            <div className="stepper-progress-hub">
+                <div className="main-track-line">
+                    <div 
+                        className="track-fill-stream" 
+                        style={{ width: `${(currentIndex / (statuses.length - 1)) * 100}%` }}
+                    ></div>
+                </div>
+                
+                <div className="stepper-nodes-layer">
+                    {statuses.map((step, index) => {
+                        const Icon = step.icon;
+                        const isCompleted = index < currentIndex;
+                        const isActive = index === currentIndex;
 
-                    return (
-                        <React.Fragment key={step.id}>
-                            <div className={`step-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}>
-                                <div className="step-node glass-pill">
-                                    {isCompleted ? <Check size={14} /> : <Icon size={14} />}
-                                    <span className="step-label">{step.label}</span>
+                        return (
+                            <div 
+                                key={step.id} 
+                                className={`step-node-wrapper ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                            >
+                                <div className="step-node-core">
+                                    <div className="node-icon-hub">
+                                        {isCompleted ? <Check size={16} /> : <Icon size={16} />}
+                                    </div>
+                                    <div className="node-glow-ring"></div>
+                                </div>
+                                <div className="step-node-label-hub">
+                                    <span className="label-text">{step.label}</span>
+                                    {isActive && <div className="active-indicator-bar"></div>}
                                 </div>
                             </div>
-                            {!isLast && (
-                                <div className={`step-line ${isCompleted ? 'completed' : ''}`}></div>
-                            )}
-                        </React.Fragment>
-                    );
-                })}
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
+
 };
 
 export default OrderStatusStepper;

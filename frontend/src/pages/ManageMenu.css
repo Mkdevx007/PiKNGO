@@ -450,11 +450,13 @@
     transition: all 0.3s;
 }
 
-.toggle-label input:checked + .toggle-design {
+.toggle-label input:checked + .toggle-design,
+.toggle-label-mini input:checked + .toggle-design {
     background: var(--accent-orange);
 }
 
-.toggle-label input:checked + .toggle-design::after {
+.toggle-label input:checked + .toggle-design::after,
+.toggle-label-mini input:checked + .toggle-design::after {
     left: 22px;
 }
 

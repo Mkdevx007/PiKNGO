@@ -55,7 +55,7 @@ export const restaurantApi = {
     getAllAdmin: () => api.get('/restaurants/admin/all'),
     getById: (id) => api.get(`/restaurants/${id}`),
     getNearby: (lat, lon, radius = 100) => api.get(`/restaurants/nearby?lat=${lat}&lon=${lon}&radius=${radius}`),
-    searchByRoute: (srcLat, srcLon, destLat, destLon, radius = 50) =>
+    searchByRoute: (srcLat, srcLon, destLat, destLon, radius = 100) =>
         api.get(`/restaurants/search?srcLat=${srcLat}&srcLon=${srcLon}&destLat=${destLat}&destLon=${destLon}&radius=${radius}`),
 
     create: (data) => api.post('/restaurants', data),
@@ -97,6 +97,12 @@ export const adminSettingsApi = {
 
 export const adminAnalyticsApi = {
     getDashboardStats: () => api.get('/admin/analytics/dashboard'),
+};
+
+export const reviewApi = {
+    submit: (userId, data) => api.post(`/reviews/user/${userId}`, data),
+    getRestaurantReviews: (restaurantId) => api.get(`/reviews/restaurant/${restaurantId}`),
+    getUserReviews: (userId) => api.get(`/reviews/user/${userId}`),
 };
 
 export const paymentApi = {

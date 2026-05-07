@@ -1,0 +1,205 @@
+.review-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.review-modal {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    padding: 2rem;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.intel-tag {
+    font-size: 0.6rem;
+    font-weight: 950;
+    color: var(--accent-orange);
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.header-intel h3 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -0.5px;
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+}
+
+.rating-selector label, 
+.input-group-elite label {
+    font-size: 0.65rem;
+    font-weight: 950;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1.5px;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.star-group {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.star-btn.active {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.4));
+}
+
+.star-btn:hover {
+    transform: scale(1.1);
+}
+
+.input-group-elite textarea {
+    width: 100%;
+    min-height: 120px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.2rem;
+    color: white;
+    font-size: 0.95rem;
+    resize: none;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-group-elite textarea:focus {
+    border-color: var(--accent-orange);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1.2rem;
+    opacity: 0.4;
+    color: white;
+}
+
+.input-with-icon input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1rem 1rem 1rem 3.5rem;
+    color: white;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-with-icon input:focus {
+    border-color: var(--accent-orange);
+}
+
+.submit-btn-elite {
+    width: 100%;
+    background: var(--accent-orange);
+    color: white;
+    border: none;
+    padding: 1.1rem;
+    border-radius: 16px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.4s ease;
+    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);
+}
+
+.submit-btn-elite:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submit-btn-elite:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(249, 115, 22, 0.4);
+    background: #ff8c00;
+}
+
+.modal-footer-intel {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+}
+
+.modal-footer-intel p {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+@keyframes scale-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-in {
+    animation: scale-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}

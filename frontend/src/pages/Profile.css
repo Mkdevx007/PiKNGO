@@ -656,3 +656,58 @@
 .elite-action-btn-mini:active {
     transform: translateY(0);
 }
+
+/* Elite Vault Preview Card */
+.vault-preview-elite {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.points-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-val {
+    font-size: 2.2rem;
+    font-weight: 950;
+    color: var(--accent-orange);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(255, 107, 0, 0.2);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    opacity: 0.5;
+    margin-top: 0.3rem;
+    font-weight: 800;
+}
+
+.vault-link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.vault-link-btn:hover {
+    background: var(--accent-orange);
+    color: black;
+    border-color: var(--accent-orange);
+    transform: scale(1.02);
+}
+
+.vault-link-btn span {
+    margin-right: 0.5rem;
+}

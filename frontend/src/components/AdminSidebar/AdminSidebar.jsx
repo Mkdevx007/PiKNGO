@@ -2,8 +2,9 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import { LayoutDashboard, Store, ClipboardList, Users, CreditCard, Settings, ChevronLeft, Home, Bell, LogOut } from 'lucide-react';
 import { authApi, orderApi } from '../../services/api';
 import NotificationDropdown from './NotificationDropdown';
-import './AdminSidebar.css';
 import React, { useState, useEffect } from 'react';
+import Logo from '../Logo/Logo';
+import './AdminSidebar.css';
 
 const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
     const navigate = useNavigate();
@@ -58,8 +59,7 @@ const AdminSidebar = ({ isCollapsed, setIsCollapsed }) => {
             <div className="sidebar-header">
                 {!isCollapsed && (
                     <div className="branding">
-                        <span className="brand-logo">Pik</span>
-                        <span className="brand-logo accent">NGo</span>
+                        <Logo size={120} />
                         <span className="pro-tag">PRO</span>
                     </div>
                 )}

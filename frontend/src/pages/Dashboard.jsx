@@ -5,7 +5,7 @@ import MapView from '../components/MapView/MapView';
 import { MapPin, Navigation, Search, LayoutGrid, Compass, SearchX, Star } from 'lucide-react';
 import axios from 'axios';
 import { CardSkeleton } from '../components/Common/Skeleton';
-import { CITY_COORDS } from '../utils/geoUtils';
+import { CITY_COORDS, reverseGeocode } from '../utils/geoUtils';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -20,6 +20,16 @@ const Dashboard = () => {
     const [hoveredRestId, setHoveredRestId] = useState(null);
     const [showSourceSuggestions, setShowSourceSuggestions] = useState(false);
     const [showDestSuggestions, setShowDestSuggestions] = useState(false);
+    const [mobileView, setMobileView] = useState('list'); // 'list' or 'map'
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
+    const [isSimulating, setIsSimulating] = useState(false);
+    const [simulatedLocation, setSimulatedLocation] = useState(null);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const cities = Object.keys(CITY_COORDS).map(city => city.charAt(0).toUpperCase() + city.slice(1));
 
@@ -198,6 +208,43 @@ const Dashboard = () => {
         }
     };
 
+    const handleMapClick = async (lat, lon) => {
+        if (!searchQuery.source) {
+            setLocationStatus("Identifying Origin...");
+            const name = await reverseGeocode(lat, lon);
+            setSearchQuery(prev => ({ ...prev, source: name }));
+            setRouteSourceCoords({ lat, lon });
+            setLocationStatus(`Origin set to ${name}`);
+        } else if (!searchQuery.destination) {
+            setLocationStatus("Identifying Destination...");
+            const name = await reverseGeocode(lat, lon);
+            setSearchQuery(prev => ({ ...prev, destination: name }));
+            setRouteDestCoords({ lat, lon });
+            setLocationStatus(`Destination set to ${name}`);
+            // Auto search after setting both coords
+            setTimeout(() => handleRouteSearch(), 500);
+        } else {
+            // Reset and start over
+            const name = await reverseGeocode(lat, lon);
+            setSearchQuery({ source: name, destination: '' });
+            setRouteSourceCoords({ lat, lon });
+            setRouteDestCoords(null);
+            setRouteFallbackWarning(false);
+            setLocationStatus(`Origin reset to ${name}`);
+        }
+    };
+
+    const handleSimulationToggle = () => {
+        if (!routeSourceCoords || !routeDestCoords) return;
+        setIsSimulating(!isSimulating);
+        if (!isSimulating) {
+            setSimulatedLocation(routeSourceCoords);
+            setLocationStatus("Simulation active: Tracking route...");
+        } else {
+            setLocationStatus("Simulation terminated.");
+        }
+    };
+
     return (
         <div className="dashboard-page auth-page-global-bg">
             <div className="bg-mesh"></div>
@@ -306,11 +353,28 @@ const Dashboard = () => {
                                 <Star size={14} fill="currentColor" />
                                 <span>Top Rated</span>
                             </button>
+
+                            {routeSourceCoords && routeDestCoords && (
+                                <button 
+                                    className={`filter-capsule simulation-toggle ${isSimulating ? 'active' : ''}`}
+                                    onClick={handleSimulationToggle}
+                                >
+                                    <Navigation size={14} className={isSimulating ? 'animate-pulse' : ''} />
+                                    <span>{isSimulating ? 'Live Simulation' : 'Start Simulation'}</span>
+                                </button>
+                            )}
                         </div>
                     </div>
 
+                    {isMobile && mobileView === 'list' && (
+                        <div className="mobile-section-header animate-fade-in">
+                            <h2 className="glow-text-orange">Top Rated Near You</h2>
+                            <p>Handpicked elite restaurants for your journey</p>
+                        </div>
+                    )}
+
                     {/* Elite Terminal HUD Split View */}
-                    <div className="dashboard-split-view technical-hub-frame">
+                    <div className={`dashboard-split-view technical-hub-frame ${isMobile ? `mobile-${mobileView}` : ''}`}>
                         <div className="hud-corner top-left"></div>
                         <div className="hud-corner top-right"></div>
                         <div className="hud-corner bottom-left"></div>
@@ -376,11 +440,34 @@ const Dashboard = () => {
                                 sourceCoords={routeSourceCoords} 
                                 destinationCoords={routeDestCoords} 
                                 hoveredRestId={hoveredRestId}
+                                onMapClick={handleMapClick}
+                                isSimulating={isSimulating}
+                                simulatedLocation={simulatedLocation}
+                                setSimulatedLocation={setSimulatedLocation}
                             />
                         </div>
                     </div>
                 </main>
             </div>
+
+            {isMobile && (
+                <button 
+                    className="mobile-view-toggle glass"
+                    onClick={() => setMobileView(mobileView === 'list' ? 'map' : 'list')}
+                >
+                    {mobileView === 'list' ? (
+                        <>
+                            <MapPin size={20} />
+                            <span>View Map</span>
+                        </>
+                    ) : (
+                        <>
+                            <LayoutGrid size={20} />
+                            <span>View List</span>
+                        </>
+                    )}
+                </button>
+            )}
         </div>
     );
 };

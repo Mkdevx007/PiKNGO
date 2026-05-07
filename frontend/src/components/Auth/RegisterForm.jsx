@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, User, Phone, MapPin, Lock, ArrowRight, ChevronLeft, Eye, EyeOff } from 'lucide-react';
+import { Mail, User, Phone, MapPin, Lock, ArrowRight, ChevronLeft, Eye, EyeOff, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { authApi } from '../../services/api';
 
 import { useToast } from '../../context/ToastContext';
@@ -141,7 +142,7 @@ const RegisterForm = ({ onSuccess }) => {
                         </div>
                         <div className="form-group">
                             <label>Area / Landmark</label>
-                            <div className="input-wrapper">
+                            <div className="input-wrapper no-icon">
                                 <input type="text" name="addressLine2" placeholder="Society, Area" value={values.addressLine2} onChange={handleChange} />
                             </div>
                         </div>
@@ -149,20 +150,20 @@ const RegisterForm = ({ onSuccess }) => {
                     <div className="grid-2">
                         <div className="form-group">
                             <label>City</label>
-                            <div className="input-wrapper">
+                            <div className="input-wrapper no-icon">
                                 <input type="text" name="city" placeholder="City" value={values.city} onChange={handleChange} required />
                             </div>
                         </div>
                         <div className="form-group">
                             <label>State</label>
-                            <div className="input-wrapper">
+                            <div className="input-wrapper no-icon">
                                 <input type="text" name="state" placeholder="State" value={values.state} onChange={handleChange} required />
                             </div>
                         </div>
                     </div>
                     <div className="form-group">
                         <label>Pincode</label>
-                        <div className="input-wrapper">
+                        <div className="input-wrapper no-icon">
                             <input type="text" name="pincode" placeholder="6 Digits" value={values.pincode} onChange={handleChange} required />
                         </div>
                     </div>
@@ -171,7 +172,6 @@ const RegisterForm = ({ onSuccess }) => {
 
                 {regStep === 3 && (
                     <div className="step-content animate-slide-in">
-                    <div className="grid-2">
                         <div className="form-group">
                             <label>Password</label>
                             <div className="input-wrapper">
@@ -189,7 +189,6 @@ const RegisterForm = ({ onSuccess }) => {
                                 <input type={showPassword ? "text" : "password"} name="confirmPassword" placeholder="••••••••" value={values.confirmPassword} onChange={handleChange} required />
                             </div>
                         </div>
-                    </div>
                     </div>
                 )}
 

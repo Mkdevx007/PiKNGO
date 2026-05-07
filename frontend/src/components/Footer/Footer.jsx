@@ -10,7 +10,7 @@ const Footer = () => {
             <div className="container">
                 <div className="footer-main">
                     <div className="footer-brand-section">
-                        <Logo size={48} />
+                        <Logo size={120} />
                         <p className="brand-desc">
                             Redefining highway dining experiences. Discover, pre-order, and enjoy 
                             premium meals from top-rated rest stops across India.

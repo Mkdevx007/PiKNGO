@@ -19,6 +19,7 @@ import GlobalSettings from './pages/GlobalSettings';
 import Promotions from './pages/Promotions';
 import AdminLayout from './components/AdminLayout/AdminLayout';
 import Footer from './components/Footer/Footer';
+import VaultPage from './pages/VaultPage';
 import { authApi } from './services/api';
 import { CartProvider } from './context/CartContext';
 import CheckoutPage from './pages/CheckoutPage';
@@ -27,6 +28,7 @@ import './App.css';
 import { ToastProvider } from './context/ToastContext';
 
 import ActiveOrderBar from './components/ActiveOrderBar/ActiveOrderBar';
+import MobileNav from './components/MobileNav/MobileNav';
 
 // Inner component to use hooks inside Router context
 function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLogin, handleLogout }) {
@@ -56,6 +58,7 @@ function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLog
           <Route path="/menu/:restaurantId" element={<MenuPage />} />
           <Route path="/checkout" element={isLoggedIn ? <CheckoutPage /> : <Navigate to="/login" />} />
           <Route path="/orders" element={isLoggedIn ? <OrdersPage /> : <Navigate to="/login" />} />
+          <Route path="/vault" element={isLoggedIn ? <VaultPage /> : <Navigate to="/login" />} />
 
           {/* Admin Routes wrapped in AdminLayout */}
           <Route path="/admin/*" element={
@@ -81,6 +84,7 @@ function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLog
       {/* Footer aur ActiveOrderBar sirf non-admin aur non-auth pages pe render honge */}
       {!shouldHideGlobalComponents && <Footer />}
       {!shouldHideGlobalComponents && <ActiveOrderBar />}
+      {!shouldHideGlobalComponents && <MobileNav />}
     </div>
   );
 }

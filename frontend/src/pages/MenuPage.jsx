@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { restaurantApi, menuApi } from '../services/api';
+import { restaurantApi, menuApi, reviewApi, authApi } from '../services/api';
 import { useCart } from '../context/CartContext';
-import { ChevronLeft, Star, Clock, Search, Filter, ArrowRight, ShoppingCart, Loader2 } from 'lucide-react';
+import { ChevronLeft, Star, Clock, Search, Filter, ArrowRight, ShoppingCart, Loader2, MessageSquare } from 'lucide-react';
+import ReviewList from '../components/Reviews/ReviewList';
+import ReviewModal from '../components/Reviews/ReviewModal';
 import './MenuPage.css';
 
 
@@ -13,22 +15,44 @@ const MenuPage = () => {
     const { cartItems, addToCart, updateQuantity } = useCart();
     const [restaurant, setRestaurant] = useState(null);
     const [menuItems, setMenuItems] = useState([]);
+    const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [smartFilter, setSmartFilter] = useState('ALL');
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
             setLoading(true);
             try {
+                // Phase 1: Critical Establishment Handshake
                 const resResponse = await restaurantApi.getById(restaurantId);
                 setRestaurant(resResponse);
-                try {
-                    const menuResponse = await menuApi.getMenu(restaurantId);
-                    setMenuItems(menuResponse || []);
-                } catch (menuErr) {
-                    setMenuItems([]);
-                }
+                
+                // Phase 2: Supplemental Data Streams (Parallel & Resilient)
+                // We use individual try-catches to ensure one failure doesn't block the UI
+                Promise.allSettled([
+                    menuApi.getMenu(restaurantId),
+                    reviewApi.getRestaurantReviews(restaurantId)
+                ]).then(([menuResult, reviewResult]) => {
+                    if (menuResult.status === 'fulfilled') {
+                        setMenuItems(menuResult.value || []);
+                    } else {
+                        console.warn("Menu stream interrupted:", menuResult.reason);
+                        setMenuItems([]);
+                    }
+
+                    if (reviewResult.status === 'fulfilled') {
+                        setReviews(reviewResult.value || []);
+                    } else {
+                        console.warn("Transmission stream interrupted:", reviewResult.reason);
+                        setReviews([]);
+                    }
+                });
+
             } catch (err) {
+                console.error("Critical establishment failure:", err);
                 setRestaurant(null);
             } finally {
                 setLoading(false);
@@ -40,9 +64,55 @@ const MenuPage = () => {
     }, [restaurantId]);
 
     const categories = ['All', ...new Set((menuItems || []).map(item => item?.itemCategory || item?.category).filter(Boolean))];
-    const filteredMenu = selectedCategory === 'All'
-        ? menuItems
-        : menuItems.filter(item => (item.itemCategory || item.category) === selectedCategory);
+    
+    // Multi-stage filtering: Category -> Radar
+    const getFilteredMenu = () => {
+        let list = [...menuItems];
+        
+        // Stage 1: Category
+        if (selectedCategory !== 'All') {
+            list = list.filter(item => (item.itemCategory || item.category) === selectedCategory);
+        }
+        
+        // Stage 2: Smart Radar
+        switch (smartFilter) {
+            case 'TRENDING':
+                // Mock logic: items with index % 3 === 0 (or real logic if available)
+                return list.filter((_, i) => i % 3 === 0);
+            case 'ELITE':
+                // High rated items (Mock or real rating if items have it)
+                return list.filter(item => (item.itemPrice || 0) > 200); // Filter by value as proxy for premium
+            case 'QUICK':
+                // Mock logic
+                return list.filter((_, i) => i % 2 !== 0);
+            default:
+                return list;
+        }
+    };
+
+    const filteredMenu = getFilteredMenu();
+
+    const handleReviewSubmit = async (reviewData) => {
+        setIsSubmittingReview(true);
+        try {
+            // Get user from profile (assuming it's stored or we fetch it)
+            const profile = await authApi.getProfile();
+            await reviewApi.submit(profile.id, {
+                ...reviewData,
+                restaurantId: restaurantId
+            });
+            
+            // Refresh reviews
+            const updatedReviews = await reviewApi.getRestaurantReviews(restaurantId);
+            setReviews(updatedReviews);
+            setIsReviewModalOpen(false);
+        } catch (err) {
+            console.error("Failed to transmit review:", err);
+            alert("Transmission failed: " + err.message);
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
 
     const getQtyInCart = (itemId) => {
         const item = cartItems.find(i => i.id === itemId);
@@ -97,6 +167,18 @@ const MenuPage = () => {
                 </div>
             </div>
 
+            <div className="mobile-category-bar glass animate-fade-in">
+                {categories.map(cat => (
+                    <button
+                        key={cat}
+                        className={`mobile-cat-item ${selectedCategory === cat ? 'active' : ''}`}
+                        onClick={() => setSelectedCategory(cat)}
+                    >
+                        {cat}
+                    </button>
+                ))}
+            </div>
+
             <div className="menu-content container">
                 <div className="menu-layout">
                     <aside className="menu-sidebar">
@@ -125,11 +207,27 @@ const MenuPage = () => {
 
                     <main className="menu-main">
                         <div className="menu-top-bar-elite animate-fade-in">
+                            <div className="radar-filters-elite">
+                                {[
+                                    { id: 'ALL', label: 'ALL RADAR' },
+                                    { id: 'TRENDING', label: 'TRENDING' },
+                                    { id: 'ELITE', label: 'ELITE PICKS' },
+                                    { id: 'QUICK', label: 'QUICK PREP' }
+                                ].map(f => (
+                                    <button 
+                                        key={f.id}
+                                        className={`radar-btn-elite ${smartFilter === f.id ? 'active' : ''}`}
+                                        onClick={() => setSmartFilter(f.id)}
+                                    >
+                                        <div className="radar-dot"></div>
+                                        <span>{f.label}</span>
+                                    </button>
+                                ))}
+                            </div>
                             <div className="search-module-elite">
                                 <Search size={20} style={{ opacity: 0.4 }} />
-                                <input type="text" placeholder="Filter menu items..." />
+                                <input type="text" placeholder="Search menu..." />
                             </div>
-                            <button className="filter-btn"><Filter size={18} /> <span>Refine</span></button>
                         </div>
 
                         <div className="menu-grid-elite">
@@ -152,6 +250,9 @@ const MenuPage = () => {
                                             />
                                             {(item.isVeg || item.veg) && (
                                                 <div className="radiant-badge badge-veg" style={{position: 'absolute', top: '1rem', left: '1rem'}}>VEG</div>
+                                            )}
+                                            {index % 3 === 0 && (
+                                                <div className="radiant-badge badge-trending" style={{position: 'absolute', top: '1rem', right: '1rem'}}>TRENDING</div>
                                             )}
                                         </div>
                                         
@@ -184,9 +285,39 @@ const MenuPage = () => {
                                 );
                             })}
                         </div>
+
+                        {/* Reviews Section */}
+                        <section className="reviews-section-elite mt-16 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                            <div className="section-header-elite mb-8">
+                                <div className="flex items-center gap-3">
+                                    <MessageSquare size={24} className="text-orange" />
+                                    <h2 className="elite-h-accent" style={{fontSize: '1.8rem'}}>COMMUNITY TRANSMISSIONS</h2>
+                                </div>
+                                <div className="header-actions">
+                                    <p className="opacity-60">Authentication scores and feedback shared by verified travelers.</p>
+                                    <button 
+                                        className="btn-primary-slim mt-4"
+                                        onClick={() => setIsReviewModalOpen(true)}
+                                    >
+                                        Record Transmission
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="reviews-grid-elite">
+                                <ReviewList reviews={reviews} />
+                            </div>
+                        </section>
                     </main>
                 </div>
             </div>
+            <ReviewModal 
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                onSubmit={handleReviewSubmit}
+                restaurantName={restaurant.restaurantName}
+                isSubmitting={isSubmittingReview}
+            />
         </div>
     );
 };

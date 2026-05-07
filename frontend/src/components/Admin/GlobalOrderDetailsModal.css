@@ -1,0 +1,327 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;850&display=swap');
+
+.admin-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.92);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    z-index: 10000;
+}
+
+.tactical-hud-window {
+    width: 100%;
+    max-width: 1200px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px; /* Hard edges feel more tactical than round ones */
+    padding: 2.5rem;
+    max-height: 95vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.8), inset 0 0 50px rgba(255, 107, 0, 0.02);
+    font-family: 'Inter', sans-serif;
+    
+    /* Tactical Background Grid */
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* Hard Corner Decorations */
+.tactical-hud-window::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px;
+    width: 30px; height: 30px;
+    border-top: 3px solid var(--accent-orange);
+    border-left: 3px solid var(--accent-orange);
+}
+
+.tactical-hud-window::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 30px; height: 30px;
+    border-bottom: 3px solid var(--accent-orange);
+    border-right: 3px solid var(--accent-orange);
+}
+
+.hud-scanline {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 50%, rgba(255, 107, 0, 0.02) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.5;
+}
+
+/* Header */
+.hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hud-header-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.tactical-icon-box {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 107, 0, 0.1);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-orange);
+    clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%);
+}
+
+.order-id-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 850;
+    letter-spacing: -1px;
+    margin: 0;
+    color: white;
+}
+
+.label-tactical {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent-orange);
+    letter-spacing: 2px;
+}
+
+.cursor-blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Grid Layout */
+.hud-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.hud-module {
+    margin-bottom: 2.5rem;
+}
+
+.module-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    opacity: 0.4;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+}
+
+/* Status Module */
+.status-control-container {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-text-large {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+.tactical-dropdown {
+    background: rgba(255, 107, 0, 0.05);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    color: white;
+    padding: 0.6rem 1rem;
+    font-weight: 800;
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+}
+
+.tactical-dropdown option {
+    background: #0f172a;
+    color: white;
+    padding: 10px;
+}
+
+/* Telemetry Node */
+.telemetry-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.tele-node {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.2rem;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.label-mini {
+    font-size: 0.55rem;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    opacity: 0.5;
+    display: block;
+}
+
+.tele-node p {
+    font-weight: 700;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Manifest List */
+.tactical-list {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    height: 300px;
+    overflow-y: auto;
+}
+
+.tactical-item-row {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.it-data {
+    display: flex;
+    gap: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.it-qty { color: var(--accent-orange); font-weight: 800; }
+.it-name { font-weight: 700; font-size: 0.85rem; }
+
+/* Financial Grid */
+.financial-data-grid {
+    padding: 2rem;
+    background: rgba(255, 107, 0, 0.02);
+    border: 1px solid rgba(255, 107, 0, 0.1);
+}
+
+.fin-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.total-terminal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px dashed rgba(255, 107, 0, 0.2);
+}
+
+.label-total { font-weight: 900; font-size: 0.7rem; opacity: 0.5; letter-spacing: 2px; }
+.value-total { font-size: 2.8rem; font-weight: 950; font-family: 'JetBrains Mono', monospace; color: var(--accent-orange); line-height: 1; }
+
+/* Footer */
+.hud-footer {
+    padding-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Close Trigger */
+.hud-close-btn {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hud-close-btn:hover {
+    background: #ef4444;
+    border-color: #ef4444;
+}
+
+.tactical-link-btn {
+    background: rgba(255, 107, 0, 0.1);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    color: var(--accent-orange);
+    padding: 0.3rem 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tactical-link-btn:hover {
+    background: var(--accent-orange);
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 107, 0, 0.4);
+}
+
+.tactical-refresh-btn {
+    width: 48px;
+    height: 48px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 0.5rem;
+}
+
+.animate-hud-entry {
+    animation: hudEntry 0.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes hudEntry {
+    from { opacity: 0; transform: scale(0.98); filter: blur(10px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@media (max-width: 1024px) {
+    .hud-layout-grid { grid-template-columns: 1fr; }
+    .tactical-hud-window { padding: 1.5rem; }
+}

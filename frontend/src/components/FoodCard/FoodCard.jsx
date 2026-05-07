@@ -31,6 +31,13 @@ const FoodCard = ({ id, image, name, rating, address, distance, isActive, onHove
                     </div>
                 )}
 
+                {parseFloat(rating) >= 4.5 && (
+                    <div className="elite-badge-corner-ribbon">
+                        <Star size={10} fill="white" />
+                        <span>ELITE HUB</span>
+                    </div>
+                )}
+
                 {!active && (
                     <div className="closed-overlay animate-fade-in">
                         <div className="closed-badge-main">

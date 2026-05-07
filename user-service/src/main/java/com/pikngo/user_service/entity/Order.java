@@ -48,6 +48,9 @@ public class Order {
     @Column(name = "payment_method")
     private String paymentMethod;
 
+    @Column(name = "points_earned")
+    private Long pointsEarned = 0L;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
 
@@ -66,10 +69,11 @@ public class Order {
         private User user;
         private Restaurant restaurant;
         private BigDecimal totalAmount;
-        private OrderStatus status = OrderStatus.PENDING;
+        private OrderStatus status;
         private String deliveryAddress;
-        private boolean isSelfPickup = false;
+        private boolean isSelfPickup;
         private String paymentMethod;
+        private Long pointsEarned = 0L;
 
         public OrderBuilder user(User user) { this.user = user; return this; }
         public OrderBuilder restaurant(Restaurant restaurant) { this.restaurant = restaurant; return this; }
@@ -78,6 +82,7 @@ public class Order {
         public OrderBuilder deliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; return this; }
         public OrderBuilder isSelfPickup(boolean isSelfPickup) { this.isSelfPickup = isSelfPickup; return this; }
         public OrderBuilder paymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; return this; }
+        public OrderBuilder pointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; return this; }
 
         public Order build() {
             Order order = new Order();
@@ -88,6 +93,7 @@ public class Order {
             order.setDeliveryAddress(deliveryAddress);
             order.setSelfPickup(isSelfPickup);
             order.setPaymentMethod(paymentMethod);
+            order.setPointsEarned(pointsEarned);
             return order;
         }
     }
@@ -114,6 +120,8 @@ public class Order {
     public void setSelfPickup(boolean selfPickup) { isSelfPickup = selfPickup; }
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public Long getPointsEarned() { return pointsEarned; }
+    public void setPointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; }
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
     public LocalDateTime getCreatedTs() { return createdTs; }

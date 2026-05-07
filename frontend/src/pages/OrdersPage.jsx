@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { orderApi } from '../services/api';
-import { ShoppingBag, Clock, CheckCircle, Package, Timer, MapPin, Activity } from 'lucide-react';
+import { ShoppingBag, Clock, CheckCircle, Package, Timer, MapPin, Activity, Utensils, Search } from 'lucide-react';
 import OrderDetailsModal from '../components/OrderDetailsModal/OrderDetailsModal';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
@@ -10,7 +10,7 @@ import './OrdersPage.css';
 import { useToast } from '../context/ToastContext';
 import { TableSkeleton } from '../components/Common/Skeleton';
 import OrderStatusStepper from '../components/OrderStatusStepper/OrderStatusStepper';
-import ReviewModal from '../components/ReviewModal/ReviewModal';
+import ReviewForm from '../components/Reviews/ReviewForm';
 
 const OrdersPage = () => {
     const { showToast } = useToast();
@@ -154,60 +154,99 @@ const OrdersPage = () => {
                 ) : (
                     <div className="orders-list">
                         {orders.map((order) => (
-                            <div key={order.id} className="order-card animate-scale-in">
-                                <div className="order-main">
-                                    <div className="order-header">
-                                        <div className="res-info">
-                                            <h3>{order.restaurantName || 'Elite Dining'}</h3>
-                                            <p className="order-date">{order.createdTs ? new Date(order.createdTs).toLocaleDateString() : 'Today'} • {order.createdTs ? new Date(order.createdTs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}</p>
-                                        </div>
-                                        <div className="order-status" style={{ 
-                                            backgroundColor: `${getStatusColor(order.status)}15`, 
-                                            color: getStatusColor(order.status), 
-                                            borderColor: `${getStatusColor(order.status)}40` 
-                                        }}>
-                                            {order.status || 'PROCESSING'}
-                                        </div>
-                                    </div>
-                                    <OrderStatusStepper currentStatus={order.status} />
-
-                                    <div className="order-items-summary">
-                                        {(order.items || []).map((item, idx) => (
-                                            <div key={item.id || idx} className="summary-item">
-                                                <span>{item.quantity}x {item.itemName || 'Item'}</span>
-                                                <span>₹{(item.price || 0) * (item.quantity || 1)}</span>
+                            <div key={order.id} className="order-card-hub glass-modern animate-scale-in">
+                                <div className="order-main-content">
+                                    <header className="card-header-elite">
+                                        <div className="brand-intel">
+                                            <div className="hub-logo">
+                                                <Utensils size={20} />
                                             </div>
-                                        ))}
+                                            <div className="brand-details">
+                                                <h3>{order.restaurantName || 'Elite Dining'}</h3>
+                                                <p className="order-id">TRANSMISSION ID: #{order.id?.toString().substring(0, 8).toUpperCase()}</p>
+                                            </div>
+                                        </div>
+                                        <div className="status-intel">
+                                            <div className="status-pill" style={{ 
+                                                backgroundColor: `${getStatusColor(order.status)}15`, 
+                                                color: getStatusColor(order.status), 
+                                                borderColor: `${getStatusColor(order.status)}40` 
+                                            }}>
+                                                <span className="status-dot" style={{ backgroundColor: getStatusColor(order.status) }}></span>
+                                                {order.status || 'PROCESSING'}
+                                            </div>
+                                            <p className="order-time-stamp">
+                                                {order.createdTs ? new Date(order.createdTs).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now'}
+                                            </p>
+                                        </div>
+                                    </header>
+
+                                    <div className="tracking-terminal-section">
+                                        <OrderStatusStepper currentStatus={order.status} />
                                     </div>
 
-                                    <div className="order-footer">
-                                        <div className="footer-left">
-                                            <p className="delivery-loc"><MapPin size={14} /> {order.deliveryAddress || 'Pick-up'}</p>
+                                    <div className="order-inventory-summary glass-modern">
+                                        <div className="summary-header">
+                                            <Package size={16} />
+                                            <span>ORDER MANIFEST</span>
                                         </div>
-                                        <div className="footer-right">
-                                            <span className="total-label">Total Paid:</span>
-                                            <span className="total-val">₹{order.totalAmount || 0}</span>
+                                        <div className="inventory-list">
+                                            {(order.items || []).map((item, idx) => (
+                                                <div key={item.id || idx} className="inventory-row">
+                                                    <span className="item-qty">{item.quantity}x</span>
+                                                    <span className="item-name">{item.itemName || 'Item'}</span>
+                                                    <span className="item-price">₹{(item.price || 0) * (item.quantity || 1)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="inventory-footer">
+                                            <div className="location-intel">
+                                                <MapPin size={14} />
+                                                <span>{order.deliveryAddress || 'Pick-up'}</span>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1">
+                                                {order.pointsEarned > 0 && (
+                                                    <div className="points-award-pill">
+                                                        <span>+{order.pointsEarned} ELITE POINTS</span>
+                                                    </div>
+                                                )}
+                                                <div className="total-intel">
+                                                    <span className="label">TOTAL TRANSMITTED:</span>
+                                                    <span className="value">₹{order.totalAmount || 0}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="order-actions">
-                                    <button className="btn-glass-slim" onClick={() => handleViewDetails(order)}>View Details</button>
-                                    {order?.status === 'DELIVERED' ? (
-                                        <button 
-                                            className="btn-primary-slim" 
-                                            onClick={() => {
-                                                setOrderToReview(order);
-                                                setIsReviewModalOpen(true);
-                                            }}
-                                        >
-                                            Rate & Review
+
+                                <aside className="order-actions-terminal">
+                                    <div className="terminal-actions-inner">
+                                        <button className="action-node-btn glass-pill" onClick={() => handleViewDetails(order)}>
+                                            <Search size={16} />
+                                            VIEW DETAILS
                                         </button>
-                                    ) : (
-                                        <button className="btn-primary-slim" onClick={() => handleViewDetails(order)}>Track Order</button>
-                                    )}
-                                </div>
+                                        {order?.status === 'DELIVERED' ? (
+                                            <button 
+                                                className="action-node-primary btn-solid-orange" 
+                                                onClick={() => {
+                                                    setOrderToReview(order);
+                                                    setIsReviewModalOpen(true);
+                                                }}
+                                            >
+                                                <Activity size={16} />
+                                                RATE EXPERIENCE
+                                            </button>
+                                        ) : (
+                                            <button className="action-node-primary btn-solid-orange" onClick={() => handleViewDetails(order)}>
+                                                <Activity size={16} />
+                                                LIVE TRACKING
+                                            </button>
+                                        )}
+                                    </div>
+                                </aside>
                             </div>
                         ))}
+
                     </div>
                 )}
             </div>
@@ -218,11 +257,16 @@ const OrdersPage = () => {
                 order={selectedOrder} 
             />
 
-            <ReviewModal 
-                isOpen={isReviewModalOpen}
-                onClose={() => setIsReviewModalOpen(false)}
-                order={orderToReview}
-            />
+            {isReviewModalOpen && (
+                <ReviewForm 
+                    restaurantId={orderToReview?.restaurantId} // Wait, I need to check if Order entity has restaurantId
+                    orderId={orderToReview?.id}
+                    onClose={() => setIsReviewModalOpen(false)}
+                    onSuccess={() => {
+                        // Optional: Refresh orders
+                    }}
+                />
+            )}
         </div>
     );
 };

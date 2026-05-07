@@ -80,6 +80,12 @@ public class User {
     @Column(name = "role")
     private UserRole role = UserRole.USER;
 
+    @Column(name = "loyalty_points")
+    private Long loyaltyPoints = 0L;
+
+    @Column(name = "vault_tier")
+    private String vaultTier = "SILVER";
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Address> addresses;
@@ -127,6 +133,8 @@ public class User {
         private boolean isActive = true;
         private boolean isDeleted = false;
         private UserRole role = UserRole.USER;
+        private Long loyaltyPoints = 0L;
+        private String vaultTier = "SILVER";
 
         public UserBuilder id(UUID id) { this.id = id; return this; }
         public UserBuilder firstName(String firstName) { this.firstName = firstName; return this; }
@@ -143,6 +151,8 @@ public class User {
         public UserBuilder isActive(boolean isActive) { this.isActive = isActive; return this; }
         public UserBuilder isDeleted(boolean isDeleted) { this.isDeleted = isDeleted; return this; }
         public UserBuilder role(UserRole role) { this.role = role; return this; }
+        public UserBuilder loyaltyPoints(Long points) { this.loyaltyPoints = points; return this; }
+        public UserBuilder vaultTier(String tier) { this.vaultTier = tier; return this; }
 
         public User build() {
             User user = new User();
@@ -161,6 +171,8 @@ public class User {
             user.setActive(isActive);
             user.setDeleted(isDeleted);
             user.setRole(role);
+            user.setLoyaltyPoints(loyaltyPoints);
+            user.setVaultTier(vaultTier);
             return user;
         }
     }
@@ -202,6 +214,10 @@ public class User {
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
     public UserRole getRole() { return role; }
     public void setRole(UserRole role) { this.role = role; }
+    public Long getLoyaltyPoints() { return loyaltyPoints; }
+    public void setLoyaltyPoints(Long loyaltyPoints) { this.loyaltyPoints = loyaltyPoints; }
+    public String getVaultTier() { return vaultTier; }
+    public void setVaultTier(String vaultTier) { this.vaultTier = vaultTier; }
     public List<Address> getAddresses() { return addresses; }
     public void setAddresses(List<Address> addresses) { this.addresses = addresses; }
     public List<Order> getOrders() { return orders; }

@@ -1,8 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, ArrowRight, Loader2, Timer } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Loader2, Timer, Activity, ChevronRight } from 'lucide-react';
 import { orderApi } from '../../services/api';
 import './ActiveOrderBar.css';
+
+const getProgressWidth = (status) => {
+    switch (status?.toUpperCase()) {
+        case 'PENDING': return '20%';
+        case 'CONFIRMED': return '40%';
+        case 'PREPARING': return '60%';
+        case 'READY': return '85%';
+        case 'DELIVERED': return '100%';
+        default: return '10%';
+    }
+};
+
+const getEstTime = (status) => {
+    switch (status?.toUpperCase()) {
+        case 'PENDING': return 'Searching Hub...';
+        case 'PREPARING': return 'In Extraction...';
+        case 'READY': return 'Ready for Pickup';
+        default: return 'ETA: 15-20m';
+    }
+};
 
 const ActiveOrderBar = () => {
     const [activeOrder, setActiveOrder] = useState(null);
@@ -46,22 +66,35 @@ const ActiveOrderBar = () => {
     if (loading || !activeOrder || isOrdersPage || isLoginPage) return null;
 
     return (
-        <div className="active-order-bar-container animate-slide-up">
-            <div className="active-order-bar glass-modern">
-                <div className="order-info">
-                    <div className="pulse-icon">
-                        <Timer size={20} className="text-orange" />
-                        <span className="pulse-ring"></span>
+        <div className="active-order-hud-container animate-slide-up">
+            <div className="active-order-hud glass-modern">
+                <div className="hud-telemetry-layer"></div>
+                <div className="hud-main-content">
+                    <div className="hud-status-node">
+                        <div className="pulse-icon-elite">
+                            <Activity size={20} className="pulse-icon-svg" />
+                            <span className="pulse-dot"></span>
+                        </div>
+                        <div className="hud-intel">
+                            <span className="hud-acct">TRANS-LINK ID: #{activeOrder.id?.toString().substring(0,8).toUpperCase()}</span>
+                            <p className="hud-status-report">
+                                STATUS: <span className="highlight">{activeOrder.status?.replace('_', ' ') || 'ACTIVE'}</span>
+                            </p>
+                        </div>
                     </div>
-                    <div className="text-details">
-                        <span className="status-label">Ongoing Order #{activeOrder.id?.toString().substring(0,6) || 'TRACK'}</span>
-                        <p className="status-text">Status: <strong>{activeOrder.status || 'Active'}</strong></p>
+                    
+                    <div className="hud-progress-module">
+                        <div className="hud-progress-track">
+                             <div className="hud-progress-fill" style={{ width: getProgressWidth(activeOrder.status) }}></div>
+                        </div>
+                        <span className="hud-time-est">{getEstTime(activeOrder.status)}</span>
                     </div>
+
+                    <button className="hud-extraction-btn" onClick={() => navigate('/orders')}>
+                        <span>VIEW HUD</span>
+                        <ChevronRight size={18} />
+                    </button>
                 </div>
-                <button className="track-btn" onClick={() => navigate('/orders')}>
-                    <span>Track Order</span>
-                    <ArrowRight size={16} />
-                </button>
             </div>
         </div>
     );

@@ -44,6 +44,10 @@ public class RestaurantServiceImpl implements RestaurantService {
         existing.setLatitude(updatedRestaurant.getLatitude());
         existing.setLongitude(updatedRestaurant.getLongitude());
         existing.setActive(updatedRestaurant.isActive());
+        existing.setCategory(updatedRestaurant.getCategory());
+        existing.setRating(updatedRestaurant.getRating());
+        existing.setDeliveryTime(updatedRestaurant.getDeliveryTime());
+        existing.setImageUrl(updatedRestaurant.getImageUrl());
 
         return restaurantRepository.save(existing);
     }

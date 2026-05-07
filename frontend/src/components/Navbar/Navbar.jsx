@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
     User, LogIn, Menu, X, ChevronDown, LogOut, Settings, 
     Sun, Moon, ShoppingCart, LayoutDashboard, 
-    Home, Utensils, Info, ShoppingBag, Users, Flame
+    Home, Utensils, Info, ShoppingBag, Users, Flame, Trophy
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useCart } from '../../context/CartContext';
@@ -48,7 +48,7 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
         <nav className={`navbar ${isNavbarScrolled ? 'scrolled glass' : 'transparent'}`}>
             <div className="navbar-container">
                 <NavLink to={isLoggedIn ? "/dashboard" : "/"} className="logo-link">
-                    <Logo />
+                    <Logo size={140} />
                 </NavLink>
 
                 <div className={`nav-links ${isOpen ? 'active' : ''}`}>
@@ -69,6 +69,12 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
                     {isLoggedIn && (
                         <NavLink to="/orders" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
                             <ShoppingBag size={16} /> <span>My Orders</span>
+                        </NavLink>
+                    )}
+
+                    {isLoggedIn && userRole === 'ADMIN' && (
+                        <NavLink to="/admin/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                            <LayoutDashboard size={16} /> <span style={{ color: '#a78bfa', fontWeight: '900' }}>Admin Hub</span>
                         </NavLink>
                     )}
 
@@ -116,12 +122,10 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
                                         <User size={16} />
                                         <span>Profile</span>
                                     </NavLink>
-                                    {userRole === 'ADMIN' && (
-                                        <NavLink to="/admin/dashboard" className="dropdown-item admin-link">
-                                            <LayoutDashboard size={16} />
-                                            <span>Admin Dashboard</span>
-                                        </NavLink>
-                                    )}
+                                    <NavLink to="/vault" className="dropdown-item">
+                                        <Trophy size={16} className="text-orange" />
+                                        <span>Elite Vault</span>
+                                    </NavLink>
                                     <div className="dropdown-divider"></div>
                                     <button className="dropdown-item logout-item" onClick={onLogout}>
                                         <LogOut size={16} />
@@ -136,9 +140,6 @@ const Navbar = ({ isLoggedIn, userName, userRole, profileImageUrl, onLogout }) =
                             <NavLink to="/register" className="btn-nav-primary">Sign Up</NavLink>
                         </div>
                     )}
-                    <button className="mobile-menu-btn" onClick={() => setIsOpen(!isOpen)}>
-                        {isOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
                 </div>
             </div>
         </nav>

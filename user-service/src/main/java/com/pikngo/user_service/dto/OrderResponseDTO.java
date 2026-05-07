@@ -18,12 +18,13 @@ public class OrderResponseDTO {
     private boolean isSelfPickup;
     private LocalDateTime createdTs;
     private List<OrderItemResponseDTO> items;
+    private Long pointsEarned;
 
     public OrderResponseDTO() {}
 
     public OrderResponseDTO(UUID id, UUID userId, String userName, UUID restaurantId, String restaurantName, 
                              BigDecimal totalAmount, String status, String deliveryAddress, String paymentMethod, 
-                             boolean isSelfPickup, LocalDateTime createdTs, List<OrderItemResponseDTO> items) {
+                             boolean isSelfPickup, LocalDateTime createdTs, List<OrderItemResponseDTO> items, Long pointsEarned) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
@@ -36,6 +37,7 @@ public class OrderResponseDTO {
         this.isSelfPickup = isSelfPickup;
         this.createdTs = createdTs;
         this.items = items;
+        this.pointsEarned = pointsEarned;
     }
 
     public static class OrderResponseDTOBuilder {
@@ -51,6 +53,7 @@ public class OrderResponseDTO {
         private boolean isSelfPickup;
         private LocalDateTime createdTs;
         private List<OrderItemResponseDTO> items;
+        private Long pointsEarned;
 
         public OrderResponseDTOBuilder id(UUID id) { this.id = id; return this; }
         public OrderResponseDTOBuilder userId(UUID userId) { this.userId = userId; return this; }
@@ -64,9 +67,10 @@ public class OrderResponseDTO {
         public OrderResponseDTOBuilder isSelfPickup(boolean isSelfPickup) { this.isSelfPickup = isSelfPickup; return this; }
         public OrderResponseDTOBuilder createdTs(LocalDateTime createdTs) { this.createdTs = createdTs; return this; }
         public OrderResponseDTOBuilder items(List<OrderItemResponseDTO> items) { this.items = items; return this; }
+        public OrderResponseDTOBuilder pointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; return this; }
 
         public OrderResponseDTO build() {
-            return new OrderResponseDTO(id, userId, userName, restaurantId, restaurantName, totalAmount, status, deliveryAddress, paymentMethod, isSelfPickup, createdTs, items);
+            return new OrderResponseDTO(id, userId, userName, restaurantId, restaurantName, totalAmount, status, deliveryAddress, paymentMethod, isSelfPickup, createdTs, items, pointsEarned);
         }
     }
 
@@ -147,4 +151,6 @@ public class OrderResponseDTO {
     public void setCreatedTs(LocalDateTime createdTs) { this.createdTs = createdTs; }
     public List<OrderItemResponseDTO> getItems() { return items; }
     public void setItems(List<OrderItemResponseDTO> items) { this.items = items; }
+    public Long getPointsEarned() { return pointsEarned; }
+    public void setPointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; }
 }

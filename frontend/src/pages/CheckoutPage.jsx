@@ -5,16 +5,17 @@ import { useCart } from '../context/CartContext';
 import { addressApi, orderApi, paymentApi } from '../services/api';
 import AddressModal from '../components/AddressModal/AddressModal.jsx';
 import { 
-    ChevronLeft, Trash2, CreditCard, ShieldCheck, 
+    ChevronLeft, Trash2, CreditCard, ShieldCheck, X,
     MapPin, Plus, CheckCircle2, Wallet, Smartphone, Banknote,
-    AlertTriangle, Loader2, Search, Navigation
+    AlertTriangle, Loader2, Search, Navigation, QrCode, Scan,
+    Minus, Plus as PlusIcon, Trash2 as TrashIcon
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
     const { showToast } = useToast();
-    const { cartItems: realCartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
-    const cartItems = realCartItems.length > 0 ? realCartItems : [{ id: 1, name: 'Mock Meal', price: 299, quantity: 1, restaurantName: 'Mock Cafe' }];
+    const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
     const navigate = useNavigate();
 
     const [addresses, setAddresses] = useState([]);
@@ -24,6 +25,7 @@ const CheckoutPage = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+    const [isVerifyingQR, setIsVerifyingQR] = useState(false);
 
     const [cardDetails, setCardDetails] = useState({
         number: '', expiry: '', cvc: '', name: ''
@@ -92,6 +94,29 @@ const CheckoutPage = () => {
         try {
             const response = await paymentApi.createOrder(finalTotal);
             const orderData = response.data || response;
+
+            // Handle MOCK MODE (if key is placeholder or status is MOCK_MODE)
+            if (orderData.keyId === 'rzp_test_placeholder' || orderData.status === 'MOCK_MODE') {
+                showToast("Test Mode: Simulating secure transaction...", "info");
+                
+                // Add a small delay for realism
+                setTimeout(async () => {
+                    try {
+                        const verifyPayload = {
+                            razorpayOrderId: orderData.razorpayOrderId,
+                            razorpayPaymentId: "pay_mock_" + Math.random().toString(36).substring(7),
+                            razorpaySignature: "sig_mock_" + Math.random().toString(36).substring(7)
+                        };
+                        
+                        await paymentApi.verifyPayment(verifyPayload);
+                        await finalizeOrder();
+                    } catch (err) {
+                        showToast("Mock payment verification failed.", "error");
+                        setIsProcessing(false);
+                    }
+                }, 2000);
+                return;
+            }
             
             if (!window.Razorpay) {
                 showToast("Razorpay failed to load. Check your internet.", "error");
@@ -144,6 +169,16 @@ const CheckoutPage = () => {
         }
     };
 
+
+    const handleVerifyQR = () => {
+        setIsVerifyingQR(true);
+        // Simulate a 3-second secure verification step to match real-world trust
+        setTimeout(() => {
+            setIsVerifyingQR(false);
+            finalizeOrder();
+        }, 3200);
+    };
+
     const finalizeOrder = async () => {
         setIsProcessing(true);
         const restaurantId = cartItems[0]?.restaurantId;
@@ -176,11 +211,20 @@ const CheckoutPage = () => {
         }
     };
 
+    const handleUpdateQuantity = (item, amount) => {
+        const newQty = item.quantity + amount;
+        if (newQty <= 0) {
+            removeFromCart(item.id || item._id);
+        } else {
+            updateQuantity(item.id || item._id, newQty);
+        }
+    };
+
     const total = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const flatFee = serviceType === 'pickup' ? 0 : 45;
     const finalTotal = total + flatFee;
 
-    if (cartItems.length === 0 && !isSuccess) {
+    if (!isSuccess && (!cartItems || cartItems.length === 0)) {
         return (
             <div className="checkout-page empty-checkout-hub animate-fade-in">
                 <div className="bg-mesh"></div>
@@ -229,8 +273,20 @@ const CheckoutPage = () => {
                     <div className="terminal-loader-hub">
                         <div className="loader-ring-elite"></div>
                         <div className="loader-info">
-                            <h3>Processing Secure Encryption</h3>
-                            <p>Authorizing Payment Terminal...</p>
+                            <h3>Authorizing Vault Access</h3>
+                            <p>Connecting to Secure Payment Network...</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isVerifyingQR && (
+                <div className="processing-terminal-overlay verifying-qr">
+                    <div className="terminal-loader-hub">
+                        <div className="loader-ring-elite pulse"></div>
+                        <div className="loader-info">
+                            <h3>Verifying Transaction</h3>
+                            <p>Confirming transaction from your UPI app...</p>
                         </div>
                     </div>
                 </div>
@@ -246,6 +302,9 @@ const CheckoutPage = () => {
                         <h1>Terminal <span className="gradient-text">Checkout</span></h1>
                         <div className="security-status"><ShieldCheck size={14} /> 256-BIT ENCRYPTED</div>
                     </div>
+                    <button className="terminal-close-btn" onClick={() => navigate('/')} title="Exit Terminal">
+                        <X size={20} />
+                    </button>
                 </header>
 
                 <div className="terminal-grid">
@@ -346,6 +405,13 @@ const CheckoutPage = () => {
                                     <span>DIGITAL UPI</span>
                                 </button>
                                 <button 
+                                    className={`vault-node glass-modern ${paymentMethod === 'upi_qr' ? 'active' : ''}`}
+                                    onClick={() => setPaymentMethod('upi_qr')}
+                                >
+                                    <Scan size={20} />
+                                    <span>TERMINAL SCAN</span>
+                                </button>
+                                <button 
                                     className={`vault-node glass-modern ${paymentMethod === 'cash' ? 'active' : ''}`}
                                     onClick={() => setPaymentMethod('cash')}
                                 >
@@ -377,6 +443,49 @@ const CheckoutPage = () => {
                                     </div>
                                 </div>
                             )}
+
+                            {paymentMethod === 'upi_qr' && (
+                                <div className="qr-terminal-arena animate-fade-in">
+                                    <div className="qr-terminal-card glass-modern">
+                                        <div className="qr-header">
+                                            <Scan size={18} />
+                                            <span>DYNAMIC UPI TERMINAL</span>
+                                        </div>
+                                        <div className="qr-code-wrapper">
+                                            <div className="qr-scanner-line"></div>
+                                            <QRCodeSVG 
+                                                value={`upi://pay?pa=7019248015@fam&pn=PikNGo&am=${finalTotal}&cu=INR&tn=PikNGo%20Order`}
+                                                size={180}
+                                                level="H"
+                                                includeMargin={true}
+                                                bgColor="transparent"
+                                                fgColor="#0f172a" /* High contrast for scannability */
+                                            />
+                                        </div>
+                                        <div className="qr-footer">
+                                            <p className="vpa-display">7019248015@fam</p>
+                                            <p className="qr-hint">Scan with GPay, PhonePe, or any UPI app</p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        className={`verify-scan-btn glass-pill ${isVerifyingQR ? 'verifying' : ''}`}
+                                        onClick={handleVerifyQR}
+                                        disabled={isVerifyingQR || isProcessing}
+                                    >
+                                        {isVerifyingQR ? (
+                                            <>
+                                                <div className="mini-loader-white-elite"></div>
+                                                <span>VERIFYING SECURELY...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle2 size={16} /> 
+                                                <span>I'VE COMPLETED THE PAYMENT</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            )}
                         </section>
                     </div>
 
@@ -389,9 +498,23 @@ const CheckoutPage = () => {
                             
                             <div className="invoice-items-hub">
                                 {cartItems.map((item) => (
-                                    <div key={item.id} className="invoice-item">
+                                    <div key={item.id} className="invoice-item animate-slide-in">
                                         <div className="item-info">
-                                            <span className="qty">{item.quantity}x</span>
+                                            <div className="invoice-qty-controls glass-pill">
+                                                <button 
+                                                    className="qty-btn" 
+                                                    onClick={() => handleUpdateQuantity(item, -1)}
+                                                >
+                                                    {item.quantity === 1 ? <TrashIcon size={12} className="trash-mini" /> : <Minus size={12} />}
+                                                </button>
+                                                <span className="qty-val">{item.quantity}</span>
+                                                <button 
+                                                    className="qty-btn" 
+                                                    onClick={() => handleUpdateQuantity(item, 1)}
+                                                >
+                                                    <PlusIcon size={12} />
+                                                </button>
+                                            </div>
                                             <span className="name">{item.name}</span>
                                         </div>
                                         <span className="price">₹{item.price * item.quantity}</span>
@@ -416,17 +539,33 @@ const CheckoutPage = () => {
                             </div>
                             
                             <button 
-                                className="terminal-pay-btn btn-solid-orange" 
+                                className={`terminal-pay-btn btn-solid-orange ${isProcessing ? 'loading' : ''}`} 
                                 onClick={handlePlaceOrder}
                                 disabled={isProcessing}
                             >
-                                <ShieldCheck size={20} />
-                                <span>AUTHORIZE PAYMENT • ₹{finalTotal}</span>
+                                {isProcessing ? (
+                                    <>
+                                        <div className="mini-loader-white-elite"></div>
+                                        <span>PROCESSING SECURELY...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShieldCheck size={20} />
+                                        <span>AUTHORIZE PAYMENT • ₹{finalTotal}</span>
+                                    </>
+                                )}
                             </button>
                             
                             <div className="terminal-trust-footer">
                                 <div className="trust-node"><ShieldCheck size={12} /> SECURE VAULT</div>
                                 <div className="trust-node"><ShieldCheck size={12} /> PCI COMPLIANT</div>
+                            </div>
+
+                            <div className="terminal-footer-exit">
+                                <button className="exit-btn-elite glass-pill" onClick={() => navigate('/')}>
+                                    <X size={14} />
+                                    <span>EXIT TERMINAL & RETURN</span>
+                                </button>
                             </div>
                         </section>
                     </aside>

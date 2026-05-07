@@ -27,25 +27,11 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
     return (
         <section className="hero">
             {/* ... (floating elements same as before) */}
-            <div className="floating-elements">
-                <div className="float-item food-1">
-                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300&auto=format&fit=crop" alt="Burger" />
-                </div>
-                <div className="float-item food-2">
-                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=300&auto=format&fit=crop" alt="Salad" />
-                </div>
-                <div className="float-item pin-1">
-                    <MapPin size={40} />
-                </div>
-                <div className="float-item nav-1">
-                    <Navigation size={32} />
-                </div>
-            </div>
 
             <div className="hero-visuals">
                 <div className="hero-image-container">
                     <img
-                        src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop"
+                        src="/assets/landing-hero.png"
                         alt="High-end Highway Travel"
                         className="hero-main-image"
                     />
@@ -53,17 +39,11 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
                 </div>
             </div>
 
-            <div className="hero-content animate-fade-in">
-
-                <h1 className="hero-title">
-                    Fuel Your Journey with <br />
-                    <span className="gradient-text italic">Premium </span>
-                    Food on the Go
-                </h1>
-                <p className="hero-subtitle">
-                    Discover top-rated highway rest stops along your route. 
-                    Order ahead and skip the queue for a seamless journey.
-                </p>
+            <div className="hero-content animate-fade-in center-layout">
+                <div className="professional-hud-badge elite-entrance">
+                    <span className="status-dot"></span>
+                    HUB STATUS: OPTIMIZED • 256-BIT SECURE
+                </div>
 
                 <form className="search-wrapper glass animate-fade-in" onSubmit={handleSubmit}>
                     <div className="search-pill">
@@ -134,22 +114,28 @@ const Hero = ({ source, destination, setSource, setDestination, onSearch }) => {
                 </div>
 
                 <div className="popular-routes animate-fade-in" style={{animationDelay: '0.4s'}}>
-                    <span className="routes-label">Popular Routes:</span>
+                    <span className="routes-label">Active Corridors:</span>
                     <div className="routes-chips">
                         {[
-                            {s: 'Delhi', d: 'Jaipur'},
-                            {s: 'Delhi', d: 'Shimla'},
-                            {s: 'Mumbai', d: 'Pune'}
+                            {s: 'Delhi', d: 'Jaipur', hubs: 12, status: 'CLEAR'},
+                            {s: 'Delhi', d: 'Shimla', hubs: 8, status: 'ACTIVE'},
+                            {s: 'Mumbai', d: 'Pune', hubs: 15, status: 'OPTIMIZED'}
                         ].map((route, i) => (
                             <button 
                                 key={i} 
-                                className="route-chip glass-pill"
+                                className="route-chip-hud glass-pill"
                                 onClick={() => {
                                     setSource(route.s);
                                     setDestination(route.d);
                                 }}
                             >
-                                {route.s} ➔ {route.d}
+                                <div className="route-main">
+                                    <span className="route-text">{route.s} ➔ {route.d}</span>
+                                    <span className={`route-status ${route.status.toLowerCase()}`}>{route.status}</span>
+                                </div>
+                                <div className="route-stats">
+                                    <Navigation size={10} /> {route.hubs} HUBS DETECTED
+                                </div>
                             </button>
                         ))}
                     </div>

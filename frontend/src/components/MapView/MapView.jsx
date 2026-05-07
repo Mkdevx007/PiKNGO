@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline, Tooltip, useMapEvents, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import './MapView.css';
 import { HIGHWAYS } from '../../data/highways';
+import { calculateDistance } from '../../utils/geoUtils';
 
 // Fix for default marker icons in Leaflet with React
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -76,14 +77,8 @@ const RoutingEngine = ({ sourceCoords, destinationCoords }) => {
             }
         }).addTo(map);
 
-        // Ensure the line is on top and visible
-        routingControlRef.current.on('routesfound', (e) => {
-            const routes = e.routes;
-            if (routes && routes[0]) {
-                const bounds = L.latLngBounds(routes[0].coordinates);
-                map.fitBounds(bounds, { padding: [50, 50], animate: true });
-            }
-        });
+        // We remove fitBounds from here to let MapAutoCenter handle the holistic view
+        // including route and restaurants
 
         // Force hide the container if it's injected
         const container = routingControlRef.current.getContainer();
@@ -120,29 +115,127 @@ const hoveredRestaurantIcon = new L.Icon({
     className: 'hovered-marker-animate'
 });
 
-const MapAutoCenter = ({ coords, focusedHighwayPath }) => {
-    const map = useMap();
-    useEffect(() => {
-        if (focusedHighwayPath && focusedHighwayPath.length > 0) {
-            const bounds = L.latLngBounds(focusedHighwayPath);
-            map.fitBounds(bounds, { padding: [100, 100], animate: true });
-        } else if (coords && coords.length > 0) {
-            const bounds = L.latLngBounds(coords);
-            map.fitBounds(bounds, { padding: [50, 50] });
+const MapEvents = ({ onMapClick }) => {
+    useMapEvents({
+        click: (e) => {
+            if (onMapClick) onMapClick(e.latlng.lat, e.latlng.lng);
         }
-    }, [coords, focusedHighwayPath, map]);
+    });
     return null;
 };
 
-const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, focusedHighwayId }) => {
+const MapAutoCenter = ({ coords, focusedHighwayPath, sourceCoords, destinationCoords }) => {
+    const map = useMap();
+    useEffect(() => {
+        let allPoints = [];
+
+        if (sourceCoords) allPoints.push([sourceCoords.lat, sourceCoords.lon]);
+        if (destinationCoords) allPoints.push([destinationCoords.lat, destinationCoords.lon]);
+        
+        if (coords && coords.length > 0) {
+            coords.forEach(c => allPoints.push(c));
+        }
+
+        if (focusedHighwayPath && focusedHighwayPath.length > 0) {
+            const bounds = L.latLngBounds(focusedHighwayPath);
+            map.fitBounds(bounds, { padding: [100, 100], animate: true });
+        } else if (allPoints.length > 0) {
+            const bounds = L.latLngBounds(allPoints);
+            map.fitBounds(bounds, { padding: [80, 80], animate: true });
+        }
+    }, [coords, focusedHighwayPath, sourceCoords, destinationCoords, map]);
+    return null;
+};
+
+const MapView = ({ 
+    restaurants, 
+    sourceCoords, 
+    destinationCoords, 
+    hoveredRestId, 
+    focusedHighwayId,
+    onMapClick,
+    isSimulating,
+    simulatedLocation,
+    setSimulatedLocation
+}) => {
     const focusedHighway = HIGHWAYS.find(h => h.id === focusedHighwayId);
     const mapRef = useRef();
+    const routePointsRef = useRef([]);
+    const [isHudMinimized, setIsHudMinimized] = React.useState(false);
+
+    // Capture route points for simulation
+    useEffect(() => {
+        if (!isSimulating) return;
+        
+        // Find the routing control line and extract coordinates
+        // This is a bit of a hack since routing control doesn't easily expose the line to React
+        const interval = setInterval(() => {
+            const lines = document.querySelectorAll('.leaflet-interactive');
+            // Usually the route line is one of these. 
+            // Better way: intercept the routing control 'routesfound' event in RoutingEngine
+        }, 1000);
+        
+        return () => clearInterval(interval);
+    }, [isSimulating]);
+
+    // Simple simulation logic: Move towards destination if no complex route available
+    useEffect(() => {
+        if (!isSimulating || !simulatedLocation || !destinationCoords) return;
+
+        const moveSpeed = 0.005; // Adjustable speed
+        
+        const simulationTimer = setInterval(() => {
+            setSimulatedLocation(prev => {
+                if (!prev) return null;
+                
+                const latDiff = destinationCoords.lat - prev.lat;
+                const lonDiff = destinationCoords.lon - prev.lon;
+                const distance = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff);
+                
+                if (distance < moveSpeed) {
+                    return destinationCoords;
+                }
+                
+                return {
+                    lat: prev.lat + (latDiff / distance) * moveSpeed,
+                    lon: prev.lon + (lonDiff / distance) * moveSpeed
+                };
+            });
+        }, 100);
+
+        return () => clearInterval(simulationTimer);
+    }, [isSimulating, destinationCoords, setSimulatedLocation]);
 
     // Proximity logic: Find the nearest stop based on the map center or current location
-    const nearestStop = restaurants.length > 0 ? restaurants.sort((a, b) => (parseFloat(a.distance || 999)) - (parseFloat(b.distance || 999)))[0] : null;
+    const nearestStop = restaurants.length > 0 ? [...restaurants].sort((a, b) => {
+        // Use live simulated distance if available for sorting, otherwise fallback to API distance
+        const userLat = simulatedLocation?.lat;
+        const userLon = simulatedLocation?.lon;
+        
+        const distA = (isSimulating && userLat) 
+            ? calculateDistance(userLat, userLon, a.latitude || a.location?.lat, a.longitude || a.location?.lon)
+            : parseFloat(a.distance);
+            
+        const distB = (isSimulating && userLat) 
+            ? calculateDistance(userLat, userLon, b.latitude || b.location?.lat, b.longitude || b.location?.lon)
+            : parseFloat(b.distance);
+        
+        // Debug logging for missing coordinates
+        if ((!a.latitude && !a.location?.lat) && !a._warned) {
+            console.warn(`Restaurant ${a.restaurantName} (ID: ${a.id}) is missing GPS coordinates.`);
+            a._warned = true;
+        }
 
-    // Custom Elite Pulsing Icon Creator
-    const createEliteIcon = (type, isHovered = false) => {
+        return (distA || 9999) - (distB || 9999);
+    })[0] : null;
+
+    // Calculate live distance for display
+    const liveDistance = nearestStop && isSimulating && simulatedLocation
+        ? calculateDistance(simulatedLocation.lat, simulatedLocation.lon, nearestStop.latitude || nearestStop.location?.lat, nearestStop.longitude || nearestStop.location?.lon)
+        : nearestStop?.distance;
+
+    // Custom Elite Pulsing Icon Creator - Memoized to prevent jitter during simulation
+    const createEliteIcon = React.useCallback((type, isHovered = false) => {
         return L.divIcon({
             className: `elite-div-icon ${type} ${isHovered ? 'hovered' : ''}`,
             html: `
@@ -153,7 +246,14 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
             iconSize: [30, 30],
             iconAnchor: [15, 15]
         });
-    };
+    }, []);
+
+    // Stable icons for Source and Destination to prevent flickering
+    const sourceMarkerIcon = React.useMemo(() => createEliteIcon('source'), [createEliteIcon]);
+    const destMarkerIcon = React.useMemo(() => createEliteIcon('destination'), [createEliteIcon]);
+    const userMarkerIcon = React.useMemo(() => createEliteIcon('user-location'), [createEliteIcon]);
+    const restaurantMarkerIcon = React.useMemo(() => createEliteIcon('restaurant'), [createEliteIcon]);
+    const restaurantHoveredIcon = React.useMemo(() => createEliteIcon('restaurant', true), [createEliteIcon]);
 
     return (
         <div className="map-view-container-pro tech-hud-frame">
@@ -163,16 +263,29 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
 
             {/* Live Proximity HUD Intel */}
             {nearestStop && (
-                <div className="map-proximity-hud animate-fade-in">
-                    <div className="hud-intel-header">LIVE INTEL: NEXT BEST STOP</div>
-                    <div className="hud-intel-content">
-                        <div className="intel-name">{nearestStop.restaurantName}</div>
-                        <div className="intel-meta">
-                            <span className="dist">{nearestStop.distance ? `${parseFloat(nearestStop.distance).toFixed(1)} KM` : 'Calculating...'}</span>
-                            <span className="divider">|</span>
-                            <span className="rating">⭐ {nearestStop.rating || '4.5'}</span>
-                        </div>
+                <div className={`map-proximity-hud animate-fade-in ${isHudMinimized ? 'minimized' : ''}`}>
+                    <div className="hud-intel-header">
+                        <span>LIVE INTEL {isHudMinimized ? '' : ': NEXT BEST STOP'}</span>
+                        <button 
+                            className="hud-toggle-btn" 
+                            onClick={() => setIsHudMinimized(!isHudMinimized)}
+                        >
+                            {isHudMinimized ? '+' : '−'}
+                        </button>
                     </div>
+                    {!isHudMinimized && (
+                        <div className="hud-intel-content">
+                            <div className="intel-name">{nearestStop.restaurantName}</div>
+                            <div className="intel-meta">
+                                <span className="dist">
+                                    {liveDistance ? `${parseFloat(liveDistance).toFixed(1)} KM` : 'NO GPS SIGNAL'}
+                                    {isSimulating && <span className="sim-badge">LIVE</span>}
+                                </span>
+                                <span className="divider">|</span>
+                                <span className="rating">⭐ {nearestStop.rating || '4.5'}</span>
+                            </div>
+                        </div>
+                    )}
                     <div className="hud-pulse-bar"></div>
                 </div>
             )}
@@ -182,20 +295,30 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                 zoom={5} 
                 style={{ height: '100%', width: '100%', borderRadius: '24px' }}
                 ref={mapRef}
+                zoomControl={false}
             >
+                <ZoomControl position="bottomright" />
                 <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 />
 
+                <MapEvents onMapClick={onMapClick} />
+
+                {isSimulating && simulatedLocation && (
+                    <Marker position={[simulatedLocation.lat, simulatedLocation.lon]} icon={userMarkerIcon}>
+                        <Popup className="premium-popup">Scanning Route...</Popup>
+                    </Marker>
+                )}
+
                 {sourceCoords && (
-                    <Marker position={[sourceCoords.lat, sourceCoords.lon]} icon={createEliteIcon('source')}>
+                    <Marker position={[sourceCoords.lat, sourceCoords.lon]} icon={sourceMarkerIcon}>
                         <Popup className="premium-popup">Starting Point</Popup>
                     </Marker>
                 )}
 
                 {destinationCoords && (
-                    <Marker position={[destinationCoords.lat, destinationCoords.lon]} icon={createEliteIcon('destination')}>
+                    <Marker position={[destinationCoords.lat, destinationCoords.lon]} icon={destMarkerIcon}>
                         <Popup className="premium-popup">Destination</Popup>
                     </Marker>
                 )}
@@ -209,8 +332,8 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                     </>
                 )}
 
-                {/* Highway Routes Layer with Neon Pulse */}
-                {sourceCoords && HIGHWAYS.map(highway => {
+                {/* Highway Routes Layer with Neon Pulse - Shown only after source is picked but before routing starts */}
+                {sourceCoords && !destinationCoords && HIGHWAYS.map(highway => {
                     const isFocused = highway.id === focusedHighwayId;
 
                     return (
@@ -260,8 +383,8 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                         <Marker 
                             key={res._id || res.id} 
                             position={[lat, lon]} 
-                            icon={createEliteIcon('restaurant', isHovered)}
-                            zIndexOffset={isHovered ? 1000 : 0}
+                            icon={isHovered ? restaurantHoveredIcon : restaurantMarkerIcon}
+                            zIndexOffset={isHovered ? 2000 : 1000} // Ensure they are above the route line
                             ref={(r) => {
                                 if (r) {
                                     if (isHovered) {
@@ -291,6 +414,8 @@ const MapView = ({ restaurants, sourceCoords, destinationCoords, hoveredRestId, 
                 <MapAutoCenter 
                     coords={restaurants.map(r => [r.latitude || (r.location && r.location.lat), r.longitude || (r.location && r.location.lon)]).filter(c => c[0] && c[1])} 
                     focusedHighwayPath={focusedHighway?.path}
+                    sourceCoords={sourceCoords}
+                    destinationCoords={destinationCoords}
                 />
             </MapContainer>
         </div>

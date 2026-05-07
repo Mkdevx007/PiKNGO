@@ -1,5 +1,6 @@
 package com.pikngo.user_service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ public class RestaurantRequestDTO {
     private String category;
     private Double rating;
     private String deliveryTime;
+
+    @JsonProperty("isActive")
     private boolean isActive;
 
     public RestaurantRequestDTO() {}
@@ -36,6 +39,8 @@ public class RestaurantRequestDTO {
     public void setRating(Double rating) { this.rating = rating; }
     public String getDeliveryTime() { return deliveryTime; }
     public void setDeliveryTime(String deliveryTime) { this.deliveryTime = deliveryTime; }
+    @JsonProperty("isActive")
     public boolean isActive() { return isActive; }
+    @JsonProperty("isActive")
     public void setActive(boolean active) { isActive = active; }
 }

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Key, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Key, Lock, ArrowRight, ChevronLeft, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { authApi } from '../../services/api';
+import OtpInput from './OtpInput';
 
 const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack }) => {
     const [forgotEmail, setForgotEmail] = useState('');
@@ -14,10 +16,10 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
         onError('');
         try {
             await authApi.forgotPassword(forgotEmail);
-            onSuccess('Reset token generated! (Check user-service/OTP_DEBUG.txt)');
+            onSuccess('A 6-digit code has been sent to your email.');
             setShowReset(true);
         } catch (err) {
-            onError(err.response?.data?.message || 'Failed to send reset link.');
+            onError(err.response?.data?.message || 'Failed to send reset code.');
         } finally { setLoading(false); }
     };
 
@@ -39,6 +41,9 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
 
     return (
         <div className="auth-card-content">
+            <Link to="/" className="auth-close-btn" title="Back to Home">
+                <X size={20} />
+            </Link>
             <h2 className="auth-title">{showReset ? 'Set New Password' : 'Forgot Password?'}</h2>
             <p className="auth-subtitle">
                 {showReset
@@ -66,10 +71,12 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
                 <form className="auth-form" onSubmit={handleResetSubmit}>
                     <div className="form-group">
                         <label>Reset Code</label>
-                        <div className="input-wrapper">
-                            <Key size={18} className="input-icon" />
-                            <input type="text" value={resetToken} onChange={(e) => setResetToken(e.target.value)} placeholder="Enter 6-digit code" required />
-                        </div>
+                        <OtpInput 
+                            length={6} 
+                            value={resetToken} 
+                            onChange={setResetToken}
+                            disabled={loading}
+                        />
                     </div>
                     <div className="form-group">
                         <label>New Password</label>

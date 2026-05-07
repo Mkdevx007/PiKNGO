@@ -14,6 +14,7 @@ import './ManageUsers.css'; // Borrowing pagination and skeleton styles
 import { useToast } from '../context/ToastContext';
 import { TableSkeleton } from '../components/Common/Skeleton';
 import { restaurantApi } from '../services/api';
+import GlobalOrderDetailsModal from '../components/Admin/GlobalOrderDetailsModal';
 
 const GlobalOrders = () => {
     const { showToast } = useToast();
@@ -34,6 +35,8 @@ const GlobalOrders = () => {
         totalPages: 0
     });
     const [isLive, setIsLive] = useState(false);
+    const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
     useEffect(() => {
         fetchOrders(pagination.page);
@@ -122,6 +125,9 @@ const GlobalOrders = () => {
         try {
             await orderApi.updateStatus(orderId, newStatus);
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+            if (selectedOrderDetails && selectedOrderDetails.id === orderId) {
+                setSelectedOrderDetails(prev => ({ ...prev, status: newStatus }));
+            }
             showToast(`Order #${orderId.substring(0, 6)} updated to ${newStatus}`, 'info');
         } catch (err) {
             console.error("Failed to update status:", err);
@@ -253,13 +259,25 @@ const GlobalOrders = () => {
                     </div>
                 ) : (
                     (filteredOrders || []).map(order => (
-                        <div key={order?.id} className={`order-pro-card glass-card animate-scale-in ${isOrderUrgent(order) ? 'status-urgent' : ''}`}>
+                        <div 
+                            key={order?.id} 
+                            className={`order-pro-card glass-card animate-scale-in ${isOrderUrgent(order) ? 'status-urgent' : ''}`}
+                            onClick={() => {
+                                setSelectedOrderDetails(order);
+                                setIsDetailsModalOpen(true);
+                            }}
+                            style={{ cursor: 'pointer' }}
+                        >
                             {isOrderUrgent(order) && <div className="urgency-banner">LATE ORDER ACTION REQUIRED</div>}
                             <div className="order-card-header">
-                                <span className="order-id-badge">#{order?.id?.substring(0, 8) || 'ORDER'}</span>
+                                <div className="flex flex-col">
+                                    <span className="order-id-badge">#{order?.id?.substring(0, 8) || 'ORDER'}</span>
+                                    <span className="text-[10px] opacity-40 mt-1 font-bold">CLICK FOR INSIGHTS</span>
+                                </div>
                                 <select 
                                     className={`status-dropdown ${order?.status?.toLowerCase() || 'pending'}`}
                                     value={order?.status || 'PENDING'}
+                                    onClick={(e) => e.stopPropagation()}
                                     onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                                 >
                                     <option value="PENDING">Pending</option>
@@ -273,7 +291,19 @@ const GlobalOrders = () => {
                             
                             <div className="order-card-body">
                                 <div className="participant-info">
-                                    <div className="participant"><Store size={14} /> <strong>{order.restaurantName}</strong></div>
+                                    <div className="participant">
+                                        <Store size={14} /> 
+                                        <strong>{order.restaurantName}</strong>
+                                        <button 
+                                            className="view-menu-mini-btn"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                window.location.href = `/restaurant/${order.restaurantId}`;
+                                            }}
+                                        >
+                                            View Menu
+                                        </button>
+                                    </div>
                                     <div className="participant"><User size={14} /> <span>{order.userName}</span></div>
                                 </div>
 
@@ -314,6 +344,13 @@ const GlobalOrders = () => {
                     </button>
                 </div>
             )}
+
+            <GlobalOrderDetailsModal 
+                isOpen={isDetailsModalOpen}
+                onClose={() => setIsDetailsModalOpen(false)}
+                order={selectedOrderDetails}
+                onUpdateStatus={handleUpdateStatus}
+            />
         </div>
     );
 };

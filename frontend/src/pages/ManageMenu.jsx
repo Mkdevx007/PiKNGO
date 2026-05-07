@@ -205,13 +205,25 @@ const ManageMenu = () => {
                                         </div>
                                     </div>
                                     <div className="toggle-group-mini">
-                                        <label className="toggle-label-mini">
-                                            <input type="checkbox" name="isVeg" checked={formData.isVeg} onChange={handleInputChange} />
+                                        <label className="toggle-label-mini" htmlFor="isVeg">
+                                            <input 
+                                                type="checkbox" 
+                                                id="isVeg"
+                                                name="isVeg" 
+                                                checked={formData.isVeg} 
+                                                onChange={handleInputChange} 
+                                            />
                                             <span className="toggle-design"></span>
                                             <span>Veg</span>
                                         </label>
-                                        <label className="toggle-label-mini">
-                                            <input type="checkbox" name="isAvailable" checked={formData.isAvailable} onChange={handleInputChange} />
+                                        <label className="toggle-label-mini" htmlFor="isAvailable">
+                                            <input 
+                                                type="checkbox" 
+                                                id="isAvailable"
+                                                name="isAvailable" 
+                                                checked={formData.isAvailable} 
+                                                onChange={handleInputChange} 
+                                            />
                                             <span className="toggle-design"></span>
                                             <span>Instock</span>
                                         </label>

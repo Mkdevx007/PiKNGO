@@ -13,7 +13,40 @@ export const CITY_COORDS = {
     'indore': { lat: 22.7196, lon: 75.8577 },
 };
 
+import axios from 'axios';
+
 export const getCoordsForCity = (cityName) => {
     const city = cityName.toLowerCase().trim();
     return CITY_COORDS[city] || CITY_COORDS['delhi']; // Default to Delhi for demo
+};
+
+export const reverseGeocode = async (lat, lon) => {
+    try {
+        const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`);
+        const data = response.data;
+        // Try to get a clean city/town/village name
+        return data.address.city || data.address.town || data.address.village || data.address.county || data.display_name.split(',')[0];
+    } catch (err) {
+        console.error("Reverse geocoding failed", err);
+        return "Unknown Hub";
+    }
+};
+
+export const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+    
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+    const d = R * c; // Distance in km
+    return d;
+};
+
+const deg2rad = (deg) => {
+    return deg * (Math.PI / 180);
 };
