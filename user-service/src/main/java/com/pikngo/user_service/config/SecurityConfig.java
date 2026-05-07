@@ -31,7 +31,13 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-                    config.setAllowedOrigins(java.util.List.of("http://localhost:5173", "http://localhost:5174"));
+                    config.setAllowedOrigins(java.util.List.of(
+                            "http://localhost:5173", 
+                            "http://localhost:5174",
+                            "http://192.168.1.7:5173",
+                            "http://192.168.1.7:5174",
+                            "https://pik-n-go.vercel.app"
+                    ));
                     config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(java.util.List.of("*"));
                     config.setAllowCredentials(true);
