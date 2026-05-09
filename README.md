@@ -6,6 +6,12 @@
   <img src="https://img.shields.io/badge/PostgreSQL-14%2B-blue?style=for-the-badge&logo=postgresql" />
   <img src="https://img.shields.io/badge/Vercel-Deployed-black?style=for-the-badge&logo=vercel" />
   <img src="https://img.shields.io/badge/Render-Backend-blueviolet?style=for-the-badge&logo=render" />
+
+  ### 🌐 Live Links
+  | Service | URL |
+  |---|---|
+  | 🖥️ **Frontend (Website)** | [https://pikngo.vercel.app](https://pikngo.vercel.app) |
+  | ⚙️ **Backend (API)** | [https://pikngo-user-service.onrender.com](https://pikngo-user-service.onrender.com) |
 </div>
 
 ---
