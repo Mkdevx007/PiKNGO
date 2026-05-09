@@ -36,7 +36,8 @@ public class SecurityConfig {
                             "http://localhost:5174",
                             "http://192.168.1.7:5173",
                             "http://192.168.1.7:5174",
-                            "https://pik-n-go.vercel.app"
+                            "https://pik-n-go.vercel.app",
+                            "https://pikngo.vercel.app"
                     ));
                     config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(java.util.List.of("*"));
