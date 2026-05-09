@@ -7,24 +7,12 @@ services:
     startCommand: java -jar target/*.jar
     envVars:
       - key: DB_URL
-        fromDatabase:
-          name: pikngo-db
-          property: connectionString
+        sync: false # Set this in Render Dashboard (e.g., jdbc:postgresql://db.xxxx.supabase.co:5432/postgres)
       - key: DB_USERNAME
-        fromDatabase:
-          name: pikngo-db
-          property: user
+        sync: false # Set this in Render Dashboard (e.g., postgres)
       - key: DB_PASSWORD
-        fromDatabase:
-          name: pikngo-db
-          property: password
+        sync: false # Set this in Render Dashboard
       - key: MAIL_USERNAME
         value: welcomedevil006@gmail.com
       - key: MAIL_PASSWORD
-        sync: false # You will set this manually in Render dashboard for safety
-
-databases:
-  - name: pikngo-db
-    databaseName: pikngo_db
-    user: pikngo_db_user
-    plan: free
+        sync: false # Set this manually in Render dashboard
