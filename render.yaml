@@ -7,11 +7,11 @@ services:
     startCommand: java -jar target/*.jar
     envVars:
       - key: DB_URL
-        sync: false # Set this in Render Dashboard (e.g., jdbc:postgresql://db.xxxx.supabase.co:5432/postgres)
+        value: jdbc:postgresql://ep-calm-bird-apehu4fz-pooler.c-7.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
       - key: DB_USERNAME
-        sync: false # Set this in Render Dashboard (e.g., postgres)
+        value: neondb_owner
       - key: DB_PASSWORD
-        sync: false # Set this in Render Dashboard
+        value: npg_7oM9ELuxjhUb
       - key: MAIL_USERNAME
         value: welcomedevil006@gmail.com
       - key: MAIL_PASSWORD
