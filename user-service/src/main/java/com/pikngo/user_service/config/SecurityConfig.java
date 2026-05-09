@@ -36,6 +36,8 @@ public class SecurityConfig {
                             "http://localhost:5174",
                             "http://192.168.1.7:5173",
                             "http://192.168.1.7:5174",
+                            "http://192.168.1.43:5174",
+                            "http://10.220.81.40:5174",
                             "https://pik-n-go.vercel.app",
                             "https://pikngo.vercel.app"
                     ));
@@ -56,8 +58,10 @@ public class SecurityConfig {
                                 "/api/v1/users/all/**",
                                 "/api/v1/users/profile/photo/**",
                                 "/api/v1/payment/**",
+                                "/api/v1/users/make-me-admin/**",
                                 "/ws-orders/**")
                         .permitAll()
+                        .requestMatchers("/api/v1/restaurants/admin/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/restaurants/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/orders/trending").permitAll()
                         .requestMatchers("/api/v1/restaurants/**").authenticated()

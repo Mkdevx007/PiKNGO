@@ -35,7 +35,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173", "http://localhost:5174", "http://192.168.1.43:5174", "http://10.220.81.40:5174") // Explicit origins for credentials
+                .allowedOrigins(
+                        "http://localhost:5173",
+                        "http://localhost:5174",
+                        "http://192.168.1.7:5173",
+                        "http://192.168.1.7:5174",
+                        "http://192.168.1.43:5174",
+                        "http://10.220.81.40:5174",
+                        "https://pik-n-go.vercel.app",
+                        "https://pikngo.vercel.app"
+                )
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);

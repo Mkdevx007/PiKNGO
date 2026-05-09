@@ -26,7 +26,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Cookie;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.HttpHeaders;
 
 import java.security.Principal;
 import java.util.UUID;
@@ -81,12 +82,14 @@ public class UserController {
 
         String token = jwtUtils.generateToken(user.getPhoneNumber(), user.getRole().name());
 
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(86400); 
-        response.addCookie(cookie);
+        ResponseCookie springCookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(86400)
+                .sameSite("None")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, springCookie.toString());
 
         JwtResponse jwtResponse = new JwtResponse("protected", user.getPhoneNumber(), user.getId(), user.getRole().name());
         return ResponseEntity.ok(ApiResponse.success("Login successful", jwtResponse));
@@ -131,12 +134,14 @@ public class UserController {
 
         String token = jwtUtils.generateToken(user.getPhoneNumber(), user.getRole().name());
 
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(86400);
-        response.addCookie(cookie);
+        ResponseCookie springCookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(86400)
+                .sameSite("None")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, springCookie.toString());
 
         JwtResponse jwtResponse = new JwtResponse("protected", user.getPhoneNumber(), user.getId(), user.getRole().name());
         return ResponseEntity.ok(ApiResponse.success("OTP verified successfully", jwtResponse));
@@ -247,12 +252,14 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie springCookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, springCookie.toString());
         return ResponseEntity.ok(ApiResponse.success("Logout successful", null));
     }
 
@@ -262,5 +269,17 @@ public class UserController {
             Principal principal) {
         authService.changePassword(principal.getName(), request);
         return ResponseEntity.ok(ApiResponse.success("Password updated successfully", null));
+    }
+
+    // TEMP ENDPOINT TO ELEVATE USER TO ADMIN FOR TESTING
+    @GetMapping("/make-me-admin/{phoneNumber}")
+    public ResponseEntity<ApiResponse<String>> makeMeAdmin(@PathVariable String phoneNumber) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + phoneNumber));
+        
+        user.setRole(User.Role.ADMIN);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(ApiResponse.success("You (" + phoneNumber + ") are now an ADMIN! Please login again.", null));
     }
 }
