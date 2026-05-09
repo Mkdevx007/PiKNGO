@@ -8,7 +8,7 @@ COPY pom.xml .
 COPY mvnw .
 COPY .mvn .mvn
 COPY src src
-RUN ./mvnw clean package -DskipTests
+RUN chmod +x ./mvnw && ./mvnw clean package -DskipTests
 
 # Stage 2: Production
 FROM eclipse-temurin:17-jre-alpine
