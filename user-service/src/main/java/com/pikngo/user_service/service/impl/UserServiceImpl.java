@@ -65,12 +65,16 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
 
         // Send Welcome Email
-        String subject = "Welcome to PikNGo Premium!";
-        String body = "Hi " + request.getFirstName() + ",\n\n" +
-                "Thank you for registering with PikNGo. Your account has been successfully created.\n" +
-                "Enjoy exploring top-tier restaurants and premium delivery services!\n\n" +
-                "Best Regards,\nThe PikNGo Team";
-        emailService.sendEmail(savedUser.getEmail(), subject, body);
+        try {
+            String subject = "Welcome to PikNGo Premium!";
+            String body = "Hi " + request.getFirstName() + ",\n\n" +
+                    "Thank you for registering with PikNGo. Your account has been successfully created.\n" +
+                    "Enjoy exploring top-tier restaurants and premium delivery services!\n\n" +
+                    "Best Regards,\nThe PikNGo Team";
+            emailService.sendEmail(savedUser.getEmail(), subject, body);
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to {}: {}", savedUser.getEmail(), e.getMessage());
+        }
 
         return savedUser;
     }
