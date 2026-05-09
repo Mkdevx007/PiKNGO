@@ -1,6 +1,7 @@
 services:
   - type: web
     name: pikngo-user-service
+    plan: free
     env: docker
     rootDir: user-service
     envVars:
