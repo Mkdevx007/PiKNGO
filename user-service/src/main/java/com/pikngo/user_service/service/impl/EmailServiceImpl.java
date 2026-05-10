@@ -30,6 +30,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @org.springframework.scheduling.annotation.Async
     public void sendEmail(String to, String subject, String body) {
         log.info("Preparing to send plain text email to {} from {}", to, fromEmail);
         if (mailSender == null) {
@@ -53,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @org.springframework.scheduling.annotation.Async
     public void sendHtmlEmail(String to, String subject, String htmlBody) {
         log.info("Preparing to send HTML email to {} from {}", to, fromEmail);
         if (mailSender == null) {
@@ -79,6 +81,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    @org.springframework.scheduling.annotation.Async
     public void sendOtpEmail(String email, String otp) {
         String subject = "Your PikNGo Verification Code";
         
