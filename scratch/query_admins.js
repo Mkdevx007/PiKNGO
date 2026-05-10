@@ -7,7 +7,7 @@ const client = new Client({
 async function findAdmins() {
   try {
     await client.connect();
-    const res = await client.query("SELECT id, phone_number, email, first_name, role FROM users WHERE role = 'ADMIN' OR role = '1'");
+    const res = await client.query("SELECT _id as id, phone_number, email, first_name, role FROM users WHERE role = 'ADMIN' OR role = '1'");
     if (res.rows.length === 0) {
       console.log('No ADMIN users found in the database.');
     } else {
