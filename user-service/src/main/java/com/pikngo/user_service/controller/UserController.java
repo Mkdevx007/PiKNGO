@@ -277,7 +277,7 @@ public class UserController {
         User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + phoneNumber));
         
-        user.setRole(User.Role.ADMIN);
+        user.setRole(User.UserRole.ADMIN);
         userRepository.save(user);
         
         return ResponseEntity.ok(ApiResponse.success("You (" + phoneNumber + ") are now an ADMIN! Please login again.", null));

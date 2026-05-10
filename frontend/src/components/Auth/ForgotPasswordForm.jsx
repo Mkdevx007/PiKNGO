@@ -41,9 +41,6 @@ const ForgotPasswordForm = ({ onSuccess, onError, loading, setLoading, onBack })
 
     return (
         <div className="auth-card-content">
-            <Link to="/" className="auth-close-btn" title="Back to Home">
-                <X size={20} />
-            </Link>
             <h2 className="auth-title">{showReset ? 'Set New Password' : 'Forgot Password?'}</h2>
             <p className="auth-subtitle">
                 {showReset
