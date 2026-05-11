@@ -18,6 +18,7 @@ public interface AuthService {
     void resetPassword(String token, String newPassword);
 
     void sendEmailOtp(String email);
+    void sendEmailOtpSync(String email);
 
     boolean verifyEmailOtp(String email, String otp);
     void changePassword(String phoneNumber, ChangePasswordRequest request);

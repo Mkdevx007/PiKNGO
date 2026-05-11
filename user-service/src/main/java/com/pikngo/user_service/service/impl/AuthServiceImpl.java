@@ -201,6 +201,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendEmailOtp(String email) {
+        String otpCode = generateAndSaveEmailOtp(email);
+        emailService.sendOtpEmail(email, otpCode);
+    }
+
+    @Override
+    public void sendEmailOtpSync(String email) {
+        String otpCode = generateAndSaveEmailOtp(email);
+        // Explicitly calling the sync version
+        emailService.sendOtpEmailSync(email, otpCode);
+    }
+
+    private String generateAndSaveEmailOtp(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
 
@@ -217,7 +229,7 @@ public class AuthServiceImpl implements AuthService {
 
         otpRepository.save(otp);
         System.out.println("DEBUG_OTP_EMAIL: " + email + " CODE: " + otpCode);
-        emailService.sendOtpEmail(email, otpCode);
+        return otpCode;
     }
 
     @Override

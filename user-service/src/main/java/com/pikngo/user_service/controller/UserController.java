@@ -271,17 +271,20 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Password updated successfully", null));
     }
 
-    // DIAGNOSTIC ENDPOINT TO TEST EMAIL
+    // DIAGNOSTIC ENDPOINT TO TEST EMAIL (SYNCHRONOUS)
     @GetMapping("/test-email")
     public ResponseEntity<ApiResponse<String>> testEmail(@RequestParam String to) {
-        log.info("DIAGNOSTIC: Testing email to {}", to);
+        log.info("DIAGNOSTIC: Testing email to {} (Synchronous)", to);
         try {
-            authService.sendEmailOtp(to);
-            return ResponseEntity.ok(ApiResponse.success("Test email triggered to " + to + ". Check Render logs for background status.", null));
+            // Using a new sync method to get the error immediately in response
+            authService.sendEmailOtpSync(to);
+            return ResponseEntity.ok(ApiResponse.success("SUCCESS! Email sent to " + to + ". Check your inbox.", null));
         } catch (Exception e) {
             log.error("DIAGNOSTIC ERROR: ", e);
+            String errorMsg = e.getMessage();
+            if (e.getCause() != null) errorMsg += " | Cause: " + e.getCause().getMessage();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Failed to trigger email: " + e.getMessage()));
+                    .body(ApiResponse.error("SMTP FAILURE: " + errorMsg));
         }
     }
 

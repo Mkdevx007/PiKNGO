@@ -9,6 +9,7 @@ public interface EmailService {
     void sendEmail(String to, String subject, String body);
 
     void sendOtpEmail(String email, String otp);
+    void sendOtpEmailSync(String email, String otp);
 
     void sendHtmlEmail(String to, String subject, String htmlBody);
 }

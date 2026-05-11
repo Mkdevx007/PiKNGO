@@ -84,9 +84,15 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @org.springframework.scheduling.annotation.Async
     public void sendOtpEmail(String email, String otp) {
-        log.info("DIAGNOSTIC: Attempting to send OTP {} to email {}", otp, email);
+        sendOtpEmailSync(email, otp);
+    }
+
+    @Override
+    public void sendOtpEmailSync(String email, String otp) {
+        log.info("DIAGNOSTIC: Attempting to send OTP {} to email {} (Sync)", otp, email);
         if (mailSender == null) {
             log.error("DIAGNOSTIC: JavaMailSender is NULL. Check application.properties and dependencies.");
+            throw new RuntimeException("JavaMailSender is NULL");
         }
         
         String subject = "Your PikNGo Verification Code";
@@ -114,7 +120,30 @@ public class EmailServiceImpl implements EmailService {
             "  </div>" +
             "</body></html>";
 
-        sendHtmlEmail(email, subject, htmlTemplate);
+        sendHtmlEmailSync(email, subject, htmlTemplate);
+    }
+
+    private void sendHtmlEmailSync(String to, String subject, String htmlBody) {
+        log.info("Sending HTML email to {} from {} (Sync)", to, fromEmail);
+        if (mailSender == null) {
+            throw new RuntimeException("JavaMailSender is NULL");
+        }
+
+        try {
+            jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+            org.springframework.mail.javamail.MimeMessageHelper helper = new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, "utf-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
+
+            mailSender.send(mimeMessage);
+            log.info("SUCCESS: HTML email sent to {}", to);
+        } catch (Exception e) {
+            log.error("DIAGNOSTIC FAILURE (Sync): {}", e.getMessage());
+            throw new RuntimeException("SMTP ERROR: " + e.getMessage(), e);
+        }
     }
 
     private void logToDebugFile(String to, String subject, String body) {
