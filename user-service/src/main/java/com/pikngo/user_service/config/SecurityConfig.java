@@ -59,6 +59,7 @@ public class SecurityConfig {
                                 "/api/v1/users/profile/photo/**",
                                 "/api/v1/payment/**",
                                 "/api/v1/users/make-me-admin/**",
+                                "/api/v1/users/test-email",
                                 "/ws-orders/**")
                         .permitAll()
                         .requestMatchers("/api/v1/restaurants/admin/**").authenticated()
