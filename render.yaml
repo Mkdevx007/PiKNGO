@@ -6,12 +6,16 @@ services:
     rootDir: user-service
     envVars:
       - key: DB_URL
-        value: jdbc:postgresql://ep-calm-bird-apehu4fz-pooler.c-7.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
+        sync: false
       - key: DB_USERNAME
-        value: neondb_owner
+        sync: false
       - key: DB_PASSWORD
-        value: npg_7oM9ELuxjhUb
+        sync: false
       - key: MAIL_USERNAME
-        value: welcomedevil006@gmail.com
+        sync: false
       - key: MAIL_PASSWORD
-        sync: false # Set this manually in Render dashboard
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 8080
