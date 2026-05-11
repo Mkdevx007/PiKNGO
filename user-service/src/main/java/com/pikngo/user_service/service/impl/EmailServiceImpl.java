@@ -75,7 +75,8 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(mimeMessage);
             log.info("SUCCESS: HTML email sent to {}", to);
         } catch (Exception e) {
-            log.error("FAILURE: Failed to send HTML email. Error: {}", e.getMessage());
+            log.error("DIAGNOSTIC FAILURE: Failed to send HTML email to {}. Error: {}", to, e.getMessage());
+            e.printStackTrace(); // This will show in Render logs
             logToDebugFile(to, subject, "[HTML FAILED: " + e.getMessage() + "]");
         }
     }
@@ -83,6 +84,11 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @org.springframework.scheduling.annotation.Async
     public void sendOtpEmail(String email, String otp) {
+        log.info("DIAGNOSTIC: Attempting to send OTP {} to email {}", otp, email);
+        if (mailSender == null) {
+            log.error("DIAGNOSTIC: JavaMailSender is NULL. Check application.properties and dependencies.");
+        }
+        
         String subject = "Your PikNGo Verification Code";
         
         // Mobile-optimized and more compact Elite template

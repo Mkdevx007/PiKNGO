@@ -271,6 +271,20 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Password updated successfully", null));
     }
 
+    // DIAGNOSTIC ENDPOINT TO TEST EMAIL
+    @GetMapping("/test-email")
+    public ResponseEntity<ApiResponse<String>> testEmail(@RequestParam String to) {
+        log.info("DIAGNOSTIC: Testing email to {}", to);
+        try {
+            authService.sendEmailOtp(to);
+            return ResponseEntity.ok(ApiResponse.success("Test email triggered to " + to + ". Check Render logs for background status.", null));
+        } catch (Exception e) {
+            log.error("DIAGNOSTIC ERROR: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Failed to trigger email: " + e.getMessage()));
+        }
+    }
+
     // TEMP ENDPOINT TO ELEVATE USER TO ADMIN FOR TESTING
     @GetMapping("/make-me-admin/{phoneNumber}")
     public ResponseEntity<ApiResponse<String>> makeMeAdmin(@PathVariable String phoneNumber) {
