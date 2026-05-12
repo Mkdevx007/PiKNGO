@@ -225,9 +225,57 @@
     margin-bottom: 1rem;
 }
 
+.profile-snapshot, .analytics-snapshot {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+.main-overview-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.top-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.top-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border-left: 3px solid var(--accent-orange);
+}
+
+.item-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.item-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent-orange);
+    font-weight: 800;
+}
+
+.empty-stats {
+    padding: 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.8rem;
+}
+
 @media (max-width: 1024px) {
-    .stats-strip {
+    .stats-strip, .main-overview-row {
         grid-template-columns: 1fr;
+        flex-direction: column;
     }
 }
 

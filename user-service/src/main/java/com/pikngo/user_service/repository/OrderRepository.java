@@ -15,12 +15,23 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findByUserIdOrderByCreatedTsDesc(UUID userId);
     List<Order> findByRestaurantIdOrderByCreatedTsDesc(UUID restaurantId);
     List<Order> findAllByOrderByCreatedTsDesc();
+    List<Order> findByStatusAndRiderIsNull(Order.OrderStatus status);
+    List<Order> findByRiderIdOrderByCreatedTsDesc(UUID riderId);
+
+    long countByIsSelfPickupFalse();
+    long countByIsSelfPickupTrue();
 
     @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'DELIVERED'")
     java.math.BigDecimal calculateTotalRevenue();
 
-    long countByIsSelfPickupTrue();
-    long countByIsSelfPickupFalse();
+    @org.springframework.data.jpa.repository.Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.restaurant.id = :restaurantId AND o.status = 'DELIVERED'")
+    java.math.BigDecimal calculateRestaurantRevenue(UUID restaurantId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(o) FROM Order o WHERE o.restaurant.id = :restaurantId")
+    long countByRestaurantId(UUID restaurantId);
+
+    @Query("SELECT mi.itemName, SUM(oi.quantity) FROM OrderItem oi JOIN oi.menuItem mi WHERE mi.restaurant.id = :restaurantId GROUP BY mi.itemName ORDER BY SUM(oi.quantity) DESC")
+    List<Object[]> findTopItemsByRestaurant(UUID restaurantId, Pageable pageable);
 
     @Query("""
             SELECT new com.pikngo.user_service.dto.TrendingItemDTO(

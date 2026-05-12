@@ -110,10 +110,29 @@ public class RestaurantController {
 
     @GetMapping("/my-restaurant")
     @PreAuthorize("hasRole('RESTAURANT_OWNER')")
-    public ResponseEntity<ApiResponse<RestaurantResponseDTO>> getMyRestaurant(Principal principal) {
-        log.info("REST request to get restaurant for owner: {}", principal.getName());
-        com.pikngo.user_service.entity.User user = userService.getUserByPhoneNumber(principal.getName());
-        RestaurantResponseDTO restaurant = restaurantService.getRestaurantByOwnerId(user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Your restaurant details fetched successfully", restaurant));
+    public ResponseEntity<ApiResponse<List<RestaurantResponseDTO>>> getMyRestaurant(Principal principal) {
+        log.info("REST request to get restaurant for owner: {}", principal != null ? principal.getName() : "unknown");
+        if (principal == null) return ResponseEntity.status(401).build();
+        var user = userService.getUserByPhoneNumber(principal.getName());
+        return ResponseEntity.ok(ApiResponse.success("My restaurant fetched successfully", restaurantService.getRestaurantsByOwner(user.getId())));
+    }
+
+    @GetMapping("/{restaurantId}/analytics")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
+    public ResponseEntity<ApiResponse<com.pikngo.user_service.dto.PartnerAnalyticsDTO>> getRestaurantAnalytics(
+            Principal principal,
+            @PathVariable UUID restaurantId) {
+        log.info("REST request to get analytics for restaurant: {}", restaurantId);
+        
+        // Security check for owner
+        var user = userService.getUserByPhoneNumber(principal.getName());
+        if (user.getRole().name().equals("RESTAURANT_OWNER")) {
+            var restaurant = restaurantService.getRestaurantById(restaurantId);
+            if (!restaurant.getOwnerId().equals(user.getId())) {
+                return ResponseEntity.status(403).build();
+            }
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success("Analytics fetched successfully", restaurantService.getPartnerAnalytics(restaurantId)));
     }
 }

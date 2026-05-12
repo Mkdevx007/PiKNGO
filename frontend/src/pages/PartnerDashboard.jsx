@@ -63,14 +63,23 @@ const PartnerDashboard = () => {
         setLoading(true);
         try {
             const res = await restaurantApi.getMyRestaurant();
-            setRestaurant(res);
-            
-            // Fetch stats if available (simulated for now)
-            setStats({
-                totalOrders: 24,
-                revenue: 12450,
-                avgRating: res.rating || 4.5
-            });
+            if (res && res.length > 0) {
+                const rest = res[0];
+                setRestaurant(rest);
+                
+                // Fetch real analytics
+                try {
+                    const analytics = await restaurantApi.getAnalytics(rest.id);
+                    setStats({
+                        totalOrders: analytics.totalOrders,
+                        revenue: analytics.totalRevenue,
+                        avgRating: analytics.averageRating,
+                        topItems: analytics.topItems || []
+                    });
+                } catch (e) {
+                    console.warn("Analytics not available yet:", e);
+                }
+            }
         } catch (err) {
             console.error("Failed to fetch partner data:", err);
             showToast("Failed to load restaurant profile", "error");
@@ -176,6 +185,20 @@ const PartnerDashboard = () => {
                                         <div className="detail"><Utensils size={14} /> {restaurant.category}</div>
                                         <div className="detail"><Clock size={14} /> {restaurant.deliveryTime} mins avg</div>
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <div className="analytics-snapshot glass-modern">
+                                <h3>Top Selling Items</h3>
+                                <div className="top-items-list">
+                                    {stats.topItems && stats.topItems.length > 0 ? stats.topItems.map((item, idx) => (
+                                        <div key={idx} className="top-item-row">
+                                            <span className="item-name">{item.itemName}</span>
+                                            <span className="item-count">{item.count} orders</span>
+                                        </div>
+                                    )) : (
+                                        <div className="empty-stats">No sales data available.</div>
+                                    )}
                                 </div>
                             </div>
                         </div>

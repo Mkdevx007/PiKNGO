@@ -109,22 +109,31 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER', 'DELIVERY_RIDER')")
     public ResponseEntity<ApiResponse<OrderResponseDTO>> updateOrderStatus(
             Principal principal,
             @PathVariable UUID orderId,
             @RequestParam Order.OrderStatus status) {
         log.info("REST request to update status for order: {} to {}", orderId, status);
         
-        // Security Check: If the user is a RESTAURANT_OWNER, verify they own this order's restaurant
         com.pikngo.user_service.entity.User currentUser = userRepository.findByPhoneNumber(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
+        // Security Check for Restaurant Owner
         if (currentUser.getRole().name().equals("RESTAURANT_OWNER")) {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new RuntimeException("Order not found"));
             if (!order.getRestaurant().getOwnerId().equals(currentUser.getId())) {
-                return ResponseEntity.status(403).build(); // Forbidden
+                return ResponseEntity.status(403).build();
+            }
+        }
+        
+        // Security Check for Delivery Rider
+        if (currentUser.getRole().name().equals("DELIVERY_RIDER")) {
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new RuntimeException("Order not found"));
+            if (order.getRider() == null || !order.getRider().getId().equals(currentUser.getId())) {
+                return ResponseEntity.status(403).build();
             }
         }
         
@@ -148,5 +157,30 @@ public class OrderController {
         var user = userRepository.findByPhoneNumber(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found for phone: " + principal.getName()));
         return ResponseEntity.ok(ApiResponse.success("My orders fetched successfully", orderService.getUserOrders(user.getId())));
+    }
+
+    @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DELIVERY_RIDER')")
+    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getAvailableOrders() {
+        log.info("REST request to get available orders for riders");
+        return ResponseEntity.ok(ApiResponse.success("Available orders fetched successfully", orderService.getAvailableOrders()));
+    }
+
+    @GetMapping("/rider")
+    @PreAuthorize("hasRole('DELIVERY_RIDER')")
+    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getRiderOrders(Principal principal) {
+        log.info("REST request to get orders for current rider: {}", principal.getName());
+        var user = userRepository.findByPhoneNumber(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(ApiResponse.success("Rider orders fetched successfully", orderService.getRiderOrders(user.getId())));
+    }
+
+    @PostMapping("/{orderId}/claim")
+    @PreAuthorize("hasRole('DELIVERY_RIDER')")
+    public ResponseEntity<ApiResponse<OrderResponseDTO>> claimOrder(Principal principal, @PathVariable UUID orderId) {
+        log.info("REST request for rider {} to claim order {}", principal.getName(), orderId);
+        var user = userRepository.findByPhoneNumber(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(ApiResponse.success("Order claimed successfully", orderService.claimOrder(orderId, user.getId())));
     }
 }

@@ -9,6 +9,8 @@ public class OrderRequestDTO {
     private BigDecimal totalAmount;
     private String deliveryAddress;
     private boolean isSelfPickup;
+    private String promoCode;
+    private java.math.BigDecimal discountAmount;
     private String paymentMethod;
     private List<OrderItemRequestDTO> items;
 
@@ -36,6 +38,10 @@ public class OrderRequestDTO {
     public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
     public boolean isSelfPickup() { return isSelfPickup; }
     public void setSelfPickup(boolean selfPickup) { isSelfPickup = selfPickup; }
+    public String getPromoCode() { return promoCode; }
+    public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
+    public java.math.BigDecimal getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; }
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     public List<OrderItemRequestDTO> getItems() { return items; }

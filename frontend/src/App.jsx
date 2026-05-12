@@ -21,6 +21,7 @@ import PartnerDashboard from './pages/PartnerDashboard';
 import AdminLayout from './components/AdminLayout/AdminLayout';
 import Footer from './components/Footer/Footer';
 import VaultPage from './pages/VaultPage';
+import RiderDashboard from './pages/RiderDashboard';
 import { authApi } from './services/api';
 import { CartProvider } from './context/CartContext';
 import CheckoutPage from './pages/CheckoutPage';
@@ -51,9 +52,10 @@ function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLog
       />
       <main>
         <Routes>
-          <Route path="/" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : <Navigate to="/dashboard" />) : <LandingPage isLoggedIn={isLoggedIn} />} />
-          <Route path="/dashboard" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : <Dashboard />) : <Navigate to="/login" />} />
+          <Route path="/" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : userRole === 'DELIVERY_RIDER' ? <Navigate to="/rider" /> : <Navigate to="/dashboard" />) : <LandingPage isLoggedIn={isLoggedIn} />} />
+          <Route path="/dashboard" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : userRole === 'DELIVERY_RIDER' ? <Navigate to="/rider" /> : <Dashboard />) : <Navigate to="/login" />} />
           <Route path="/partner" element={isLoggedIn && userRole === 'RESTAURANT_OWNER' ? <PartnerDashboard /> : <Navigate to="/login" />} />
+          <Route path="/rider" element={isLoggedIn && userRole === 'DELIVERY_RIDER' ? <RiderDashboard /> : <Navigate to="/login" />} />
           <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
           <Route path="/register" element={<AuthPage onLogin={handleLogin} />} />
           <Route path="/profile" element={isLoggedIn ? <ProfileScreen onProfileUpdate={(data) => setProfileImageUrl(data.profileImageUrl)} /> : <Navigate to="/login" />} />

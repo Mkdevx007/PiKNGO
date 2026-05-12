@@ -62,6 +62,8 @@ public class OrderServiceImpl implements OrderService {
                 .deliveryAddress(request.getDeliveryAddress())
                 .isSelfPickup(request.isSelfPickup())
                 .paymentMethod(request.getPaymentMethod())
+                .promoCode(request.getPromoCode())
+                .discountAmount(request.getDiscountAmount())
                 .status(Order.OrderStatus.PENDING)
                 .build();
 
@@ -162,6 +164,42 @@ public class OrderServiceImpl implements OrderService {
         return mapToDTO(orderRepository.save(order));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponseDTO> getAvailableOrders() {
+        return orderRepository.findByStatusAndRiderIsNull(Order.OrderStatus.READY)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponseDTO> getRiderOrders(UUID riderId) {
+        return orderRepository.findByRiderIdOrderByCreatedTsDesc(riderId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public OrderResponseDTO claimOrder(UUID orderId, UUID riderId) {
+        log.info("Rider {} claiming order {}", riderId, orderId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        User rider = userRepository.findById(riderId)
+                .orElseThrow(() -> new RuntimeException("Rider not found"));
+
+        if (order.getRider() != null) {
+            throw new RuntimeException("Order already claimed by another rider");
+        }
+
+        order.setRider(rider);
+        order.setStatus(Order.OrderStatus.PICKED_UP);
+        return mapToDTO(orderRepository.save(order));
+    }
+
     private OrderResponseDTO mapToDTO(Order order) {
         if (order == null) return null;
         
@@ -184,6 +222,14 @@ public class OrderServiceImpl implements OrderService {
             builder.restaurantId(order.getRestaurant().getId())
                    .restaurantName(order.getRestaurant().getRestaurantName());
         }
+
+        if (order.getRider() != null) {
+            builder.riderId(order.getRider().getId())
+                   .riderName(order.getRider().getFirstName() + " " + order.getRider().getLastName());
+        }
+
+        builder.promoCode(order.getPromoCode())
+               .discountAmount(order.getDiscountAmount());
 
         if (order.getItems() != null) {
             builder.items(order.getItems().stream().map(item -> {

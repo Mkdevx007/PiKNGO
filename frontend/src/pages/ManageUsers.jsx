@@ -4,7 +4,7 @@ import {
     Shield, Mail, Phone, Calendar, 
     ChevronRight, User as UserIcon, ShieldCheck,
     UserPlus, UserMinus, ShieldAlert, Trash2, AlertCircle,
-    ChevronLeft, Loader2
+    ChevronLeft, Loader2, Utensils, Bike
 } from 'lucide-react';
 import { authApi } from '../services/api';
 import './ManageUsers.css';
@@ -111,6 +111,7 @@ const ManageUsers = () => {
         const matchesRole = roleFilter === 'All' || 
                             (roleFilter === 'Admins' && user.role === 'ADMIN') || 
                             (roleFilter === 'Partners' && user.role === 'RESTAURANT_OWNER') || 
+                            (roleFilter === 'Riders' && user.role === 'DELIVERY_RIDER') || 
                             (roleFilter === 'Users' && user.role === 'USER');
         const matchesStatus = statusFilter === 'All' || 
                               (statusFilter === 'Active' && user.isActive) || 
@@ -157,6 +158,7 @@ const ManageUsers = () => {
                             <button className={`segment-btn ${roleFilter === 'All' ? 'active' : ''}`} onClick={() => setRoleFilter('All')}>All Roles</button>
                             <button className={`segment-btn ${roleFilter === 'Admins' ? 'active' : ''}`} onClick={() => setRoleFilter('Admins')}><ShieldCheck size={14} /> Admins</button>
                             <button className={`segment-btn ${roleFilter === 'Partners' ? 'active' : ''}`} onClick={() => setRoleFilter('Partners')}><Utensils size={14} /> Partners</button>
+                            <button className={`segment-btn ${roleFilter === 'Riders' ? 'active' : ''}`} onClick={() => setRoleFilter('Riders')}><Bike size={14} /> Riders</button>
                             <button className={`segment-btn ${roleFilter === 'Users' ? 'active' : ''}`} onClick={() => setRoleFilter('Users')}><UserIcon size={14} /> Users</button>
                         </div>
                         <div className="orders-type-segment">
@@ -227,8 +229,11 @@ const ManageUsers = () => {
                                             </td>
                                             <td>
                                                 <span className={`role-badge ${user.role.toLowerCase()}`}>
-                                                    {user.role === 'ADMIN' ? <ShieldCheck size={12} /> : (user.role === 'RESTAURANT_OWNER' ? <Utensils size={12} /> : <UserIcon size={12} />)}
-                                                    {user.role === 'RESTAURANT_OWNER' ? 'PARTNER' : user.role}
+                                                    {user.role === 'ADMIN' ? <ShieldCheck size={12} /> : 
+                                                     (user.role === 'RESTAURANT_OWNER' ? <Utensils size={12} /> : 
+                                                      (user.role === 'DELIVERY_RIDER' ? <Bike size={12} /> : <UserIcon size={12} />))}
+                                                    {user.role === 'RESTAURANT_OWNER' ? 'PARTNER' : 
+                                                     (user.role === 'DELIVERY_RIDER' ? 'RIDER' : user.role)}
                                                 </span>
                                             </td>
                                             <td>
@@ -263,6 +268,12 @@ const ManageUsers = () => {
                                                                 <button className="dropdown-item" onClick={() => handleUpdateRole(user, 'RESTAURANT_OWNER')}>
                                                                     <Utensils size={14} />
                                                                     <span>Set as Partner</span>
+                                                                </button>
+                                                            )}
+                                                            {user.role !== 'DELIVERY_RIDER' && (
+                                                                <button className="dropdown-item" onClick={() => handleUpdateRole(user, 'DELIVERY_RIDER')}>
+                                                                    <Bike size={14} />
+                                                                    <span>Set as Rider</span>
                                                                 </button>
                                                             )}
                                                             {user.role !== 'ADMIN' && (

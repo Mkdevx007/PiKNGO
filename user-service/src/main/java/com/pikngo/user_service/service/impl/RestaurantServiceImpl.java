@@ -5,6 +5,8 @@ import com.pikngo.user_service.repository.RestaurantRepository;
 import com.pikngo.user_service.service.RestaurantService;
 import com.pikngo.user_service.dto.RestaurantResponseDTO;
 import com.pikngo.user_service.repository.RestaurantWithDistance;
+import com.pikngo.user_service.repository.OrderRepository;
+import org.springframework.data.domain.PageRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,9 +22,11 @@ public class RestaurantServiceImpl implements RestaurantService {
     private static final Logger log = LoggerFactory.getLogger(RestaurantServiceImpl.class);
 
     private final RestaurantRepository restaurantRepository;
+    private final OrderRepository orderRepository;
 
-    public RestaurantServiceImpl(RestaurantRepository restaurantRepository) {
+    public RestaurantServiceImpl(RestaurantRepository restaurantRepository, OrderRepository orderRepository) {
         this.restaurantRepository = restaurantRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -172,6 +176,36 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RestaurantResponseDTO> getRestaurantsByOwner(UUID ownerId) {
+        return restaurantRepository.findByOwnerId(ownerId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public com.pikngo.user_service.dto.PartnerAnalyticsDTO getPartnerAnalytics(UUID restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+        
+        java.math.BigDecimal revenue = orderRepository.calculateRestaurantRevenue(restaurantId);
+        long totalOrders = orderRepository.countByRestaurantId(restaurantId);
+        
+        List<Object[]> topItemsRaw = orderRepository.findTopItemsByRestaurant(restaurantId, PageRequest.of(0, 5));
+        List<com.pikngo.user_service.dto.PartnerAnalyticsDTO.TopItemDTO> topItems = topItemsRaw.stream()
+                .map(row -> new com.pikngo.user_service.dto.PartnerAnalyticsDTO.TopItemDTO((String) row[0], (Long) row[1]))
+                .collect(Collectors.toList());
+
+        com.pikngo.user_service.dto.PartnerAnalyticsDTO analytics = new com.pikngo.user_service.dto.PartnerAnalyticsDTO();
+        analytics.setTotalRevenue(revenue != null ? revenue : java.math.BigDecimal.ZERO);
+        analytics.setTotalOrders(totalOrders);
+        analytics.setAverageRating(restaurant.getRating());
+        analytics.setTopItems(topItems);
+        
+        return analytics;
     }
 
     @Override

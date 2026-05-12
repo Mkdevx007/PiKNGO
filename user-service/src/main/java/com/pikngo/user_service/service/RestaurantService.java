@@ -18,5 +18,7 @@ public interface RestaurantService {
     List<RestaurantResponseDTO> getAllActiveRestaurants();
     List<RestaurantResponseDTO> getAllRestaurantsForAdmin();
     RestaurantResponseDTO getRestaurantById(UUID id);
+    List<RestaurantResponseDTO> getRestaurantsByOwner(UUID ownerId);
+    com.pikngo.user_service.dto.PartnerAnalyticsDTO getPartnerAnalytics(UUID restaurantId);
     RestaurantResponseDTO getRestaurantByOwnerId(UUID ownerId);
 }

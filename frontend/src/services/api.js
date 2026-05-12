@@ -61,6 +61,7 @@ export const restaurantApi = {
     create: (data) => api.post('/restaurants', data),
     update: (id, data) => api.put(`/restaurants/${id}`, data),
     getMyRestaurant: () => api.get('/restaurants/my-restaurant'),
+    getAnalytics: (id) => api.get(`/restaurants/${id}/analytics`),
 };
 
 export const menuApi = {
@@ -81,6 +82,9 @@ export const orderApi = {
     placeOrder: (data) => api.post('/orders', data),
     getMyOrders: () => api.get('/orders/my-orders'),
     getRestaurantOrders: (restaurantId) => api.get(`/orders/restaurant/${restaurantId}`),
+    getAvailableOrders: () => api.get('/orders/available'),
+    getRiderOrders: () => api.get('/orders/rider'),
+    claimOrder: (orderId) => api.post(`/orders/${orderId}/claim`),
     getAllOrders: (page = 0, size = 10) => api.get(`/orders/all?page=${page}&size=${size}`),
     updateStatus: (orderId, status) => api.patch(`/orders/${orderId}/status?status=${status}`),
     updateAddress: (orderId, address) => api.patch(`/orders/${orderId}/address?address=${address}`),
@@ -109,6 +113,10 @@ export const reviewApi = {
 export const paymentApi = {
     createOrder: (amount) => api.post('/payment/create-order', { amount }),
     verifyPayment: (paymentData) => api.post('/payment/verify', paymentData),
+};
+
+export const promotionApi = {
+    validate: (code) => api.get(`/promotions/validate?code=${code}`),
 };
 
 export default api;

@@ -21,7 +21,7 @@ import java.util.UUID;
 public class User {
     
     public enum UserRole {
-        USER, ADMIN, RESTAURANT_OWNER
+        USER, ADMIN, RESTAURANT_OWNER, DELIVERY_RIDER
     }
 
     @Id

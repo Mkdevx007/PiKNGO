@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { useCart } from '../context/CartContext';
-import { addressApi, orderApi, paymentApi } from '../services/api';
+import { addressApi, orderApi, paymentApi, promotionApi } from '../services/api';
 import AddressModal from '../components/AddressModal/AddressModal.jsx';
 import { 
     ChevronLeft, Trash2, CreditCard, ShieldCheck, X,
@@ -26,6 +26,9 @@ const CheckoutPage = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [isVerifyingQR, setIsVerifyingQR] = useState(false);
+    const [promoCode, setPromoCode] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState(null);
+    const [promoLoading, setPromoLoading] = useState(false);
 
     const [cardDetails, setCardDetails] = useState({
         number: '', expiry: '', cvc: '', name: ''
@@ -189,6 +192,8 @@ const CheckoutPage = () => {
             deliveryAddress: serviceType === 'pickup' ? "SELF_PICKUP" : `${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}`,
             isSelfPickup: serviceType === 'pickup',
             paymentMethod: paymentMethod,
+            promoCode: appliedPromo ? appliedPromo.code : null,
+            discountAmount: discount || 0,
             items: cartItems.map(item => ({
                 menuItemId: item.id || item._id,
                 quantity: item.quantity,
@@ -220,9 +225,37 @@ const CheckoutPage = () => {
         }
     };
 
+    const handleApplyPromo = async () => {
+        if (!promoCode.trim()) return;
+        setPromoLoading(true);
+        try {
+            const promo = await promotionApi.validate(promoCode.trim());
+            if (promo && promo.discountPercentage) {
+                if (promo.minOrderAmount && total < promo.minOrderAmount) {
+                    showToast(`Minimum order ₹${promo.minOrderAmount} required for this promo`, 'error');
+                } else {
+                    setAppliedPromo(promo);
+                    showToast(`🎉 Promo applied! ${promo.discountPercentage}% off`, 'success');
+                }
+            } else {
+                showToast('Invalid or expired promo code', 'error');
+            }
+        } catch (err) {
+            showToast(err.message || 'Promo code not found', 'error');
+        } finally {
+            setPromoLoading(false);
+        }
+    };
+
     const total = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const flatFee = serviceType === 'pickup' ? 0 : 45;
-    const finalTotal = total + flatFee;
+    const discount = appliedPromo
+        ? Math.min(
+            (total * appliedPromo.discountPercentage) / 100,
+            appliedPromo.maxDiscountAmount || Infinity
+          )
+        : 0;
+    const finalTotal = Math.max(0, total + flatFee - discount);
 
     if (!isSuccess && (!cartItems || cartItems.length === 0)) {
         return (
@@ -531,6 +564,38 @@ const CheckoutPage = () => {
                                     <span>Handover/Logistics</span>
                                     <span className="accent-text">₹{flatFee}</span>
                                 </div>
+
+                                {/* Promo Code Section */}
+                                <div className="promo-section">
+                                    {appliedPromo ? (
+                                        <div className="promo-applied-badge">
+                                            <span>🎉 {appliedPromo.code} ({appliedPromo.discountPercentage}% off)</span>
+                                            <button onClick={() => { setAppliedPromo(null); setPromoCode(''); }}>✕</button>
+                                        </div>
+                                    ) : (
+                                        <div className="promo-input-row">
+                                            <input
+                                                type="text"
+                                                className="promo-input"
+                                                placeholder="Promo code..."
+                                                value={promoCode}
+                                                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
+                                            />
+                                            <button className="promo-apply-btn" onClick={handleApplyPromo} disabled={promoLoading}>
+                                                {promoLoading ? '...' : 'APPLY'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {discount > 0 && (
+                                    <div className="calc-row discount-row">
+                                        <span>Promo Discount</span>
+                                        <span className="discount-val">-₹{discount.toFixed(0)}</span>
+                                    </div>
+                                )}
+
                                 <div className="calc-divider"></div>
                                 <div className="calc-row grand-total">
                                     <span>Total Transmission</span>

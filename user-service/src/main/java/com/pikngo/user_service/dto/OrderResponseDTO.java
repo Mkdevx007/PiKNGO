@@ -19,12 +19,17 @@ public class OrderResponseDTO {
     private LocalDateTime createdTs;
     private List<OrderItemResponseDTO> items;
     private Long pointsEarned;
+    private UUID riderId;
+    private String riderName;
+    private String promoCode;
+    private java.math.BigDecimal discountAmount;
 
     public OrderResponseDTO() {}
 
-    public OrderResponseDTO(UUID id, UUID userId, String userName, UUID restaurantId, String restaurantName, 
-                             BigDecimal totalAmount, String status, String deliveryAddress, String paymentMethod, 
-                             boolean isSelfPickup, LocalDateTime createdTs, List<OrderItemResponseDTO> items, Long pointsEarned) {
+    public OrderResponseDTO(UUID id, UUID userId, String userName, UUID restaurantId, String restaurantName,
+                             BigDecimal totalAmount, String status, String deliveryAddress, String paymentMethod,
+                             boolean isSelfPickup, LocalDateTime createdTs, List<OrderItemResponseDTO> items, Long pointsEarned,
+                             UUID riderId, String riderName, String promoCode, java.math.BigDecimal discountAmount) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
@@ -38,6 +43,10 @@ public class OrderResponseDTO {
         this.createdTs = createdTs;
         this.items = items;
         this.pointsEarned = pointsEarned;
+        this.riderId = riderId;
+        this.riderName = riderName;
+        this.promoCode = promoCode;
+        this.discountAmount = discountAmount;
     }
 
     public static class OrderResponseDTOBuilder {
@@ -54,6 +63,10 @@ public class OrderResponseDTO {
         private LocalDateTime createdTs;
         private List<OrderItemResponseDTO> items;
         private Long pointsEarned;
+        private UUID riderId;
+        private String riderName;
+        private String promoCode;
+        private java.math.BigDecimal discountAmount;
 
         public OrderResponseDTOBuilder id(UUID id) { this.id = id; return this; }
         public OrderResponseDTOBuilder userId(UUID userId) { this.userId = userId; return this; }
@@ -68,9 +81,13 @@ public class OrderResponseDTO {
         public OrderResponseDTOBuilder createdTs(LocalDateTime createdTs) { this.createdTs = createdTs; return this; }
         public OrderResponseDTOBuilder items(List<OrderItemResponseDTO> items) { this.items = items; return this; }
         public OrderResponseDTOBuilder pointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; return this; }
+        public OrderResponseDTOBuilder riderId(UUID riderId) { this.riderId = riderId; return this; }
+        public OrderResponseDTOBuilder riderName(String riderName) { this.riderName = riderName; return this; }
+        public OrderResponseDTOBuilder promoCode(String promoCode) { this.promoCode = promoCode; return this; }
+        public OrderResponseDTOBuilder discountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; return this; }
 
         public OrderResponseDTO build() {
-            return new OrderResponseDTO(id, userId, userName, restaurantId, restaurantName, totalAmount, status, deliveryAddress, paymentMethod, isSelfPickup, createdTs, items, pointsEarned);
+            return new OrderResponseDTO(id, userId, userName, restaurantId, restaurantName, totalAmount, status, deliveryAddress, paymentMethod, isSelfPickup, createdTs, items, pointsEarned, riderId, riderName, promoCode, discountAmount);
         }
     }
 
@@ -153,4 +170,12 @@ public class OrderResponseDTO {
     public void setItems(List<OrderItemResponseDTO> items) { this.items = items; }
     public Long getPointsEarned() { return pointsEarned; }
     public void setPointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; }
+    public UUID getRiderId() { return riderId; }
+    public void setRiderId(UUID riderId) { this.riderId = riderId; }
+    public String getRiderName() { return riderName; }
+    public void setRiderName(String riderName) { this.riderName = riderName; }
+    public String getPromoCode() { return promoCode; }
+    public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
+    public java.math.BigDecimal getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; }
 }

@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class Order {
 
     public enum OrderStatus {
-        PENDING, CONFIRMED, PREPARING, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
+        PENDING, CONFIRMED, PREPARING, READY, PICKED_UP, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
     }
 
     @Id
@@ -31,6 +31,10 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rider_id")
+    private User rider;
 
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
@@ -50,6 +54,12 @@ public class Order {
 
     @Column(name = "points_earned")
     private Long pointsEarned = 0L;
+
+    @Column(name = "promo_code")
+    private String promoCode;
+
+    @Column(name = "discount_amount", precision = 12, scale = 2)
+    private java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
@@ -74,6 +84,9 @@ public class Order {
         private boolean isSelfPickup;
         private String paymentMethod;
         private Long pointsEarned = 0L;
+        private User rider;
+        private String promoCode;
+        private java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
 
         public OrderBuilder user(User user) { this.user = user; return this; }
         public OrderBuilder restaurant(Restaurant restaurant) { this.restaurant = restaurant; return this; }
@@ -83,6 +96,9 @@ public class Order {
         public OrderBuilder isSelfPickup(boolean isSelfPickup) { this.isSelfPickup = isSelfPickup; return this; }
         public OrderBuilder paymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; return this; }
         public OrderBuilder pointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; return this; }
+        public OrderBuilder rider(User rider) { this.rider = rider; return this; }
+        public OrderBuilder promoCode(String promoCode) { this.promoCode = promoCode; return this; }
+        public OrderBuilder discountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; return this; }
 
         public Order build() {
             Order order = new Order();
@@ -94,6 +110,9 @@ public class Order {
             order.setSelfPickup(isSelfPickup);
             order.setPaymentMethod(paymentMethod);
             order.setPointsEarned(pointsEarned);
+            order.setRider(rider);
+            order.setPromoCode(promoCode);
+            order.setDiscountAmount(discountAmount);
             return order;
         }
     }
@@ -122,6 +141,12 @@ public class Order {
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     public Long getPointsEarned() { return pointsEarned; }
     public void setPointsEarned(Long pointsEarned) { this.pointsEarned = pointsEarned; }
+    public User getRider() { return rider; }
+    public void setRider(User rider) { this.rider = rider; }
+    public String getPromoCode() { return promoCode; }
+    public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
+    public java.math.BigDecimal getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; }
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
     public LocalDateTime getCreatedTs() { return createdTs; }

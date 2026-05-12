@@ -17,4 +17,7 @@ public interface OrderService {
     Page<OrderResponseDTO> getAllOrders(Pageable pageable);
     OrderResponseDTO updateOrderStatus(UUID orderId, Order.OrderStatus status);
     OrderResponseDTO updateOrderAddress(UUID orderId, String address);
+    List<OrderResponseDTO> getAvailableOrders();
+    List<OrderResponseDTO> getRiderOrders(UUID riderId);
+    OrderResponseDTO claimOrder(UUID orderId, UUID riderId);
 }
