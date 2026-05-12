@@ -226,20 +226,22 @@ public class UserController {
 
     @PatchMapping("/{userId}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<User>> updateUserStatus(
+    public ResponseEntity<ApiResponse<String>> updateUserStatus(
             @PathVariable UUID userId,
             @RequestParam boolean active) {
         log.info("Admin request to update user {} status to {}", userId, active);
-        return ResponseEntity.ok(ApiResponse.success("User status updated successfully", userService.updateUserStatus(userId, active)));
+        userService.updateUserStatus(userId, active);
+        return ResponseEntity.ok(ApiResponse.success("User status updated successfully", null));
     }
 
     @PatchMapping("/{userId}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<User>> updateUserRole(
+    public ResponseEntity<ApiResponse<String>> updateUserRole(
             @PathVariable UUID userId,
             @RequestParam String role) {
         log.info("Admin request to update user {} role to {}", userId, role);
-        return ResponseEntity.ok(ApiResponse.success("User role updated successfully", userService.updateUserRole(userId, role)));
+        userService.updateUserRole(userId, role);
+        return ResponseEntity.ok(ApiResponse.success("User role updated successfully", null));
     }
 
     @DeleteMapping("/admin/{userId}")
