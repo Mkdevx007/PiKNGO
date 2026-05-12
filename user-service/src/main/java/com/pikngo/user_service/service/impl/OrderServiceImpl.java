@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,16 +29,19 @@ public class OrderServiceImpl implements OrderService {
     private final MenuItemRepository menuItemRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final com.pikngo.user_service.service.LoyaltyService loyaltyService;
+    private final com.pikngo.user_service.service.NotificationService notificationService;
 
     public OrderServiceImpl(OrderRepository orderRepository, UserRepository userRepository, 
                             RestaurantRepository restaurantRepository, MenuItemRepository menuItemRepository,
-                            SimpMessagingTemplate messagingTemplate, com.pikngo.user_service.service.LoyaltyService loyaltyService) {
+                            SimpMessagingTemplate messagingTemplate, com.pikngo.user_service.service.LoyaltyService loyaltyService,
+                            com.pikngo.user_service.service.NotificationService notificationService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
         this.menuItemRepository = menuItemRepository;
         this.messagingTemplate = messagingTemplate;
         this.loyaltyService = loyaltyService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -132,6 +136,18 @@ public class OrderServiceImpl implements OrderService {
         
         // Broadcast order status update to WebSocket topic
         messagingTemplate.convertAndSend("/topic/orders", response);
+
+        // Send Push Notification
+        try {
+            String title = "Order Status Updated";
+            String body = "Your order #" + order.getId().toString().substring(0, 8).toUpperCase() + " is now " + status.name();
+            notificationService.sendNotification(order.getUser().getId().toString(), title, body, Map.of(
+                "orderId", order.getId().toString(),
+                "status", status.name()
+            ));
+        } catch (Exception e) {
+            log.warn("Failed to send push notification for order {}: {}", orderId, e.getMessage());
+        }
         
         return response;
     }

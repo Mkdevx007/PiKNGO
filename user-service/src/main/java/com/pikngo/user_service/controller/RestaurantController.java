@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,9 +23,11 @@ public class RestaurantController {
     private static final Logger log = LoggerFactory.getLogger(RestaurantController.class);
 
     private final RestaurantService restaurantService;
+    private final com.pikngo.user_service.service.UserService userService;
 
-    public RestaurantController(RestaurantService restaurantService) {
+    public RestaurantController(RestaurantService restaurantService, com.pikngo.user_service.service.UserService userService) {
         this.restaurantService = restaurantService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -41,6 +44,7 @@ public class RestaurantController {
                 .rating(dto.getRating())
                 .deliveryTime(dto.getDeliveryTime())
                 .imageUrl(dto.getImageUrl())
+                .ownerId(dto.getOwnerId())
                 .build();
         return new ResponseEntity<>(ApiResponse.success("Restaurant created successfully", restaurantService.createRestaurant(restaurant)), HttpStatus.CREATED);
     }
@@ -59,6 +63,7 @@ public class RestaurantController {
                 .rating(dto.getRating())
                 .deliveryTime(dto.getDeliveryTime())
                 .imageUrl(dto.getImageUrl())
+                .ownerId(dto.getOwnerId())
                 .build();
         return ResponseEntity.ok(ApiResponse.success("Restaurant updated successfully", restaurantService.updateRestaurant(id, restaurant)));
     }
@@ -101,5 +106,14 @@ public class RestaurantController {
     public ResponseEntity<ApiResponse<RestaurantResponseDTO>> getById(@PathVariable UUID id) {
         log.info("REST request to get restaurant by ID: {}", id);
         return ResponseEntity.ok(ApiResponse.success("Restaurant details fetched successfully", restaurantService.getRestaurantById(id)));
+    }
+
+    @GetMapping("/my-restaurant")
+    @PreAuthorize("hasRole('RESTAURANT_OWNER')")
+    public ResponseEntity<ApiResponse<RestaurantResponseDTO>> getMyRestaurant(Principal principal) {
+        log.info("REST request to get restaurant for owner: {}", principal.getName());
+        com.pikngo.user_service.entity.User user = userService.getUserByPhoneNumber(principal.getName());
+        RestaurantResponseDTO restaurant = restaurantService.getRestaurantByOwnerId(user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Your restaurant details fetched successfully", restaurant));
     }
 }

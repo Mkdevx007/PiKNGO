@@ -18,4 +18,5 @@ public interface RestaurantService {
     List<RestaurantResponseDTO> getAllActiveRestaurants();
     List<RestaurantResponseDTO> getAllRestaurantsForAdmin();
     RestaurantResponseDTO getRestaurantById(UUID id);
+    RestaurantResponseDTO getRestaurantByOwnerId(UUID ownerId);
 }

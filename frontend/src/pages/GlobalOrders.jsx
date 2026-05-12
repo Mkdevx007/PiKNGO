@@ -15,6 +15,7 @@ import { useToast } from '../context/ToastContext';
 import { TableSkeleton } from '../components/Common/Skeleton';
 import { restaurantApi } from '../services/api';
 import GlobalOrderDetailsModal from '../components/Admin/GlobalOrderDetailsModal';
+import AdminGlobalMap from '../components/Admin/AdminGlobalMap';
 
 const GlobalOrders = () => {
     const { showToast } = useToast();
@@ -37,6 +38,8 @@ const GlobalOrders = () => {
     const [isLive, setIsLive] = useState(false);
     const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedOrders, setSelectedOrders] = useState([]);
+    const [showMap, setShowMap] = useState(false);
 
     useEffect(() => {
         fetchOrders(pagination.page);
@@ -147,6 +150,24 @@ const GlobalOrders = () => {
             showToast('Failed to update address', 'error');
         }
     };
+    const handleBulkUpdate = async (newStatus) => {
+        if (selectedOrders.length === 0) return;
+        try {
+            await Promise.all(selectedOrders.map(id => orderApi.updateStatus(id, newStatus)));
+            setOrders(prev => prev.map(o => selectedOrders.includes(o.id) ? { ...o, status: newStatus } : o));
+            setSelectedOrders([]);
+            showToast(`Updated ${selectedOrders.length} orders to ${newStatus}`, 'success');
+        } catch (err) {
+            showToast('Bulk update failed partially', 'error');
+        }
+    };
+
+    const toggleOrderSelection = (e, id) => {
+        e.stopPropagation();
+        setSelectedOrders(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
 
     // Note: Server-side filtering is preferred for large datasets, 
     // but we'll keep client-side for immediate UX feel if the page size is small.
@@ -183,12 +204,37 @@ const GlobalOrders = () => {
                     </div>
                 </div>
                 <div className="header-stats">
+                    <button className={`btn-map-toggle glass-pill ${showMap ? 'active' : ''}`} onClick={() => setShowMap(!showMap)}>
+                        <MapPin size={16} />
+                        <span>{showMap ? 'HIDE MAP' : 'SHOW TRANSMISSION MAP'}</span>
+                    </button>
                     <div className="stat-badge glass">
                         <Clock size={14} className="text-orange" />
                         <span>{(orders || []).filter(o => o?.status === 'PENDING').length} Pending on this page</span>
                     </div>
                 </div>
             </header>
+
+            {showMap && (
+                <div className="admin-map-section animate-slide-down">
+                    <AdminGlobalMap orders={orders} />
+                </div>
+            )}
+
+            {selectedOrders.length > 0 && (
+                <div className="bulk-action-bar animate-slide-up">
+                    <div className="selection-info">
+                        <CheckCircle size={18} />
+                        <span>{selectedOrders.length} TRANSMISSIONS SELECTED</span>
+                    </div>
+                    <div className="bulk-actions">
+                        <button className="bulk-btn preparing" onClick={() => handleBulkUpdate('PREPARING')}>SET PREPARING</button>
+                        <button className="bulk-btn ready" onClick={() => handleBulkUpdate('READY')}>SET READY</button>
+                        <button className="bulk-btn cancel" onClick={() => handleBulkUpdate('CANCELLED')}>CANCEL ALL</button>
+                        <button className="bulk-btn-close" onClick={() => setSelectedOrders([])}><X size={16} /></button>
+                    </div>
+                </div>
+            )}
 
             <div className="orders-filters glass-card">
                 <div className="search-box-large">
@@ -270,6 +316,11 @@ const GlobalOrders = () => {
                         >
                             {isOrderUrgent(order) && <div className="urgency-banner">LATE ORDER ACTION REQUIRED</div>}
                             <div className="order-card-header">
+                                <div className="selection-trigger" onClick={(e) => toggleOrderSelection(e, order.id)}>
+                                    <div className={`custom-checkbox ${selectedOrders.includes(order.id) ? 'checked' : ''}`}>
+                                        {selectedOrders.includes(order.id) && <Check size={12} />}
+                                    </div>
+                                </div>
                                 <div className="flex flex-col">
                                     <span className="order-id-badge">#{order?.id?.substring(0, 8) || 'ORDER'}</span>
                                     <span className="text-[10px] opacity-40 mt-1 font-bold">CLICK FOR INSIGHTS</span>

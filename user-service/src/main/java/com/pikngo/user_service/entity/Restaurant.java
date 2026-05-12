@@ -48,6 +48,9 @@ public class Restaurant {
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
 
+    @Column(name = "owner_id")
+    private UUID ownerId;
+
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<MenuItem> menuItems;
@@ -74,6 +77,7 @@ public class Restaurant {
         private String deliveryTime;
         private boolean isActive = true;
         private boolean isDeleted = false;
+        private UUID ownerId;
 
         public RestaurantBuilder restaurantName(String restaurantName) { this.restaurantName = restaurantName; return this; }
         public RestaurantBuilder address(String address) { this.address = address; return this; }
@@ -85,6 +89,7 @@ public class Restaurant {
         public RestaurantBuilder deliveryTime(String deliveryTime) { this.deliveryTime = deliveryTime; return this; }
         public RestaurantBuilder isActive(boolean isActive) { this.isActive = isActive; return this; }
         public RestaurantBuilder isDeleted(boolean isDeleted) { this.isDeleted = isDeleted; return this; }
+        public RestaurantBuilder ownerId(UUID ownerId) { this.ownerId = ownerId; return this; }
 
         public Restaurant build() {
             Restaurant rest = new Restaurant();
@@ -98,6 +103,7 @@ public class Restaurant {
             rest.setDeliveryTime(deliveryTime);
             rest.setActive(isActive);
             rest.setDeleted(isDeleted);
+            rest.setOwnerId(ownerId);
             return rest;
         }
     }
@@ -129,6 +135,8 @@ public class Restaurant {
     public void setActive(boolean active) { isActive = active; }
     public boolean isDeleted() { return isDeleted; }
     public void setDeleted(boolean deleted) { isDeleted = deleted; }
+    public UUID getOwnerId() { return ownerId; }
+    public void setOwnerId(UUID ownerId) { this.ownerId = ownerId; }
     public List<MenuItem> getMenuItems() { return menuItems; }
     public void setMenuItems(List<MenuItem> menuItems) { this.menuItems = menuItems; }
     public LocalDateTime getCreatedTs() { return createdTs; }

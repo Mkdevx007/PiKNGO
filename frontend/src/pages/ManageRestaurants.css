@@ -735,3 +735,15 @@
     color: var(--text-muted);
     font-weight: 700;
 }
+
+.owner-id-badge-mini {
+    margin-top: 4px;
+    padding: 2px 8px;
+    background: rgba(255, 107, 0, 0.1);
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    border-radius: 6px;
+    font-size: 0.7rem !important;
+    font-family: 'JetBrains Mono', monospace;
+    color: #ff6b00 !important;
+    width: fit-content;
+}

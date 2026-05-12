@@ -17,5 +17,9 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: FIREBASE_CONFIG
+        sync: false
+      - key: MAPBOX_TOKEN
+        sync: false
       - key: PORT
         value: 8080

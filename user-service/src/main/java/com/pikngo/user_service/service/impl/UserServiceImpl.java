@@ -113,6 +113,7 @@ public class UserServiceImpl implements UserService {
         if (request.getCity() != null) user.setCity(request.getCity());
         if (request.getState() != null) user.setState(request.getState());
         if (request.getPincode() != null) user.setPincode(request.getPincode());
+        if (request.getFcmToken() != null) user.setFcmToken(request.getFcmToken());
         
         return userRepository.save(user);
     }

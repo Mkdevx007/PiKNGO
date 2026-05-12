@@ -12,8 +12,9 @@ import { useToast } from '../context/ToastContext';
 import { TableSkeleton } from '../components/Common/Skeleton';
 import SafeImage from '../components/Common/SafeImage';
 
-const ManageMenu = () => {
-    const { restaurantId } = useParams();
+const ManageMenu = ({ partnerMode = false, restaurantId: propRestaurantId }) => {
+    const { restaurantId: paramRestaurantId } = useParams();
+    const restaurantId = propRestaurantId || paramRestaurantId;
     const navigate = useNavigate();
     const { showToast } = useToast();
     
@@ -36,7 +37,9 @@ const ManageMenu = () => {
     });
 
     useEffect(() => {
-        fetchData();
+        if (restaurantId) {
+            fetchData();
+        }
     }, [restaurantId]);
 
     const fetchData = async () => {
@@ -138,10 +141,12 @@ const ManageMenu = () => {
             <div className="container">
                 <header className="manage-header elite-header-card">
                     <div className="header-left">
-                        <button className="back-btn glass-pill" onClick={() => navigate('/admin/restaurants')}>
-                            <ChevronLeft size={20} />
-                            <span>NODE REGISTRY</span>
-                        </button>
+                        {!partnerMode && (
+                            <button className="back-btn glass-pill" onClick={() => navigate('/admin/restaurants')}>
+                                <ChevronLeft size={20} />
+                                <span>NODE REGISTRY</span>
+                            </button>
+                        )}
                         <div className="header-titles">
                             <span className="elite-h-accent">CATALOG IDENTIFIER // {restaurant?.restaurantName?.toUpperCase()}</span>
                             <h1>Manage <span className="gradient-text">Menu</span></h1>

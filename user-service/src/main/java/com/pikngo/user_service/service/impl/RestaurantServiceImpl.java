@@ -64,6 +64,7 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .rating(restaurant.getRating())
                 .deliveryTime(restaurant.getDeliveryTime())
                 .isActive(restaurant.isActive())
+                .ownerId(restaurant.getOwnerId())
                 .build();
     }
 
@@ -80,6 +81,8 @@ public class RestaurantServiceImpl implements RestaurantService {
         dto.setDeliveryTime(projection.getDeliveryTime());
         dto.setActive(projection.getIsActive());
         dto.setDistance(projection.getDistance());
+        // Since projection might not have ownerId, we handle it gracefully
+        // but RestaurantWithDistance should be updated if we need it here.
         return dto;
     }
 
@@ -177,5 +180,13 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurantRepository.findById(id)
                 .map(this::mapToDTO)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found with ID: " + id));
+    }
+
+    @Override
+    public RestaurantResponseDTO getRestaurantByOwnerId(UUID ownerId) {
+        log.info("Fetching restaurant for owner ID: {}", ownerId);
+        return restaurantRepository.findByOwnerId(ownerId)
+                .map(this::mapToDTO)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found for owner: " + ownerId));
     }
 }

@@ -17,12 +17,14 @@ import AdminDashboard from './pages/AdminDashboard';
 import GlobalOrders from './pages/GlobalOrders';
 import GlobalSettings from './pages/GlobalSettings';
 import Promotions from './pages/Promotions';
+import PartnerDashboard from './pages/PartnerDashboard';
 import AdminLayout from './components/AdminLayout/AdminLayout';
 import Footer from './components/Footer/Footer';
 import VaultPage from './pages/VaultPage';
 import { authApi } from './services/api';
 import { CartProvider } from './context/CartContext';
 import CheckoutPage from './pages/CheckoutPage';
+import { requestNotificationPermission } from './services/notificationService';
 import './App.css';
 
 import { ToastProvider } from './context/ToastContext';
@@ -34,8 +36,9 @@ import MobileNav from './components/MobileNav/MobileNav';
 function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLogin, handleLogout }) {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isPartnerRoute = location.pathname.startsWith('/partner');
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
-  const shouldHideGlobalComponents = isAdminRoute || isAuthRoute;
+  const shouldHideGlobalComponents = isAdminRoute || isPartnerRoute || isAuthRoute;
 
   return (
     <div className="app">
@@ -48,8 +51,9 @@ function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLog
       />
       <main>
         <Routes>
-          <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <LandingPage isLoggedIn={isLoggedIn} />} />
-          <Route path="/dashboard" element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />} />
+          <Route path="/" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : <Navigate to="/dashboard" />) : <LandingPage isLoggedIn={isLoggedIn} />} />
+          <Route path="/dashboard" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : <Dashboard />) : <Navigate to="/login" />} />
+          <Route path="/partner" element={isLoggedIn && userRole === 'RESTAURANT_OWNER' ? <PartnerDashboard /> : <Navigate to="/login" />} />
           <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
           <Route path="/register" element={<AuthPage onLogin={handleLogin} />} />
           <Route path="/profile" element={isLoggedIn ? <ProfileScreen onProfileUpdate={(data) => setProfileImageUrl(data.profileImageUrl)} /> : <Navigate to="/login" />} />
@@ -112,6 +116,9 @@ function App() {
       const fullData = response.data || response;
       setUserName(fullData.firstName || fullData.phoneNumber);
       setProfileImageUrl(fullData.profileImageUrl || '');
+      
+      // Request Notification Permission and register FCM token
+      await requestNotificationPermission();
     } catch (err) {
       console.warn("Failed to fetch full profile after login", err);
     }
@@ -150,6 +157,9 @@ function App() {
         setUserName(data.firstName || data.phoneNumber);
         setProfileImageUrl(data.profileImageUrl || '');
         setUserRole(data.role || 'USER');
+
+        // Ensure notifications are registered on resume session
+        requestNotificationPermission();
       } catch (err) {
         // If profile check fails, the user is definitely not logged in or session expired
         setIsLoggedIn(false);

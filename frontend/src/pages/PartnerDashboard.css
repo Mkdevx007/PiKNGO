@@ -1,0 +1,232 @@
+.partner-dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background: #020617;
+    color: white;
+}
+
+.partner-sidebar {
+    width: 260px;
+    background: rgba(15, 23, 42, 0.8);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+}
+
+.partner-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 3rem;
+}
+
+.brand-logo {
+    width: 32px;
+    height: 32px;
+    background: var(--accent-orange);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: white;
+}
+
+.partner-brand span {
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+}
+
+.partner-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.partner-nav button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.partner-nav button:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: white;
+}
+
+.partner-nav button.active {
+    background: rgba(255, 107, 0, 0.1);
+    color: var(--accent-orange);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+.status-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.status-switch.online {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.status-switch.offline {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.partner-content {
+    flex: 1;
+    margin-left: 260px;
+    padding: 2.5rem;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+}
+
+.header-info h1 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 0.3rem;
+}
+
+.header-info p {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.live-badge {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px;
+}
+
+.stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-val {
+    font-size: 2rem;
+    font-weight: 900;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.profile-snapshot {
+    padding: 2rem;
+}
+
+.profile-snapshot h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.snapshot-body {
+    display: flex;
+    gap: 2rem;
+}
+
+.snapshot-body img {
+    width: 200px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.snapshot-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+}
+
+.snapshot-details .detail {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.text-orange { color: var(--accent-orange); }
+.text-green { color: #22c55e; }
+.text-amber { color: #facc15; }
+
+.partner-loading, .partner-empty-state {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.partner-empty-state h2 {
+    color: #ef4444;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .stats-strip {
+        grid-template-columns: 1fr;
+    }
+}

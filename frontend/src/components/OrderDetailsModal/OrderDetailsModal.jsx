@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Package, MapPin, CreditCard, Clock, CheckCircle2, ChevronRight, Truck, Smartphone } from 'lucide-react';
+import LiveTrackingMap from '../Tracking/LiveTrackingMap';
 import './OrderDetailsModal.css';
 
 const OrderDetailsModal = ({ isOpen, onClose, order }) => {
@@ -34,7 +35,12 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                 <div className="modal-body scrollable">
                     {/* Status Tracking */}
                     <section className="detail-section tracking-section">
-                        <h3>Live Tracking</h3>
+                        <h3>Live Transmission Hub</h3>
+                        
+                        <div className="modal-map-wrapper">
+                            <LiveTrackingMap order={order} />
+                        </div>
+
                         <div className="tracking-timeline">
                             {steps.map((step, idx) => (
                                 <div key={idx} className={`timeline-step ${step.isCompleted ? 'completed' : ''} ${step.isCurrent ? 'current' : ''}`}>

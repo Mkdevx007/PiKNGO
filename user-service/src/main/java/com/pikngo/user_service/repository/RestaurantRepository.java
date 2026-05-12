@@ -21,4 +21,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, UUID> {
             "(6371 * acos(cos(radians(?1)) * cos(radians(r.latitude)) * cos(radians(r.longitude) - radians(?2)) + sin(radians(?1)) * sin(radians(r.latitude)))) < ?3 " +
             "ORDER BY distance ASC", nativeQuery = true)
     List<RestaurantWithDistance> findNearbyRestaurants(Double lat, Double lon, Double radiusInKm);
+    
+    java.util.Optional<Restaurant> findByOwnerId(UUID ownerId);
 }

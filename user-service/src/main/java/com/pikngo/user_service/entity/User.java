@@ -21,7 +21,7 @@ import java.util.UUID;
 public class User {
     
     public enum UserRole {
-        USER, ADMIN, OWNER
+        USER, ADMIN, RESTAURANT_OWNER
     }
 
     @Id
@@ -86,6 +86,9 @@ public class User {
     @Column(name = "vault_tier")
     private String vaultTier = "SILVER";
 
+    @Column(name = "fcm_token")
+    private String fcmToken;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Address> addresses;
@@ -135,6 +138,7 @@ public class User {
         private UserRole role = UserRole.USER;
         private Long loyaltyPoints = 0L;
         private String vaultTier = "SILVER";
+        private String fcmToken;
 
         public UserBuilder id(UUID id) { this.id = id; return this; }
         public UserBuilder firstName(String firstName) { this.firstName = firstName; return this; }
@@ -153,6 +157,7 @@ public class User {
         public UserBuilder role(UserRole role) { this.role = role; return this; }
         public UserBuilder loyaltyPoints(Long points) { this.loyaltyPoints = points; return this; }
         public UserBuilder vaultTier(String tier) { this.vaultTier = tier; return this; }
+        public UserBuilder fcmToken(String fcmToken) { this.fcmToken = fcmToken; return this; }
 
         public User build() {
             User user = new User();
@@ -173,6 +178,7 @@ public class User {
             user.setRole(role);
             user.setLoyaltyPoints(loyaltyPoints);
             user.setVaultTier(vaultTier);
+            user.setFcmToken(fcmToken);
             return user;
         }
     }
@@ -218,6 +224,8 @@ public class User {
     public void setLoyaltyPoints(Long loyaltyPoints) { this.loyaltyPoints = loyaltyPoints; }
     public String getVaultTier() { return vaultTier; }
     public void setVaultTier(String vaultTier) { this.vaultTier = vaultTier; }
+    public String getFcmToken() { return fcmToken; }
+    public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
     public List<Address> getAddresses() { return addresses; }
     public void setAddresses(List<Address> addresses) { this.addresses = addresses; }
     public List<Order> getOrders() { return orders; }

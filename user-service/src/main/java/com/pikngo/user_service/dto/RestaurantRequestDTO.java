@@ -19,6 +19,8 @@ public class RestaurantRequestDTO {
     @JsonProperty("isActive")
     private boolean isActive;
 
+    private UUID ownerId;
+
     public RestaurantRequestDTO() {}
 
     public UUID getId() { return id; }
@@ -43,4 +45,7 @@ public class RestaurantRequestDTO {
     public boolean isActive() { return isActive; }
     @JsonProperty("isActive")
     public void setActive(boolean active) { isActive = active; }
+
+    public UUID getOwnerId() { return ownerId; }
+    public void setOwnerId(UUID ownerId) { this.ownerId = ownerId; }
 }

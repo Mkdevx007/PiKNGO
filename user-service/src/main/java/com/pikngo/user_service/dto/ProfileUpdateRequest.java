@@ -15,10 +15,11 @@ public class ProfileUpdateRequest {
     private String city;
     private String state;
     private String pincode;
+    private String fcmToken;
 
     public ProfileUpdateRequest() {}
 
-    public ProfileUpdateRequest(String firstName, String lastName, String email, String addressLine1, String addressLine2, String city, String state, String pincode) {
+    public ProfileUpdateRequest(String firstName, String lastName, String email, String addressLine1, String addressLine2, String city, String state, String pincode, String fcmToken) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -27,6 +28,7 @@ public class ProfileUpdateRequest {
         this.city = city;
         this.state = state;
         this.pincode = pincode;
+        this.fcmToken = fcmToken;
     }
 
     public static class ProfileUpdateRequestBuilder {
@@ -38,6 +40,7 @@ public class ProfileUpdateRequest {
         private String city;
         private String state;
         private String pincode;
+        private String fcmToken;
 
         public ProfileUpdateRequestBuilder firstName(String firstName) { this.firstName = firstName; return this; }
         public ProfileUpdateRequestBuilder lastName(String lastName) { this.lastName = lastName; return this; }
@@ -47,9 +50,10 @@ public class ProfileUpdateRequest {
         public ProfileUpdateRequestBuilder city(String city) { this.city = city; return this; }
         public ProfileUpdateRequestBuilder state(String state) { this.state = state; return this; }
         public ProfileUpdateRequestBuilder pincode(String pincode) { this.pincode = pincode; return this; }
+        public ProfileUpdateRequestBuilder fcmToken(String fcmToken) { this.fcmToken = fcmToken; return this; }
 
         public ProfileUpdateRequest build() {
-            return new ProfileUpdateRequest(firstName, lastName, email, addressLine1, addressLine2, city, state, pincode);
+            return new ProfileUpdateRequest(firstName, lastName, email, addressLine1, addressLine2, city, state, pincode, fcmToken);
         }
     }
 
@@ -73,4 +77,6 @@ public class ProfileUpdateRequest {
     public void setState(String state) { this.state = state; }
     public String getPincode() { return pincode; }
     public void setPincode(String pincode) { this.pincode = pincode; }
+    public String getFcmToken() { return fcmToken; }
+    public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
 }

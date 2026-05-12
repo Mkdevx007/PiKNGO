@@ -31,7 +31,8 @@ const ManageRestaurants = () => {
         rating: 4.5,
         deliveryTime: '30',
         image: '',
-        isActive: true
+        isActive: true,
+        ownerId: ''
     });
 
     const [submitting, setSubmitting] = useState(false);
@@ -97,7 +98,8 @@ const ManageRestaurants = () => {
                 rating: parseFloat(formData.rating),
                 deliveryTime: formData.deliveryTime.toString(),
                 imageUrl: formData.image,
-                isActive: formData.isActive
+                isActive: formData.isActive,
+                ownerId: formData.ownerId || null
             };
 
             if (editingRes) {
@@ -235,6 +237,11 @@ const ManageRestaurants = () => {
                                                     <Clock size={14} />
                                                     <span>{res.deliveryTime || '30-40'} min</span>
                                                 </div>
+                                                {res.ownerId && (
+                                                    <div className="detail-item owner-id-badge-mini">
+                                                        <span>OWNER: {res.ownerId.substring(0, 8)}...</span>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="card-actions-grid">
@@ -253,7 +260,8 @@ const ManageRestaurants = () => {
                                                         image: res.imageUrl || res.image || '',
                                                         isActive: res.isActive !== false,
                                                         latitude: res.latitude || 18.5204,
-                                                        longitude: res.longitude || 73.8567
+                                                        longitude: res.longitude || 73.8567,
+                                                        ownerId: res.ownerId || ''
                                                     });
                                                     setViewMode('form');
                                                 }}>
@@ -328,6 +336,10 @@ const ManageRestaurants = () => {
                                                 <ImageIcon size={14} />
                                                 <input type="text" name="image" value={formData.image} onChange={handleInputChange} placeholder="https://..." />
                                             </div>
+                                        </div>
+                                        <div className="input-field">
+                                            <label>Owner ID (User UUID)</label>
+                                            <input type="text" name="ownerId" value={formData.ownerId} onChange={handleInputChange} placeholder="Assign an owner..." />
                                         </div>
                                     </div>
                                 </div>

@@ -16,6 +16,7 @@ public class RestaurantResponseDTO {
     @JsonProperty("isActive")
     private boolean isActive;
     private Double distance;
+    private UUID ownerId;
 
     public RestaurantResponseDTO() {}
 
@@ -32,6 +33,7 @@ public class RestaurantResponseDTO {
         @JsonProperty("isActive")
         private boolean isActive;
         private Double distance;
+        private UUID ownerId;
 
         public RestaurantResponseDTOBuilder id(UUID id) { this.id = id; return this; }
         public RestaurantResponseDTOBuilder restaurantName(String restaurantName) { this.restaurantName = restaurantName; return this; }
@@ -44,6 +46,7 @@ public class RestaurantResponseDTO {
         public RestaurantResponseDTOBuilder deliveryTime(String deliveryTime) { this.deliveryTime = deliveryTime; return this; }
         public RestaurantResponseDTOBuilder isActive(boolean isActive) { this.isActive = isActive; return this; }
         public RestaurantResponseDTOBuilder distance(Double distance) { this.distance = distance; return this; }
+        public RestaurantResponseDTOBuilder ownerId(UUID ownerId) { this.ownerId = ownerId; return this; }
 
         public RestaurantResponseDTO build() {
             RestaurantResponseDTO dto = new RestaurantResponseDTO();
@@ -58,6 +61,7 @@ public class RestaurantResponseDTO {
             dto.setDeliveryTime(deliveryTime);
             dto.setActive(isActive);
             dto.setDistance(distance);
+            dto.setOwnerId(ownerId);
             return dto;
         }
     }
@@ -91,4 +95,6 @@ public class RestaurantResponseDTO {
     public void setActive(boolean active) { isActive = active; }
     public Double getDistance() { return distance; }
     public void setDistance(Double distance) { this.distance = distance; }
+    public UUID getOwnerId() { return ownerId; }
+    public void setOwnerId(UUID ownerId) { this.ownerId = ownerId; }
 }

@@ -60,6 +60,7 @@ export const restaurantApi = {
 
     create: (data) => api.post('/restaurants', data),
     update: (id, data) => api.put(`/restaurants/${id}`, data),
+    getMyRestaurant: () => api.get('/restaurants/my-restaurant'),
 };
 
 export const menuApi = {
