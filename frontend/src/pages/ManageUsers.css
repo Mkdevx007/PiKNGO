@@ -206,6 +206,19 @@
     overflow: hidden;
 }
 
+/* Fix for dropdown clipping on last few rows - Force upwards direction */
+.user-row:nth-last-child(1) .action-dropdown,
+.user-row:nth-last-child(2) .action-dropdown,
+.user-row:nth-last-child(3) .action-dropdown {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    box-shadow: 
+        0 -15px 35px rgba(0, 0, 0, 0.6), 
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
 .dropdown-header {
     padding: 0.6rem 0.85rem;
     font-size: 0.7rem;
