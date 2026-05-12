@@ -76,8 +76,7 @@ const ManageUsers = () => {
         }
     };
 
-    const handleToggleRole = async (user) => {
-        const newRole = user.role === 'ADMIN' ? 'USER' : 'ADMIN';
+    const handleUpdateRole = async (user, newRole) => {
         try {
             await authApi.updateRole(user.id, newRole);
             setUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: newRole } : u));
@@ -111,6 +110,7 @@ const ManageUsers = () => {
                               (user.email || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesRole = roleFilter === 'All' || 
                             (roleFilter === 'Admins' && user.role === 'ADMIN') || 
+                            (roleFilter === 'Partners' && user.role === 'RESTAURANT_OWNER') || 
                             (roleFilter === 'Users' && user.role === 'USER');
         const matchesStatus = statusFilter === 'All' || 
                               (statusFilter === 'Active' && user.isActive) || 
@@ -156,6 +156,7 @@ const ManageUsers = () => {
                         <div className="orders-type-segment">
                             <button className={`segment-btn ${roleFilter === 'All' ? 'active' : ''}`} onClick={() => setRoleFilter('All')}>All Roles</button>
                             <button className={`segment-btn ${roleFilter === 'Admins' ? 'active' : ''}`} onClick={() => setRoleFilter('Admins')}><ShieldCheck size={14} /> Admins</button>
+                            <button className={`segment-btn ${roleFilter === 'Partners' ? 'active' : ''}`} onClick={() => setRoleFilter('Partners')}><Utensils size={14} /> Partners</button>
                             <button className={`segment-btn ${roleFilter === 'Users' ? 'active' : ''}`} onClick={() => setRoleFilter('Users')}><UserIcon size={14} /> Users</button>
                         </div>
                         <div className="orders-type-segment">
@@ -226,8 +227,8 @@ const ManageUsers = () => {
                                             </td>
                                             <td>
                                                 <span className={`role-badge ${user.role.toLowerCase()}`}>
-                                                    {user.role === 'ADMIN' ? <ShieldCheck size={12} /> : <UserIcon size={12} />}
-                                                    {user.role}
+                                                    {user.role === 'ADMIN' ? <ShieldCheck size={12} /> : (user.role === 'RESTAURANT_OWNER' ? <Utensils size={12} /> : <UserIcon size={12} />)}
+                                                    {user.role === 'RESTAURANT_OWNER' ? 'PARTNER' : user.role}
                                                 </span>
                                             </td>
                                             <td>
@@ -251,11 +252,25 @@ const ManageUsers = () => {
                                                     </button>
                                                     {actionMenuUserId === user.id && (
                                                         <div className="action-dropdown glass-modern animate-scale-in" onClick={e => e.stopPropagation()}>
-                                                            <div className="dropdown-header">User Actions</div>
-                                                            <button className="dropdown-item" onClick={() => handleToggleRole(user)}>
-                                                                {user.role === 'ADMIN' ? <ShieldAlert size={14} /> : <ShieldCheck size={14} />}
-                                                                <span>Make {user.role === 'ADMIN' ? 'User' : 'Admin'}</span>
-                                                            </button>
+                                                            <div className="dropdown-header">Assign Role</div>
+                                                            {user.role !== 'USER' && (
+                                                                <button className="dropdown-item" onClick={() => handleUpdateRole(user, 'USER')}>
+                                                                    <UserIcon size={14} />
+                                                                    <span>Set as User</span>
+                                                                </button>
+                                                            )}
+                                                            {user.role !== 'RESTAURANT_OWNER' && (
+                                                                <button className="dropdown-item" onClick={() => handleUpdateRole(user, 'RESTAURANT_OWNER')}>
+                                                                    <Utensils size={14} />
+                                                                    <span>Set as Partner</span>
+                                                                </button>
+                                                            )}
+                                                            {user.role !== 'ADMIN' && (
+                                                                <button className="dropdown-item" onClick={() => handleUpdateRole(user, 'ADMIN')}>
+                                                                    <ShieldCheck size={14} />
+                                                                    <span>Set as Admin</span>
+                                                                </button>
+                                                            )}
                                                             <button className={`dropdown-item ${user.isActive ? 'deactivate' : 'activate'}`} onClick={() => handleToggleStatus(user)}>
                                                                 {user.isActive ? <UserMinus size={14} /> : <UserPlus size={14} />}
                                                                 <span>{user.isActive ? 'Deactivate' : 'Activate'}</span>
