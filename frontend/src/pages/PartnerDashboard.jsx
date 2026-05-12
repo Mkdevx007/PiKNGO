@@ -15,6 +15,8 @@ const PartnerDashboard = () => {
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
+    const [orders, setOrders] = useState([]);
+    const [ordersLoading, setOrdersLoading] = useState(false);
     const [stats, setStats] = useState({
         totalOrders: 0,
         revenue: 0,
@@ -24,6 +26,38 @@ const PartnerDashboard = () => {
     useEffect(() => {
         fetchPartnerData();
     }, []);
+
+    useEffect(() => {
+        if (activeTab === 'orders' && restaurant) {
+            fetchOrders();
+            // Polling for new orders every 30 seconds
+            const interval = setInterval(fetchOrders, 30000);
+            return () => clearInterval(interval);
+        }
+    }, [activeTab, restaurant]);
+
+    const fetchOrders = async () => {
+        if (!restaurant) return;
+        setOrdersLoading(true);
+        try {
+            const res = await orderApi.getRestaurantOrders(restaurant.id);
+            setOrders(res);
+        } catch (err) {
+            console.error("Failed to fetch orders:", err);
+        } finally {
+            setOrdersLoading(false);
+        }
+    };
+
+    const handleUpdateOrderStatus = async (orderId, newStatus) => {
+        try {
+            await orderApi.updateStatus(orderId, newStatus);
+            showToast(`Order status updated to ${newStatus}`, 'success');
+            fetchOrders(); // Refresh list
+        } catch (err) {
+            showToast("Failed to update order status", "error");
+        }
+    };
 
     const fetchPartnerData = async () => {
         setLoading(true);
@@ -156,9 +190,59 @@ const PartnerDashboard = () => {
                 )}
 
                 {activeTab === 'orders' && (
-                    <div className="orders-section glass-modern">
-                        <h3>Active Transmissions</h3>
-                        <p className="opacity-50">Filterable order view coming soon...</p>
+                    <div className="orders-section glass-modern animate-slide-up">
+                        <div className="section-header">
+                            <h3>Active Transmissions</h3>
+                            <button className="btn-icon-glass sm" onClick={fetchOrders} disabled={ordersLoading}>
+                                <Activity size={14} className={ordersLoading ? 'animate-spin' : ''} />
+                            </button>
+                        </div>
+                        
+                        <div className="orders-list">
+                            {orders.length === 0 ? (
+                                <div className="empty-orders">
+                                    <ShoppingBag size={40} opacity={0.2} />
+                                    <p>No active orders in the network.</p>
+                                </div>
+                            ) : (
+                                orders.map(order => (
+                                    <div key={order.id} className="partner-order-card glass-modern">
+                                        <div className="order-main">
+                                            <div className="order-id">#{order.id.substring(0, 8).toUpperCase()}</div>
+                                            <div className="order-user-name">{order.userName}</div>
+                                            <div className="order-items-list">
+                                                {order.items.map(item => (
+                                                    <span key={item.id} className="item-pill">
+                                                        {item.quantity}x {item.itemName}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="order-meta">
+                                            <div className="order-total">₹{order.totalAmount}</div>
+                                            <div className={`order-status-badge ${order.status.toLowerCase()}`}>
+                                                {order.status}
+                                            </div>
+                                        </div>
+                                        <div className="order-actions">
+                                            {order.status === 'PENDING' && (
+                                                <button className="btn-action start" onClick={() => handleUpdateOrderStatus(order.id, 'PREPARING')}>
+                                                    START PREPARING
+                                                </button>
+                                            )}
+                                            {order.status === 'PREPARING' && (
+                                                <button className="btn-action ready" onClick={() => handleUpdateOrderStatus(order.id, 'READY')}>
+                                                    MARK AS READY
+                                                </button>
+                                            )}
+                                            {order.status === 'READY' && (
+                                                <div className="waiting-badge">WAITING FOR PICKUP</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 )}
             </main>

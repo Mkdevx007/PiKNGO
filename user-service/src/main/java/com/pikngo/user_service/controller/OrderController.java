@@ -30,11 +30,15 @@ public class OrderController {
     private final OrderService orderService;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+    private final com.pikngo.user_service.repository.RestaurantRepository restaurantRepository;
 
-    public OrderController(OrderService orderService, UserRepository userRepository, OrderRepository orderRepository) {
+    public OrderController(OrderService orderService, UserRepository userRepository, 
+                           OrderRepository orderRepository,
+                           com.pikngo.user_service.repository.RestaurantRepository restaurantRepository) {
         this.orderService = orderService;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
+        this.restaurantRepository = restaurantRepository;
     }
 
     /** Trending endpoint: returns the top 30 most-ordered menu items across all restaurants */
@@ -79,8 +83,21 @@ public class OrderController {
     }
 
     @GetMapping("/restaurant/{restaurantId}")
-    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getRestaurantOrders(@PathVariable UUID restaurantId) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
+    public ResponseEntity<ApiResponse<List<OrderResponseDTO>>> getRestaurantOrders(Principal principal, @PathVariable UUID restaurantId) {
         log.info("REST request to get orders for restaurant: {}", restaurantId);
+        
+        // Security Check: If the user is a RESTAURANT_OWNER, verify they own this restaurant
+        com.pikngo.user_service.entity.User currentUser = userRepository.findByPhoneNumber(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (currentUser.getRole().name().equals("RESTAURANT_OWNER")) {
+            var restaurant = restaurantRepository.findById(restaurantId).orElse(null);
+            if (restaurant == null || restaurant.getOwnerId() == null || !restaurant.getOwnerId().equals(currentUser.getId())) {
+                return ResponseEntity.status(403).build(); // Forbidden
+            }
+        }
+        
         return ResponseEntity.ok(ApiResponse.success("Restaurant orders fetched successfully", orderService.getRestaurantOrders(restaurantId)));
     }
 
@@ -92,11 +109,25 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
     public ResponseEntity<ApiResponse<OrderResponseDTO>> updateOrderStatus(
+            Principal principal,
             @PathVariable UUID orderId,
             @RequestParam Order.OrderStatus status) {
         log.info("REST request to update status for order: {} to {}", orderId, status);
+        
+        // Security Check: If the user is a RESTAURANT_OWNER, verify they own this order's restaurant
+        com.pikngo.user_service.entity.User currentUser = userRepository.findByPhoneNumber(principal.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (currentUser.getRole().name().equals("RESTAURANT_OWNER")) {
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new RuntimeException("Order not found"));
+            if (!order.getRestaurant().getOwnerId().equals(currentUser.getId())) {
+                return ResponseEntity.status(403).build(); // Forbidden
+            }
+        }
+        
         return ResponseEntity.ok(ApiResponse.success("Order status updated successfully", orderService.updateOrderStatus(orderId, status)));
     }
 
