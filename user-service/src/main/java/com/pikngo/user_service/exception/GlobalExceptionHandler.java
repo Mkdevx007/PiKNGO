@@ -169,6 +169,30 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle JPA Constraint Violation Exceptions
+     */
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolation(jakarta.validation.ConstraintViolationException ex, WebRequest request) {
+        log.warn("ConstraintViolationException: {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            String propertyPath = violation.getPropertyPath().toString();
+            errors.put(propertyPath, violation.getMessage());
+        });
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("message", "Data validation failed");
+        body.put("fieldErrors", errors);
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Handle all other general exceptions
      */
     @ExceptionHandler(Exception.class)
@@ -179,7 +203,7 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         body.put("error", "Internal Server Error");
-        body.put("message", "An unexpected error occurred. Please contact support.");
+        body.put("message", "Error: " + ex.getClass().getSimpleName() + " - " + ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);

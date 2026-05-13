@@ -42,8 +42,7 @@ public class User {
     private String email;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Invalid phone number")
-    @Column(name = "phone_number", unique = true, nullable = false, length = 15)
+    @Column(name = "phone_number", unique = true, nullable = false, length = 100)
     private String phoneNumber;
 
     @Column(name = "user_password")

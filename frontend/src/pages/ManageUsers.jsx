@@ -20,6 +20,7 @@ const ManageUsers = () => {
     const [roleFilter, setRoleFilter] = useState('All');
     const [statusFilter, setStatusFilter] = useState('All');
     const [actionMenuUserId, setActionMenuUserId] = useState(null);
+    const [dropdownPosition, setDropdownPosition] = useState('down');
     const [pagination, setPagination] = useState({
         page: 0,
         size: 10,
@@ -58,6 +59,27 @@ const ManageUsers = () => {
         }
     };
 
+    const handleActionClick = (e, userId) => {
+        e.stopPropagation();
+        if (actionMenuUserId === userId) {
+            setActionMenuUserId(null);
+            return;
+        }
+        
+        const rect = e.currentTarget.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const dropdownHeight = 280; // Approximate height of the menu
+
+        if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+            setDropdownPosition('up');
+        } else {
+            setDropdownPosition('down');
+        }
+        
+        setActionMenuUserId(userId);
+    };
+
     const handlePageChange = (newPage) => {
         if (newPage >= 0 && newPage < pagination.totalPages) {
             fetchUsers(newPage);
@@ -65,26 +87,36 @@ const ManageUsers = () => {
     };
 
     const handleToggleStatus = async (user) => {
+        const oldStatus = user.isActive;
+        // Optimistic UI update
+        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive: !oldStatus, isDeleted: false } : u));
+        setActionMenuUserId(null);
+        
         try {
-            await authApi.updateStatus(user.id, !user.isActive);
-            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive: !u.isActive, isDeleted: false } : u));
-            setActionMenuUserId(null);
-            showToast(`User ${user.firstName} is now ${!user.isActive ? 'Active' : 'Inactive'}`, 'info');
+            await authApi.updateStatus(user.id, !oldStatus);
+            showToast(`User ${user.firstName} is now ${!oldStatus ? 'Active' : 'Inactive'}`, 'info');
         } catch (err) {
             console.error("Failed to update status:", err);
-            showToast('Error updating user status', 'error');
+            // Rollback on failure
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, isActive: oldStatus } : u));
+            showToast(`Error: ${err.message || 'Failed to update status'}`, 'error');
         }
     };
 
     const handleUpdateRole = async (user, newRole) => {
+        const oldRole = user.role;
+        // Optimistic UI update
+        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: newRole } : u));
+        setActionMenuUserId(null);
+
         try {
             await authApi.updateRole(user.id, newRole);
-            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: newRole } : u));
-            setActionMenuUserId(null);
             showToast(`${user.firstName}'s role updated to ${newRole}`, 'success');
         } catch (err) {
             console.error("Failed to update role:", err);
-            showToast('Error updating user role', 'error');
+            // Rollback on failure
+            setUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: oldRole } : u));
+            showToast(`Error: ${err.message || 'Failed to update role'}`, 'error');
         }
     };
 
@@ -248,15 +280,12 @@ const ManageUsers = () => {
                                                 <div className="action-cell">
                                                     <button 
                                                         className={`action-menu-btn ${actionMenuUserId === user.id ? 'active' : ''}`}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setActionMenuUserId(actionMenuUserId === user.id ? null : user.id);
-                                                        }}
+                                                        onClick={(e) => handleActionClick(e, user.id)}
                                                     >
                                                         <MoreVertical size={18} />
                                                     </button>
                                                     {actionMenuUserId === user.id && (
-                                                        <div className="action-dropdown glass-modern animate-scale-in" onClick={e => e.stopPropagation()}>
+                                                        <div className={`action-dropdown glass-modern animate-scale-in ${dropdownPosition}`} onClick={e => e.stopPropagation()}>
                                                             <div className="dropdown-header">Assign Role</div>
                                                             {user.role !== 'USER' && (
                                                                 <button className="dropdown-item" onClick={() => handleUpdateRole(user, 'USER')}>

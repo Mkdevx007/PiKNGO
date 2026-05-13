@@ -103,7 +103,14 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         otpRepository.save(otp);
-        smsService.sendSms(phoneNumber, "Your PikNGo verification code is: " + otpCode);
+        
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                smsService.sendSms(phoneNumber, "Your PikNGo verification code is: " + otpCode);
+            } catch (Exception e) {
+                log.error("Failed to send async SMS: ", e);
+            }
+        });
     }
 
     @Override
@@ -173,8 +180,14 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("Password reset OTP generated for {}: {}", email, token);
         
-        // Use the new professional HTML email template
-        emailService.sendOtpEmail(email, token);
+        // Dispatch email asynchronously so it doesn't block the response
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                emailService.sendOtpEmailSync(email, token);
+            } catch (Exception e) {
+                log.error("Failed to send async forgot password email: ", e);
+            }
+        });
     }
 
     @Override
@@ -202,7 +215,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void sendEmailOtp(String email) {
         String otpCode = generateAndSaveEmailOtp(email);
-        emailService.sendOtpEmail(email, otpCode);
+        
+        // Dispatch email asynchronously to prevent UI freezing
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                emailService.sendOtpEmailSync(email, otpCode);
+            } catch (Exception e) {
+                log.error("Failed to send async login email: ", e);
+            }
+        });
     }
 
     @Override

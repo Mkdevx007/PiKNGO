@@ -191,8 +191,6 @@
 .action-dropdown {
     position: absolute;
     right: 0;
-    top: 100%;
-    margin-top: 0.5rem;
     width: 190px;
     background: rgba(20, 20, 25, 0.95);
     backdrop-filter: blur(25px) saturate(200%);
@@ -200,20 +198,26 @@
     border-radius: 16px;
     padding: 0.5rem;
     z-index: 1000;
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.6), 
-        0 0 0 1px rgba(255, 255, 255, 0.05);
     overflow: hidden;
 }
 
-/* Fix for dropdown clipping on last few rows - Force upwards direction */
-.user-row:nth-last-child(1) .action-dropdown,
-.user-row:nth-last-child(2) .action-dropdown,
-.user-row:nth-last-child(3) .action-dropdown {
+.action-dropdown.down {
+    top: 100%;
+    bottom: auto;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    transform-origin: top right;
+    box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.6), 
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.action-dropdown.up {
     top: auto;
     bottom: 100%;
     margin-top: 0;
     margin-bottom: 0.5rem;
+    transform-origin: bottom right;
     box-shadow: 
         0 -15px 35px rgba(0, 0, 0, 0.6), 
         0 0 0 1px rgba(255, 255, 255, 0.05);
