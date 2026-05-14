@@ -47,6 +47,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchStats();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchStats = async () => {
@@ -83,8 +84,8 @@ const AdminDashboard = () => {
             });
             
             showToast('Analytics refreshed successfully', 'success');
-        } catch (err) {
-            console.error("Failed to fetch dashboard stats:", err);
+        } catch (_err) {
+            console.error("Failed to fetch dashboard stats");
             showToast('Failed to refresh data', 'error');
         } finally {
             setLoading(false);

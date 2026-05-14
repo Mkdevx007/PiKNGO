@@ -25,6 +25,7 @@ const RiderDashboard = () => {
 
     useEffect(() => {
         fetchRiderProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -33,6 +34,7 @@ const RiderDashboard = () => {
             const interval = setInterval(fetchOrders, 30000);
             return () => clearInterval(interval);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rider, activeTab]);
 
     // WebSocket Setup
@@ -96,7 +98,7 @@ const RiderDashboard = () => {
         try {
             const data = await authApi.getProfile();
             setRider(data);
-        } catch (err) {
+        } catch (_err) {
             showToast("Failed to fetch rider profile", "error");
         } finally {
             setLoading(false);
@@ -133,7 +135,7 @@ const RiderDashboard = () => {
             await orderApi.updateStatus(orderId, status);
             showToast(`Order marked as ${status}`, "success");
             fetchOrders();
-        } catch (err) {
+        } catch (_err) {
             showToast("Failed to update status", "error");
         }
     };

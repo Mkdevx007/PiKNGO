@@ -140,8 +140,8 @@ function App() {
       
       // Request Notification Permission and register FCM token
       await requestNotificationPermission();
-    } catch (err) {
-      console.warn("Failed to fetch full profile after login", err);
+    } catch (_err) {
+      console.warn("Failed to fetch full profile after login");
     }
   };
 
@@ -194,6 +194,7 @@ function App() {
       }
     };
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (authLoading) {

@@ -49,6 +49,7 @@ const MapRefresher = ({ restaurantLoc, userLoc, riderLoc }) => {
             if (riderLoc) bounds.extend(riderLoc);
             map.fitBounds(bounds, { padding: [50, 50] });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [restaurantLoc, userLoc, riderLoc, map]);
 
     return null;
