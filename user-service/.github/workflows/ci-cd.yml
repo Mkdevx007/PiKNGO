@@ -4,16 +4,16 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'PikNGo/user-service/**'
+      - 'user-service/**'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'PikNGo/user-service/**'
+      - 'user-service/**'
 
 env:
   JAVA_VERSION: '17'
   SERVICE_NAME: user-service
-  SERVICE_PATH: PikNGo/user-service
+  SERVICE_PATH: user-service
 
 jobs:
   test:
