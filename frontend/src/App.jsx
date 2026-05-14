@@ -48,7 +48,7 @@ const PageLoader = () => (
 );
 
 // Inner component to use hooks inside Router context
-function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLogin, handleLogout }) {
+function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, setProfileImageUrl, handleLogin, handleLogout }) {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isPartnerRoute = location.pathname.startsWith('/partner');
@@ -194,7 +194,7 @@ function App() {
       }
     };
     checkAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   if (authLoading) {
@@ -219,6 +219,7 @@ function App() {
               userName={userName}
               userRole={userRole}
               profileImageUrl={profileImageUrl}
+              setProfileImageUrl={setProfileImageUrl}
               handleLogin={handleLogin}
               handleLogout={handleLogout}
             />
