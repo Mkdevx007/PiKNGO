@@ -61,26 +61,24 @@ const LiveTrackingMap = ({ order, riderLocation }) => {
     const [riderLoc, setRiderLoc] = useState(null);
 
     useEffect(() => {
-        // In a real app, coordinates would come from order.restaurant.lat/lng
-        // For demo, we use slightly randomized offsets based onMurthal/Delhi
         if (order) {
-            // Simulate coordinates if not provided
-            // MURTHAL HUB (Restaurant)
-            const rLat = 28.9950;
-            const rLng = 77.1211;
+            // Priority: actual order coordinates > restaurant entity coordinates > defaults
+            const rLat = order.restaurantLatitude || 28.6139;
+            const rLng = order.restaurantLongitude || 77.2090;
             
-            // USER HUB (Delhi North)
-            const uLat = 28.7041;
-            const uLng = 77.1025;
+            const uLat = order.deliveryLatitude || 28.5355;
+            const uLng = order.deliveryLongitude || 77.3910;
 
             setRestaurantLoc([rLat, rLng]);
             setUserLoc([uLat, uLng]);
             
             if (riderLocation) {
-                setRiderLoc(riderLocation);
-            } else if (order.status === 'READY' || order.status === 'DELIVERED') {
-                 // Simulate rider at midpoint
-                 setRiderLoc([(rLat + uLat)/2, (rLng + uLng)/2]);
+                setRiderLoc([riderLocation.latitude, riderLocation.longitude]);
+            } else if (order.riderLatitude && order.riderLongitude) {
+                setRiderLoc([order.riderLatitude, order.riderLongitude]);
+            } else if (order.status === 'READY' || order.status === 'PICKED_UP' || order.status === 'OUT_FOR_DELIVERY') {
+                 // If no live location yet, show at restaurant as starting point
+                 setRiderLoc([rLat, rLng]);
             }
         }
     }, [order, riderLocation]);

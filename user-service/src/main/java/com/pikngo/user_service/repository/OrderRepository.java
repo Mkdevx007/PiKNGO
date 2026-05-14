@@ -56,4 +56,18 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
             ORDER BY SUM(oi.quantity) DESC
             """)
     List<TrendingItemDTO> findTopTrendingItems(Pageable pageable);
+
+    @Query(value = "SELECT CAST(created_ts AS DATE) as date, SUM(total_amount) as revenue, COUNT(*) as count " +
+                   "FROM orders WHERE status = 'DELIVERED' AND created_ts >= CURRENT_DATE - INTERVAL '7 days' " +
+                   "GROUP BY CAST(created_ts AS DATE) ORDER BY date ASC", nativeQuery = true)
+    List<Object[]> findWeeklyRevenue();
+
+    @Query(value = "SELECT status, COUNT(*) as count FROM orders GROUP BY status", nativeQuery = true)
+    List<Object[]> findOrderStatusCounts();
+
+    @Query(value = "SELECT r.restaurant_name as name, SUM(o.total_amount) as value " +
+                   "FROM orders o JOIN restaurants r ON o.restaurant_id = r._id " +
+                   "WHERE o.status = 'DELIVERED' " +
+                   "GROUP BY r.restaurant_name ORDER BY value DESC LIMIT 5", nativeQuery = true)
+    List<Object[]> findTopRestaurantsByRevenue();
 }

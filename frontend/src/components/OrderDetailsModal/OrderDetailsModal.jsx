@@ -3,7 +3,7 @@ import { X, Package, MapPin, CreditCard, Clock, CheckCircle2, ChevronRight, Truc
 import LiveTrackingMap from '../Tracking/LiveTrackingMap';
 import './OrderDetailsModal.css';
 
-const OrderDetailsModal = ({ isOpen, onClose, order }) => {
+const OrderDetailsModal = ({ isOpen, onClose, order, riderLocation }) => {
     if (!isOpen || !order) return null;
 
     const getStatusSteps = (status) => {
@@ -38,7 +38,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                         <h3>Live Transmission Hub</h3>
                         
                         <div className="modal-map-wrapper">
-                            <LiveTrackingMap order={order} />
+                            <LiveTrackingMap order={order} riderLocation={riderLocation} />
                         </div>
 
                         <div className="tracking-timeline">

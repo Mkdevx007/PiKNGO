@@ -61,6 +61,18 @@ public class Order {
     @Column(name = "discount_amount", precision = 12, scale = 2)
     private java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
 
+    @Column(name = "rider_latitude")
+    private Double riderLatitude;
+
+    @Column(name = "rider_longitude")
+    private Double riderLongitude;
+
+    @Column(name = "delivery_latitude")
+    private Double deliveryLatitude;
+
+    @Column(name = "delivery_longitude")
+    private Double deliveryLongitude;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
 
@@ -87,6 +99,10 @@ public class Order {
         private User rider;
         private String promoCode;
         private java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
+        private Double riderLatitude;
+        private Double riderLongitude;
+        private Double deliveryLatitude;
+        private Double deliveryLongitude;
 
         public OrderBuilder user(User user) { this.user = user; return this; }
         public OrderBuilder restaurant(Restaurant restaurant) { this.restaurant = restaurant; return this; }
@@ -99,6 +115,10 @@ public class Order {
         public OrderBuilder rider(User rider) { this.rider = rider; return this; }
         public OrderBuilder promoCode(String promoCode) { this.promoCode = promoCode; return this; }
         public OrderBuilder discountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; return this; }
+        public OrderBuilder riderLatitude(Double lat) { this.riderLatitude = lat; return this; }
+        public OrderBuilder riderLongitude(Double lng) { this.riderLongitude = lng; return this; }
+        public OrderBuilder deliveryLatitude(Double lat) { this.deliveryLatitude = lat; return this; }
+        public OrderBuilder deliveryLongitude(Double lng) { this.deliveryLongitude = lng; return this; }
 
         public Order build() {
             Order order = new Order();
@@ -113,6 +133,10 @@ public class Order {
             order.setRider(rider);
             order.setPromoCode(promoCode);
             order.setDiscountAmount(discountAmount);
+            order.setRiderLatitude(riderLatitude);
+            order.setRiderLongitude(riderLongitude);
+            order.setDeliveryLatitude(deliveryLatitude);
+            order.setDeliveryLongitude(deliveryLongitude);
             return order;
         }
     }
@@ -147,6 +171,14 @@ public class Order {
     public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
     public java.math.BigDecimal getDiscountAmount() { return discountAmount; }
     public void setDiscountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; }
+    public Double getRiderLatitude() { return riderLatitude; }
+    public void setRiderLatitude(Double riderLatitude) { this.riderLatitude = riderLatitude; }
+    public Double getRiderLongitude() { return riderLongitude; }
+    public void setRiderLongitude(Double riderLongitude) { this.riderLongitude = riderLongitude; }
+    public Double getDeliveryLatitude() { return deliveryLatitude; }
+    public void setDeliveryLatitude(Double deliveryLatitude) { this.deliveryLatitude = deliveryLatitude; }
+    public Double getDeliveryLongitude() { return deliveryLongitude; }
+    public void setDeliveryLongitude(Double deliveryLongitude) { this.deliveryLongitude = deliveryLongitude; }
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
     public LocalDateTime getCreatedTs() { return createdTs; }

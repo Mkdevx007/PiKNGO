@@ -3,7 +3,7 @@ import {
     Users, Store, ShoppingBag, 
     TrendingUp, ArrowUpRight, ArrowDownRight,
     Clock, IndianRupee, Activity, Package, Smartphone,
-    Loader2
+    Loader2, Brain, Sparkles, Award, Truck, AlertTriangle, Cpu, Zap
 } from 'lucide-react';
 import { 
     LineChart, Line, XAxis, YAxis, CartesianGrid, 
@@ -11,6 +11,7 @@ import {
     BarChart, Bar, Legend, Cell, PieChart, Pie
 } from 'recharts';
 import { orderApi, adminAnalyticsApi } from '../services/api';
+import AiChatConsole from '../components/AiChat/AiChatConsole';
 import './AdminDashboard.css';
 
 const data = [
@@ -38,7 +39,9 @@ const AdminDashboard = () => {
         deliveryOrders: 0,
         recentActivity: [],
         chartData: [],
-        restaurantRevenue: []
+        statusDistribution: [],
+        restaurantRevenue: [],
+        aiInsights: []
     });
     const [loading, setLoading] = useState(true);
 
@@ -51,62 +54,32 @@ const AdminDashboard = () => {
         try {
             const [analyticsRes, orders] = await Promise.all([
                 adminAnalyticsApi.getDashboardStats(),
-                orderApi.getAllOrders(0, 100) // Get more for better charts
+                orderApi.getAllOrders(0, 10) // Just get a few for the list
             ]);
 
             const statsRes = analyticsRes || {};
             const allOrdersRaw = orders || [];
-            const allOrders = Array.isArray(allOrdersRaw) ? allOrdersRaw : (allOrdersRaw?.content || []);
+            const recentOrders = Array.isArray(allOrdersRaw) ? allOrdersRaw : (allOrdersRaw?.content || []);
             
-            const pickupCount = statsRes.pickupOrders || 0;
-            const deliveryCount = statsRes.deliveryOrders || 0;
-
-            // Process Chart Data (Last 7 Days)
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const last7Days = [];
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                last7Days.push({
-                    dayIndex: date.getDay(),
-                    name: days[date.getDay()],
-                    dateString: date.toLocaleDateString(),
-                    revenue: 0,
-                    orders: 0
-                });
-            }
-
-            // Process Restaurant Revenue
-            const resMap = {};
-
-            allOrders.forEach(order => {
-                const orderDate = new Date(order.createdTs).toLocaleDateString();
-                const dayMatch = last7Days.find(d => d.dateString === orderDate);
-                if (dayMatch) {
-                    dayMatch.revenue += (order.totalAmount || 0);
-                    dayMatch.orders += 1;
-                }
-
-                // Group by restaurant
-                const rName = order.restaurantName || 'Unknown';
-                resMap[rName] = (resMap[rName] || 0) + (order.totalAmount || 0);
-            });
-
-            const restaurantRevenue = Object.keys(resMap).map(name => ({
-                name,
-                value: resMap[name]
-            })).sort((a, b) => b.value - a.value).slice(0, 5);
+            // Format status distribution for Pie Chart
+            const statusDist = statsRes.orderStatusDistribution || {};
+            const pieData = Object.keys(statusDist).map(key => ({
+                name: key,
+                value: statusDist[key]
+            }));
 
             setStats({
-                totalUsers: statsRes.totalUsers,
-                totalRestaurants: statsRes.totalRestaurants,
-                totalOrders: statsRes.totalOrders,
-                totalRevenue: statsRes.totalRevenue,
-                pickupOrders: pickupCount,
-                deliveryOrders: deliveryCount,
-                recentActivity: allOrders.slice(0, 5),
-                chartData: last7Days,
-                restaurantRevenue
+                totalUsers: statsRes.totalUsers || 0,
+                totalRestaurants: statsRes.totalRestaurants || 0,
+                totalOrders: statsRes.totalOrders || 0,
+                totalRevenue: statsRes.totalRevenue || 0,
+                pickupOrders: statsRes.pickupOrders || 0,
+                deliveryOrders: statsRes.deliveryOrders || 0,
+                recentActivity: recentOrders.slice(0, 5),
+                chartData: statsRes.weeklyRevenue || [],
+                statusDistribution: pieData,
+                restaurantRevenue: statsRes.topRestaurants || [],
+                aiInsights: statsRes.aiInsights || []
             });
             
             showToast('Analytics refreshed successfully', 'success');
@@ -192,6 +165,47 @@ const AdminDashboard = () => {
                     colorClass="purple"
                     delay="0.3s"
                 />
+            </div>
+
+            <div className="ai-intelligence-hub glass-card elite-border animate-slide-up">
+                <div className="ai-header">
+                    <div className="ai-title">
+                        <Brain className="ai-brain-icon" size={24} />
+                        <h3>Neural Intelligence Hub</h3>
+                        <div className="ai-status">
+                            <Sparkles size={12} className="sparkle-anim" />
+                            ANALYZING LIVE DATA
+                        </div>
+                    </div>
+                </div>
+                <div className="insights-grid">
+                    {stats.aiInsights && stats.aiInsights.length > 0 ? stats.aiInsights.map((insight, idx) => {
+                        const Icon = {
+                            zap: Zap,
+                            'trending-up': TrendingUp,
+                            award: Award,
+                            truck: Truck,
+                            'alert-triangle': AlertTriangle,
+                            cpu: Cpu
+                        }[insight.icon] || Activity;
+
+                        return (
+                            <div key={idx} className={`insight-card ${insight.type.toLowerCase()}`}>
+                                <div className="insight-icon">
+                                    <Icon size={18} />
+                                </div>
+                                <div className="insight-content">
+                                    <p>{insight.message}</p>
+                                </div>
+                            </div>
+                        );
+                    }) : (
+                        <div className="insight-loading">
+                            <Loader2 className="animate-spin" size={20} />
+                            <span>Booting AI logic engine...</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="charts-main-grid">
@@ -309,21 +323,21 @@ const AdminDashboard = () => {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
-                                        data={
-                                            stats.deliveryOrders === 0 && stats.pickupOrders === 0
-                                            ? [ { name: 'Delivery', value: 65 }, { name: 'Self-Pickup', value: 35 } ]
-                                            : [ { name: 'Delivery', value: stats.deliveryOrders }, { name: 'Self-Pickup', value: stats.pickupOrders } ]
-                                        }
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={70}
-                                        outerRadius={90}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {[0, 1].map((index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
+                                         data={
+                                             stats.statusDistribution && stats.statusDistribution.length > 0
+                                             ? stats.statusDistribution
+                                             : [ { name: 'No Data', value: 100 } ]
+                                         }
+                                         cx="50%"
+                                         cy="50%"
+                                         innerRadius={70}
+                                         outerRadius={90}
+                                         paddingAngle={5}
+                                         dataKey="value"
+                                     >
+                                         {(stats.statusDistribution || []).map((entry, index) => (
+                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                         ))}
                                     </Pie>
                                     <Tooltip />
                                     <Legend />
@@ -353,6 +367,7 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </div>
+            <AiChatConsole />
         </div>
     );
 };

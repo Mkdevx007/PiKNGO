@@ -3,8 +3,11 @@ import {
     Bike, MapPin, Package, Navigation, 
     CheckCircle2, Clock, Map as MapIcon, 
     ChevronRight, Power, Activity, ShoppingBag,
-    User, Phone, LogOut, RefreshCw
+    User, Phone, LogOut, RefreshCw,
+    GripVertical, Radio
 } from 'lucide-react';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 import { orderApi, authApi } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import './RiderDashboard.css';
@@ -16,6 +19,9 @@ const RiderDashboard = () => {
     const [myOrders, setMyOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('available'); // 'available' or 'active'
+    const [stompClient, setStompClient] = useState(null);
+    const [isLive, setIsLive] = useState(false);
+    const [currentPos, setCurrentPos] = useState(null);
 
     useEffect(() => {
         fetchRiderProfile();
@@ -28,6 +34,63 @@ const RiderDashboard = () => {
             return () => clearInterval(interval);
         }
     }, [rider, activeTab]);
+
+    // WebSocket Setup
+    useEffect(() => {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
+        const wsUrl = baseUrl.replace('/api/v1', '') + '/ws-orders';
+        const client = new Client({
+            webSocketFactory: () => new SockJS(wsUrl),
+            reconnectDelay: 5000,
+            debug: (str) => { console.log(str); }
+        });
+
+        client.onConnect = () => {
+            setIsLive(true);
+            setStompClient(client);
+        };
+
+        client.onStompError = () => setIsLive(false);
+        client.onWebSocketClose = () => setIsLive(false);
+
+        client.activate();
+        return () => client.deactivate();
+    }, []);
+
+    // Geolocation Tracking
+    useEffect(() => {
+        if (!navigator.geolocation) return;
+
+        const watchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                setCurrentPos({
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude
+                });
+            },
+            (err) => console.error("Geolocation error:", err),
+            { enableHighAccuracy: true }
+        );
+
+        return () => navigator.geolocation.clearWatch(watchId);
+    }, []);
+
+    // Broadcast Location to Server
+    useEffect(() => {
+        if (!isLive || !stompClient || !currentPos || myOrders.length === 0) return;
+
+        const activeOrder = myOrders.find(o => ['PICKED_UP', 'OUT_FOR_DELIVERY'].includes(o.status));
+        if (activeOrder) {
+            stompClient.publish({
+                destination: '/app/update-location',
+                body: JSON.stringify({
+                    orderId: activeOrder.id,
+                    latitude: currentPos.latitude,
+                    longitude: currentPos.longitude
+                })
+            });
+        }
+    }, [currentPos, isLive, stompClient, myOrders]);
 
     const fetchRiderProfile = async () => {
         try {
@@ -94,9 +157,15 @@ const RiderDashboard = () => {
                         <p>{rider?.firstName} {rider?.lastName} // {rider?.phoneNumber}</p>
                     </div>
                 </div>
-                <button className="btn-logout-glass" onClick={() => { authApi.logout(); window.location.href = '/login'; }}>
-                    <LogOut size={18} />
-                </button>
+                <div className="header-actions">
+                    <div className={`connection-status ${isLive ? 'live' : 'offline'}`}>
+                        <Radio size={14} className={isLive ? 'animate-pulse' : ''} />
+                        <span>{isLive ? 'GPS LINK ACTIVE' : 'OFFLINE'}</span>
+                    </div>
+                    <button className="btn-logout-glass" onClick={() => { authApi.logout(); window.location.href = '/login'; }}>
+                        <LogOut size={18} />
+                    </button>
+                </div>
             </header>
 
             <div className="rider-stats-strip">

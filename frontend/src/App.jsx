@@ -1,37 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar/Navbar';
-import LandingPage from './pages/LandingPage';
-import AuthPage from './pages/AuthPage';
-import AboutPage from './pages/AboutPage';
-import ProfileScreen from './pages/ProfileScreen';
-import Dashboard from './pages/Dashboard';
-import TrendingPage from './pages/TrendingPage';
-import MenuPage from './pages/MenuPage';
-import ManageRestaurants from './pages/ManageRestaurants';
-import OrdersPage from './pages/OrdersPage';
-import ManageMenu from './pages/ManageMenu';
-import ManageUsers from './pages/ManageUsers';
-import AdminDashboard from './pages/AdminDashboard';
-import GlobalOrders from './pages/GlobalOrders';
-import GlobalSettings from './pages/GlobalSettings';
-import Promotions from './pages/Promotions';
-import PartnerDashboard from './pages/PartnerDashboard';
-import AdminLayout from './components/AdminLayout/AdminLayout';
-import Footer from './components/Footer/Footer';
-import VaultPage from './pages/VaultPage';
-import RiderDashboard from './pages/RiderDashboard';
 import { authApi } from './services/api';
 import { CartProvider } from './context/CartContext';
-import CheckoutPage from './pages/CheckoutPage';
 import { requestNotificationPermission } from './services/notificationService';
 import './App.css';
-
 import { ToastProvider } from './context/ToastContext';
 
+// Lazy load pages for performance
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ProfileScreen = lazy(() => import('./pages/ProfileScreen'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const TrendingPage = lazy(() => import('./pages/TrendingPage'));
+const MenuPage = lazy(() => import('./pages/MenuPage'));
+const ManageRestaurants = lazy(() => import('./pages/ManageRestaurants'));
+const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const ManageMenu = lazy(() => import('./pages/ManageMenu'));
+const ManageUsers = lazy(() => import('./pages/ManageUsers'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const GlobalOrders = lazy(() => import('./pages/GlobalOrders'));
+const GlobalSettings = lazy(() => import('./pages/GlobalSettings'));
+const Promotions = lazy(() => import('./pages/Promotions'));
+const PartnerDashboard = lazy(() => import('./pages/PartnerDashboard'));
+const AdminLayout = lazy(() => import('./components/AdminLayout/AdminLayout'));
+const VaultPage = lazy(() => import('./pages/VaultPage'));
+const RiderDashboard = lazy(() => import('./pages/RiderDashboard'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+
+// Static imports for non-page components to keep UI stable
+import Footer from './components/Footer/Footer';
 import ActiveOrderBar from './components/ActiveOrderBar/ActiveOrderBar';
 import MobileNav from './components/MobileNav/MobileNav';
+
+// Premium Fallback Loader
+const PageLoader = () => (
+  <div className="elite-page-loader">
+    <div className="loader-glow"></div>
+    <div className="loader-content">
+      <div className="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+);
 
 // Inner component to use hooks inside Router context
 function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLogin, handleLogout }) {
@@ -51,42 +65,47 @@ function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, handleLog
         onLogout={handleLogout}
       />
       <main>
-        <Routes>
-          <Route path="/" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : userRole === 'DELIVERY_RIDER' ? <Navigate to="/rider" /> : <Navigate to="/dashboard" />) : <LandingPage isLoggedIn={isLoggedIn} />} />
-          <Route path="/dashboard" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : userRole === 'DELIVERY_RIDER' ? <Navigate to="/rider" /> : <Dashboard />) : <Navigate to="/login" />} />
-          <Route path="/partner" element={isLoggedIn && userRole === 'RESTAURANT_OWNER' ? <PartnerDashboard /> : <Navigate to="/login" />} />
-          <Route path="/rider" element={isLoggedIn && userRole === 'DELIVERY_RIDER' ? <RiderDashboard /> : <Navigate to="/login" />} />
-          <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
-          <Route path="/register" element={<AuthPage onLogin={handleLogin} />} />
-          <Route path="/profile" element={isLoggedIn ? <ProfileScreen onProfileUpdate={(data) => setProfileImageUrl(data.profileImageUrl)} /> : <Navigate to="/login" />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/trending" element={<TrendingPage />} />
-          <Route path="/menu/:restaurantId" element={<MenuPage />} />
-          <Route path="/checkout" element={isLoggedIn ? <CheckoutPage /> : <Navigate to="/login" />} />
-          <Route path="/orders" element={isLoggedIn ? <OrdersPage /> : <Navigate to="/login" />} />
-          <Route path="/vault" element={isLoggedIn ? <VaultPage /> : <Navigate to="/login" />} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : userRole === 'DELIVERY_RIDER' ? <Navigate to="/rider" /> : <Navigate to="/dashboard" />) : <LandingPage isLoggedIn={isLoggedIn} />} />
+            <Route path="/dashboard" element={isLoggedIn ? (userRole === 'RESTAURANT_OWNER' ? <Navigate to="/partner" /> : userRole === 'DELIVERY_RIDER' ? <Navigate to="/rider" /> : <Dashboard />) : <Navigate to="/login" />} />
+            <Route path="/partner" element={isLoggedIn && userRole === 'RESTAURANT_OWNER' ? <PartnerDashboard /> : <Navigate to="/login" />} />
+            <Route path="/rider" element={isLoggedIn && userRole === 'DELIVERY_RIDER' ? <RiderDashboard /> : <Navigate to="/login" />} />
+            <Route path="/login" element={<AuthPage onLogin={handleLogin} />} />
+            <Route path="/register" element={<AuthPage onLogin={handleLogin} />} />
+            <Route path="/profile" element={isLoggedIn ? <ProfileScreen onProfileUpdate={(data) => setProfileImageUrl(data.profileImageUrl)} /> : <Navigate to="/login" />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/trending" element={<TrendingPage />} />
+            <Route path="/menu/:restaurantId" element={<MenuPage />} />
+            <Route path="/checkout" element={isLoggedIn ? <CheckoutPage /> : <Navigate to="/login" />} />
+            <Route path="/orders" element={isLoggedIn ? <OrdersPage /> : <Navigate to="/login" />} />
+            <Route path="/vault" element={isLoggedIn ? <VaultPage /> : <Navigate to="/login" />} />
 
-          {/* Admin Routes wrapped in AdminLayout */}
-          <Route path="/admin/*" element={
-            isLoggedIn && userRole === 'ADMIN' ? (
-              <AdminLayout>
-                <Routes>
-                  <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="restaurants" element={<ManageRestaurants />} />
-                  <Route path="all-orders" element={<GlobalOrders />} />
-                  <Route path="users" element={<ManageUsers />} />
-                  <Route path="settings" element={<GlobalSettings />} />
-                  <Route path="promotions" element={<Promotions />} />
-                  <Route path="menu/:restaurantId" element={<ManageMenu />} />
-                  <Route path="*" element={<Navigate to="dashboard" />} />
-                </Routes>
-              </AdminLayout>
-            ) : <Navigate to="/" />
-          } />
+            {/* Admin Routes wrapped in AdminLayout */}
+            <Route path="/admin/*" element={
+              isLoggedIn && userRole === 'ADMIN' ? (
+                <AdminLayout>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="restaurants" element={<ManageRestaurants />} />
+                      <Route path="all-orders" element={<GlobalOrders />} />
+                      <Route path="users" element={<ManageUsers />} />
+                      <Route path="settings" element={<GlobalSettings />} />
+                      <Route path="promotions" element={<Promotions />} />
+                      <Route path="menu/:restaurantId" element={<ManageMenu />} />
+                      <Route path="*" element={<Navigate to="dashboard" />} />
+                    </Routes>
+                  </Suspense>
+                </AdminLayout>
+              ) : <Navigate to="/" />
+            } />
 
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
       </main>
+
       {/* Footer aur ActiveOrderBar sirf non-admin aur non-auth pages pe render honge */}
       {!shouldHideGlobalComponents && <Footer />}
       {!shouldHideGlobalComponents && <ActiveOrderBar />}

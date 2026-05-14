@@ -48,8 +48,10 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
             log.info("SUCCESS: Plain text email sent to {}", to);
         } catch (Exception e) {
-            log.error("FAILURE: Failed to send plain email. Fallback to debug log.");
-            logToDebugFile(to, subject, body);
+            log.error("FAILURE: Failed to send plain email to {}. Error: {}. Cause: {}", 
+                to, e.getMessage(), e.getCause() != null ? e.getCause().getMessage() : "Unknown");
+            e.printStackTrace();
+            logToDebugFile(to, subject, body + "\n[ERROR: " + e.getMessage() + "]");
         }
     }
 
@@ -141,8 +143,16 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(mimeMessage);
             log.info("SUCCESS: HTML email sent to {}", to);
         } catch (Exception e) {
-            log.error("DIAGNOSTIC FAILURE (Sync): {}", e.getMessage());
-            throw new RuntimeException("SMTP ERROR: " + e.getMessage(), e);
+            log.error("DIAGNOSTIC FAILURE (Sync) for {}: {}. Cause: {}", 
+                to, e.getMessage(), e.getCause() != null ? e.getCause().getMessage() : "Unknown");
+            
+            // Log full stack trace for deep debugging
+            java.io.StringWriter sw = new java.io.StringWriter();
+            e.printStackTrace(new java.io.PrintWriter(sw));
+            log.error("Full SMTP Error Stack Trace:\n{}", sw.toString());
+            
+            logToDebugFile(to, subject, "[HTML FAILED: " + e.getMessage() + "]");
+            throw new RuntimeException("SMTP ERROR for " + to + ": " + e.getMessage(), e);
         }
     }
 

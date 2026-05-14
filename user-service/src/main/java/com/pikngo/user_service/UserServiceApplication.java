@@ -13,6 +13,18 @@ public class UserServiceApplication {
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceApplication.class);
 
+    @org.springframework.context.annotation.Bean
+    public org.springframework.boot.CommandLineRunner dropRoleConstraintRunner(org.springframework.jdbc.core.JdbcTemplate jdbcTemplate) {
+        return args -> {
+            try {
+                jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;");
+                log.info("Successfully dropped obsolete users_role_check constraint from database.");
+            } catch (Exception e) {
+                log.warn("Could not drop users_role_check constraint (might not exist): {}", e.getMessage());
+            }
+        };
+    }
+
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         dotenv.entries().forEach(entry -> {

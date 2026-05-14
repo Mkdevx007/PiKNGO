@@ -21,6 +21,8 @@ const OrdersPage = () => {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [orderToReview, setOrderToReview] = useState(null);
     const [isLive, setIsLive] = useState(false);
+    const [riderLocations, setRiderLocations] = useState({}); // { orderId: { lat, lng } }
+    const [stompClient, setStompClient] = useState(null);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -54,15 +56,16 @@ const OrdersPage = () => {
         // --- WebSocket Setup ---
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
         const wsUrl = baseUrl.replace('/api/v1', '') + '/ws-orders';
-        const stompClient = new Client({
+        const client = new Client({
             webSocketFactory: () => new SockJS(wsUrl),
             reconnectDelay: 5000,
-            debug: () => {}
+            debug: (str) => { console.log(str); }
         });
+        setStompClient(client);
 
-        stompClient.onConnect = () => {
+        client.onConnect = () => {
             setIsLive(true);
-            stompClient.subscribe('/topic/orders', (message) => {
+            client.subscribe('/topic/orders', (message) => {
                 const updatedOrder = JSON.parse(message.body);
                 const currentUserId = localStorage.getItem('userId');
 
@@ -84,21 +87,44 @@ const OrdersPage = () => {
             });
         };
 
-        stompClient.onStompError = (error) => {
+        client.onStompError = (error) => {
             console.error("WebSocket connection error:", error);
             setIsLive(false);
         };
 
-        stompClient.onWebSocketClose = () => {
+        client.onWebSocketClose = () => {
             setIsLive(false);
         };
 
-        stompClient.activate();
+        client.activate();
 
         return () => {
-            stompClient.deactivate();
+            client.deactivate();
         };
     }, []);
+
+    // Effect to subscribe to tracking when orders change or connection established
+    useEffect(() => {
+        if (!isLive || !stompClient || orders.length === 0) return;
+
+        const subscriptions = [];
+        orders.forEach(order => {
+            if (['PICKED_UP', 'OUT_FOR_DELIVERY'].includes(order.status)) {
+                const sub = stompClient.subscribe(`/topic/order-tracking/${order.id}`, (message) => {
+                    const update = JSON.parse(message.body);
+                    setRiderLocations(prev => ({
+                        ...prev,
+                        [update.orderId]: { latitude: update.latitude, longitude: update.longitude }
+                    }));
+                });
+                subscriptions.push(sub);
+            }
+        });
+
+        return () => {
+            subscriptions.forEach(s => s.unsubscribe());
+        };
+    }, [isLive, stompClient, orders]);
 
     const getStatusColor = (status) => {
         switch (status?.toUpperCase()) {
@@ -255,6 +281,7 @@ const OrdersPage = () => {
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
                 order={selectedOrder} 
+                riderLocation={selectedOrder ? riderLocations[selectedOrder.id] : null}
             />
 
             {isReviewModalOpen && (
