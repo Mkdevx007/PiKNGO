@@ -1,32 +1,34 @@
+/* ============================================
+   Active Order HUD — Top Sticky Notification Bar
+   ============================================ */
+
 .active-order-hud-container {
     position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2000;
-    width: 95%;
-    max-width: 600px;
+    top: 70px; /* Below navbar */
+    left: 0;
+    right: 0;
+    z-index: 1500;
+    width: 100%;
     pointer-events: none;
-    filter: drop-shadow(0 25px 60px rgba(0, 0, 0, 0.7));
+    filter: drop-shadow(0 8px 32px rgba(0, 0, 0, 0.5));
 }
 
 @media (max-width: 768px) {
     .active-order-hud-container {
-        bottom: calc(var(--mobile-nav-height) + 15px);
+        top: 60px;
     }
 }
 
 .active-order-hud {
-    background: rgba(2, 6, 23, 0.85);
+    background: rgba(2, 6, 23, 0.92);
     backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(249, 115, 22, 0.3);
-    border-radius: 28px;
-    padding: 1.5rem 2rem;
+    border-bottom: 2px solid rgba(249, 115, 22, 0.4);
+    padding: 0.8rem 2rem;
     position: relative;
     overflow: hidden;
     pointer-events: auto;
+    border-radius: 0;
 }
 
 .hud-telemetry-layer {
@@ -42,51 +44,57 @@
 .hud-telemetry-layer::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.4), transparent);
-    animation: HUD-scan 3s infinite linear;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(249, 115, 22, 0.4), transparent);
+    animation: HUD-scan-horizontal 3s infinite linear;
 }
 
-@keyframes HUD-scan {
-    0% { top: 0; }
-    100% { top: 100%; }
+@keyframes HUD-scan-horizontal {
+    0% { left: 0; }
+    100% { left: 100%; }
 }
 
 .hud-main-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2rem;
+    gap: 1.5rem;
     position: relative;
     z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .hud-status-node {
     display: flex;
     align-items: center;
-    gap: 1.2rem;
+    gap: 1rem;
+    flex-shrink: 0;
 }
 
 .pulse-icon-elite {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     background: rgba(249, 115, 22, 0.1);
-    border-radius: 16px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(249, 115, 22, 0.3);
     position: relative;
     color: var(--accent-orange);
+    flex-shrink: 0;
 }
 
 .pulse-dot {
     position: absolute;
     top: -2px;
     right: -2px;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     background: var(--accent-orange);
     border-radius: 50%;
     box-shadow: 0 0 10px var(--accent-orange);
@@ -105,7 +113,7 @@
 }
 
 .hud-acct {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     font-weight: 800;
     letter-spacing: 2px;
     opacity: 0.5;
@@ -113,7 +121,7 @@
 }
 
 .hud-status-report {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 900;
     margin: 0;
     letter-spacing: 0.5px;
@@ -129,11 +137,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.4rem;
+    min-width: 0;
 }
 
 .hud-progress-track {
-    height: 6px;
+    height: 4px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     overflow: hidden;
@@ -148,7 +157,7 @@
 }
 
 .hud-time-est {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 800;
     letter-spacing: 1px;
     opacity: 0.6;
@@ -159,31 +168,69 @@
 .hud-extraction-btn {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    padding: 0.8rem 1.6rem;
+    gap: 0.6rem;
+    padding: 0.55rem 1.2rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
-    border-radius: 16px;
+    border-radius: 12px;
     font-weight: 900;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     letter-spacing: 1.5px;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .hud-extraction-btn:hover {
     background: var(--accent-orange);
     color: black;
     border-color: var(--accent-orange);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(249, 115, 22, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+}
+
+/* Slide-down animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .active-order-hud { padding: 1rem 1.2rem; }
-    .hud-extraction-btn span { display: none; }
-    .hud-extraction-btn { padding: 0.8rem; border-radius: 50%; }
-    .hud-progress-module { display: none; }
+    .active-order-hud {
+        padding: 0.6rem 1rem;
+    }
+    .hud-extraction-btn span {
+        display: none;
+    }
+    .hud-extraction-btn {
+        padding: 0.6rem;
+        border-radius: 50%;
+    }
+    .hud-progress-module {
+        display: none;
+    }
+    .pulse-icon-elite {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+    }
+    .hud-acct {
+        font-size: 0.5rem;
+    }
+    .hud-status-report {
+        font-size: 0.72rem;
+    }
 }

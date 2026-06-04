@@ -1,0 +1,214 @@
+.drive-mode-container {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(20px);
+    padding: 20px;
+}
+
+.drive-mode-overlay {
+    width: 100%;
+    max-width: 600px;
+    height: 80vh;
+    border-radius: 40px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 60px 40px;
+    box-shadow: 
+        0 40px 100px rgba(0, 0, 0, 0.8),
+        inset 0 0 100px rgba(59, 130, 246, 0.05);
+}
+
+.drive-mode-header {
+    text-align: center;
+}
+
+.hud-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    color: #3b82f6;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    margin-bottom: 12px;
+}
+
+.safety-warning {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
+}
+
+.voice-visualizer {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mic-btn {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    z-index: 10;
+}
+
+.mic-btn.listening {
+    background: #ff6b00;
+    border-color: #ff6b00;
+    box-shadow: 0 0 40px rgba(255, 107, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mic-btn.processing {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+    animation: rotate-border 2s linear infinite;
+}
+
+.pulse-ring, .pulse-ring-outer {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid #ff6b00;
+    opacity: 0;
+}
+
+.pulse-ring.active {
+    animation: pulse-ring 2s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+}
+
+.pulse-ring-outer.active {
+    animation: pulse-ring 2s cubic-bezier(0.23, 1, 0.32, 1) infinite 1s;
+}
+
+@keyframes pulse-ring {
+    0% { width: 120px; height: 120px; opacity: 0.6; }
+    100% { width: 300px; height: 300px; opacity: 0; }
+}
+
+.transcript-display {
+    text-align: center;
+    min-height: 100px;
+}
+
+.status-text {
+    font-size: 18px;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.user-text {
+    font-size: 24px;
+    font-family: 'Playfair Display', serif;
+    color: #ff6b00;
+    font-style: italic;
+    opacity: 0.9;
+}
+
+.command-hints {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.command-hints span {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.hint-pill {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 8px 20px;
+    border-radius: 50px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+}
+
+.hud-decoration {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(59, 130, 246, 0.3);
+}
+
+.hud-decoration.left { left: 40px; }
+.hud-decoration.right { right: 40px; }
+
+.hud-line {
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(to right, currentColor, transparent);
+}
+
+.hud-decoration.right .hud-line {
+    background: linear-gradient(to left, currentColor, transparent);
+}
+
+.close-btn {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-btn:hover { color: white; }
+
+/* Interactive Cyberpunk Quick-Command Pills */
+.clickable-pill {
+    background: rgba(249, 115, 22, 0.06) !important;
+    border: 1px solid rgba(249, 115, 22, 0.25) !important;
+    color: #ff6b00 !important;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    outline: none;
+    box-shadow: 0 0 10px rgba(249, 115, 22, 0.05);
+}
+
+.clickable-pill:hover {
+    background: rgba(249, 115, 22, 0.2) !important;
+    border-color: #ff6b00 !important;
+    color: #fff !important;
+    box-shadow: 
+        0 0 20px rgba(249, 115, 22, 0.4),
+        inset 0 0 10px rgba(249, 115, 22, 0.2);
+    transform: translateY(-2px);
+}
+
+.clickable-pill:active {
+    transform: scale(0.96) translateY(0);
+    box-shadow: 0 0 5px rgba(249, 115, 22, 0.2);
+}
+

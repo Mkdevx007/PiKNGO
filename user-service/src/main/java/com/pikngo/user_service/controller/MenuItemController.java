@@ -31,19 +31,19 @@ public class MenuItemController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
     public ResponseEntity<ApiResponse<MenuItem>> addMenuItem(@PathVariable UUID restaurantId, @RequestBody MenuItem menuItem) {
         return ResponseEntity.ok(ApiResponse.success("Menu item added successfully", menuItemService.addMenuItem(restaurantId, menuItem)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
     public ResponseEntity<ApiResponse<MenuItem>> updateMenuItem(@PathVariable UUID id, @RequestBody MenuItem menuItem) {
         return ResponseEntity.ok(ApiResponse.success("Menu item updated successfully", menuItemService.updateMenuItem(id, menuItem)));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
     public ResponseEntity<ApiResponse<Void>> deleteMenuItem(@PathVariable UUID id) {
         menuItemService.deleteMenuItem(id);
         return ResponseEntity.ok(ApiResponse.success("Menu item deleted successfully", null));

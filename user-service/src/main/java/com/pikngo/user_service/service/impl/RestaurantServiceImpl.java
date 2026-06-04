@@ -108,6 +108,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         List<Restaurant> allActive = restaurantRepository.findByIsActiveTrueAndIsDeletedFalse();
         
         return allActive.stream()
+                .filter(res -> res.getLatitude() != null && res.getLongitude() != null)
                 .filter(res -> isAlongRoute(srcLat, srcLon, destLat, destLon, res.getLatitude(), res.getLongitude(), radius))
                 .map(res -> {
                     RestaurantResponseDTO dto = mapToDTO(res);

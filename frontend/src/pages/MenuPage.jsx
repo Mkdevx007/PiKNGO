@@ -287,16 +287,17 @@ const MenuPage = () => {
                         </div>
 
                         {/* Reviews Section */}
-                        <section className="reviews-section-elite mt-16 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                            <div className="section-header-elite mb-8">
-                                <div className="flex items-center gap-3">
-                                    <MessageSquare size={24} className="text-orange" />
-                                    <h2 className="elite-h-accent" style={{fontSize: '1.8rem'}}>COMMUNITY TRANSMISSIONS</h2>
+                        <section className="reviews-section-elite animate-fade-in-up" style={{ marginTop: '4rem', animationDelay: '0.4s' }}>
+                            <div className="section-header-elite" style={{ marginBottom: '2rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                                    <MessageSquare size={24} color="var(--accent-orange)" />
+                                    <h2 className="elite-h-accent" style={{fontSize: '1.8rem', margin: 0}}>COMMUNITY TRANSMISSIONS</h2>
                                 </div>
                                 <div className="header-actions">
-                                    <p className="opacity-60">Authentication scores and feedback shared by verified travelers.</p>
+                                    <p style={{ opacity: 0.6 }}>Authentication scores and feedback shared by verified travelers.</p>
                                     <button 
-                                        className="btn-primary-slim mt-4"
+                                        className="btn-primary"
+                                        style={{ marginTop: '1rem', padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}
                                         onClick={() => setIsReviewModalOpen(true)}
                                     >
                                         Record Transmission

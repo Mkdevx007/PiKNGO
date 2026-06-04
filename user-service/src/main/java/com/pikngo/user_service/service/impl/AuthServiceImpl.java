@@ -8,6 +8,7 @@ import com.pikngo.user_service.dto.OtpVerificationRequest;
 import com.pikngo.user_service.entity.OtpVerification;
 import com.pikngo.user_service.entity.User;
 import com.pikngo.user_service.entity.PasswordResetToken;
+import com.pikngo.user_service.exception.EmailDeliveryException;
 import com.pikngo.user_service.exception.InvalidOtpException;
 import com.pikngo.user_service.exception.UserNotFoundException;
 import com.pikngo.user_service.repository.OtpVerificationRepository;
@@ -213,17 +214,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void sendEmailOtp(String email) {
         String otpCode = generateAndSaveEmailOtp(email);
-        
-        // Dispatch email asynchronously to prevent UI freezing
-        java.util.concurrent.CompletableFuture.runAsync(() -> {
-            try {
-                emailService.sendOtpEmailSync(email, otpCode);
-            } catch (Exception e) {
-                log.error("Failed to send async login email: ", e);
-            }
-        });
+        try {
+            emailService.sendOtpEmailSync(email, otpCode);
+        } catch (Exception e) {
+            log.error("Failed to send login email OTP to {}: ", email, e);
+            throw new EmailDeliveryException(
+                    "Verification email could not be sent. On Render/Vercel set MAIL_USERNAME and MAIL_PASSWORD "
+                            + "(use a Gmail App Password). Also check Spam/Promotions.",
+                    e);
+        }
     }
 
     @Override

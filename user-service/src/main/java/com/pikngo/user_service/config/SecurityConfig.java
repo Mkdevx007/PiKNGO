@@ -13,7 +13,7 @@ import org.springframework.http.HttpMethod;
 
 /**
  * Developer 1: Security & Auth
- * TODO: Implement Spring Security configuration and secure endpoints.
+ * Spring Security configuration to secure API endpoints and handle JWT authentication.
  */
 @Configuration
 @EnableWebSecurity
@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 "/api/v1/payment/**",
                                 "/api/v1/users/make-me-admin/**",
                                 "/api/v1/users/test-email",
+                                "/api/v1/admin/ai/test-connectivity",
                                 "/ws-orders/**")
                         .permitAll()
                         .requestMatchers("/api/v1/restaurants/admin/**").authenticated()

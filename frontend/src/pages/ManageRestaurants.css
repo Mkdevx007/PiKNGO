@@ -157,13 +157,17 @@
 }
 
 .search-wrapper input {
-    background: none;
-    border: none;
-    outline: none;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
     width: 100%;
-    color: white;
+    color: white !important;
     font-size: 1rem;
     font-weight: 600;
+}
+
+.search-wrapper input::placeholder {
+    color: rgba(255, 255, 255, 0.2);
 }
 
 .filter-group {

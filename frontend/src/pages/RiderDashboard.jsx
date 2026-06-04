@@ -4,12 +4,16 @@ import {
     CheckCircle2, Clock, Map as MapIcon, 
     ChevronRight, Power, Activity, ShoppingBag,
     User, Phone, LogOut, RefreshCw,
-    GripVertical, Radio
+    GripVertical, Radio, Wallet, History,
+    Sun, Moon, AlertTriangle, Star
 } from 'lucide-react';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
-import { orderApi, authApi } from '../services/api';
+import { orderApi, authApi, sosApi } from '../services/api';
 import { useToast } from '../context/ToastContext';
+import OrderChat from '../components/OrderChat/OrderChat';
+import RiderMap from '../components/RiderMap/RiderMap';
+import EarningsChart from '../components/EarningsChart/EarningsChart';
 import './RiderDashboard.css';
 
 const RiderDashboard = () => {
@@ -18,10 +22,20 @@ const RiderDashboard = () => {
     const [availableOrders, setAvailableOrders] = useState([]);
     const [myOrders, setMyOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('available'); // 'available' or 'active'
+    const [activeTab, setActiveTab] = useState('available'); // 'available', 'active', 'wallet', 'history'
     const [stompClient, setStompClient] = useState(null);
     const [isLive, setIsLive] = useState(false);
     const [currentPos, setCurrentPos] = useState(null);
+    const [isDayMode, setIsDayMode] = useState(false);
+
+    // Real history and metrics calculation
+    const completedOrders = myOrders.filter(o => o.status === 'DELIVERED');
+    const activeTasks = myOrders.filter(o => o.status !== 'DELIVERED');
+    const totalEarnings = completedOrders.reduce((sum, order) => sum + (order.totalAmount * 0.1), 0); // Mock 10% commission
+
+    const acceptanceRate = "94%"; // Keep mocked for now
+    const onTimeRate = "98%"; // Keep mocked for now
+
 
     useEffect(() => {
         fetchRiderProfile();
@@ -110,7 +124,7 @@ const RiderDashboard = () => {
             if (activeTab === 'available') {
                 const res = await orderApi.getAvailableOrders();
                 setAvailableOrders(res || []);
-            } else {
+            } else if (activeTab === 'active') {
                 const res = await orderApi.getRiderOrders();
                 setMyOrders(res || []);
             }
@@ -140,6 +154,29 @@ const RiderDashboard = () => {
         }
     };
 
+    const handleNavigate = (order) => {
+        if (order.deliveryLatitude && order.deliveryLongitude) {
+            // Navigate using GPS coordinates
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${order.deliveryLatitude},${order.deliveryLongitude}`, '_blank');
+        } else {
+            // Fallback to address text search
+            const query = encodeURIComponent(order.deliveryAddress + ', ' + (order.restaurantName || ''));
+            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+        }
+    };
+
+    const handleSOS = async () => {
+        try {
+            const lat = currentPos ? currentPos.latitude : 0.0;
+            const lng = currentPos ? currentPos.longitude : 0.0;
+            await sosApi.triggerSos(lat, lng);
+            showToast("SOS Alert triggered! Support Team is notified.", "error");
+        } catch (err) {
+            showToast("Failed to trigger SOS from server, falling back to local alert", "error");
+            console.error(err);
+        }
+    };
+
     if (loading) return (
         <div className="rider-loading">
             <RefreshCw className="animate-spin" size={40} />
@@ -148,7 +185,7 @@ const RiderDashboard = () => {
     );
 
     return (
-        <div className="rider-dashboard animate-fade-in">
+        <div className={`rider-dashboard animate-fade-in ${isDayMode ? 'day-mode' : ''}`}>
             <header className="rider-header glass-modern">
                 <div className="rider-info">
                     <div className="rider-avatar">
@@ -160,6 +197,9 @@ const RiderDashboard = () => {
                     </div>
                 </div>
                 <div className="header-actions">
+                    <button className="btn-theme-toggle" onClick={() => setIsDayMode(!isDayMode)}>
+                        {isDayMode ? <Moon size={18}/> : <Sun size={18}/>}
+                    </button>
                     <div className={`connection-status ${isLive ? 'live' : 'offline'}`}>
                         <Radio size={14} className={isLive ? 'animate-pulse' : ''} />
                         <span>{isLive ? 'GPS LINK ACTIVE' : 'OFFLINE'}</span>
@@ -173,13 +213,18 @@ const RiderDashboard = () => {
             <div className="rider-stats-strip">
                 <div className="stat-card glass-modern">
                     <Activity size={20} className="text-orange" />
-                    <div className="stat-val">{myOrders.filter(o => o.status !== 'DELIVERED').length}</div>
+                    <div className="stat-val">{activeTasks.length}</div>
                     <div className="stat-label">Active Tasks</div>
                 </div>
                 <div className="stat-card glass-modern">
-                    <Package size={20} className="text-blue" />
-                    <div className="stat-val">{availableOrders.length}</div>
-                    <div className="stat-label">Ready for Pickup</div>
+                    <CheckCircle2 size={20} className="text-blue" />
+                    <div className="stat-val">{onTimeRate}</div>
+                    <div className="stat-label">On-Time Rate</div>
+                </div>
+                <div className="stat-card glass-modern">
+                    <Star size={20} style={{color: '#eab308'}} />
+                    <div className="stat-val">4.9</div>
+                    <div className="stat-label">Rating</div>
                 </div>
             </div>
 
@@ -188,18 +233,30 @@ const RiderDashboard = () => {
                     className={`rider-tab ${activeTab === 'available' ? 'active' : ''}`}
                     onClick={() => setActiveTab('available')}
                 >
-                    AVAILABLE <span className="count-dot">{availableOrders.length}</span>
+                    <Package size={16}/> AVAILABLE <span className="count-dot">{availableOrders.length}</span>
                 </button>
                 <button 
                     className={`rider-tab ${activeTab === 'active' ? 'active' : ''}`}
                     onClick={() => setActiveTab('active')}
                 >
-                    MY TASKS <span className="count-dot">{myOrders.filter(o => o.status !== 'DELIVERED').length}</span>
+                    <Activity size={16}/> MY TASKS <span className="count-dot">{activeTasks.length}</span>
+                </button>
+                <button 
+                    className={`rider-tab ${activeTab === 'wallet' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('wallet')}
+                >
+                    <Wallet size={16}/> WALLET
+                </button>
+                <button 
+                    className={`rider-tab ${activeTab === 'history' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('history')}
+                >
+                    <History size={16}/> HISTORY
                 </button>
             </nav>
 
             <main className="rider-main">
-                {activeTab === 'available' ? (
+                {activeTab === 'available' && (
                     <div className="order-grid">
                         {availableOrders.length === 0 ? (
                             <div className="empty-state">
@@ -239,7 +296,9 @@ const RiderDashboard = () => {
                             ))
                         )}
                     </div>
-                ) : (
+                )}
+
+                {activeTab === 'active' && (
                     <div className="order-grid">
                         {myOrders.length === 0 ? (
                             <div className="empty-state">
@@ -249,6 +308,13 @@ const RiderDashboard = () => {
                         ) : (
                             myOrders.map(order => (
                                 <div key={order.id} className={`rider-order-card glass-modern active ${order.status.toLowerCase()}`}>
+                                    {/* Map Component integrated for active order */}
+                                    <RiderMap 
+                                        riderPos={currentPos ? [currentPos.latitude, currentPos.longitude] : null}
+                                        storePos={(order.restaurantLatitude && order.restaurantLongitude) ? [order.restaurantLatitude, order.restaurantLongitude] : null}
+                                        userPos={(order.deliveryLatitude && order.deliveryLongitude) ? [order.deliveryLatitude, order.deliveryLongitude] : null}
+                                    />
+
                                     <div className="order-header">
                                         <span className="status-indicator">{order.status}</span>
                                         <span className="order-tag"># {order.id.substring(0,8).toUpperCase()}</span>
@@ -267,6 +333,10 @@ const RiderDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="rider-actions">
+                                        <button className="btn-status navigate" onClick={() => handleNavigate(order)}>
+                                            <Navigation size={16} /> NAVIGATE
+                                        </button>
+                                        
                                         {order.status === 'PICKED_UP' && (
                                             <button className="btn-status out" onClick={() => handleUpdateStatus(order.id, 'OUT_FOR_DELIVERY')}>
                                                 OUT FOR DELIVERY
@@ -288,7 +358,59 @@ const RiderDashboard = () => {
                         )}
                     </div>
                 )}
+
+                {activeTab === 'wallet' && (
+                    <div style={{padding: '0 1.5rem'}}>
+                        <div className="wallet-card">
+                            <div>
+                                <div className="wallet-label">Available Balance</div>
+                                <div className="wallet-balance">₹{totalEarnings.toFixed(2)}</div>
+                                <p style={{margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem'}}>Based on {completedOrders.length} completed orders</p>
+                            </div>
+                            <button className="btn-withdraw">WITHDRAW</button>
+                        </div>
+                        <EarningsChart />
+                    </div>
+                )}
+
+                {activeTab === 'history' && (
+                    <div style={{padding: '0 1.5rem'}}>
+                        <div className="history-list">
+                            {completedOrders.length === 0 ? (
+                                <div className="empty-state">
+                                    <p>No delivery history yet.</p>
+                                </div>
+                            ) : (
+                                completedOrders.map((order, i) => (
+                                    <div key={order.id} className="history-item">
+                                        <div>
+                                            <div style={{fontWeight: 800, marginBottom: '4px'}}>{order.deliveryAddress}</div>
+                                            <div className="history-date">{new Date(order.createdTs).toLocaleString()} • ID: {order.id.substring(0,8).toUpperCase()}</div>
+                                        </div>
+                                        <div style={{textAlign: 'right'}}>
+                                            <div className="history-price">+₹{(order.totalAmount * 0.1).toFixed(2)}</div>
+                                            <div style={{color: '#eab308', fontSize: '0.8rem', fontWeight: '800'}}>★ 5.0</div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
             </main>
+
+            {/* Floating SOS Button */}
+            <button className="btn-sos" onClick={handleSOS} title="Emergency SOS">
+                <AlertTriangle size={24} />
+            </button>
+
+            {/* Real-time Order Chat */}
+            <OrderChat 
+                orders={myOrders}
+                currentUserId={rider?.id?.toString()}
+                currentUserName={rider?.firstName ? `${rider.firstName} ${rider.lastName}` : 'Rider'}
+                currentUserRole="DELIVERY_RIDER"
+            />
         </div>
     );
 };

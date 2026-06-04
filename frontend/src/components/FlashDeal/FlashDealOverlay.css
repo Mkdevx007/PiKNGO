@@ -1,0 +1,162 @@
+.flash-deal-container {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    width: calc(100% - 40px);
+    max-width: 400px;
+}
+
+.flash-deal-card {
+    position: relative;
+    padding: 24px;
+    border-radius: 28px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(255, 107, 0, 0.4);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(255, 107, 0, 0.15);
+    overflow: hidden;
+}
+
+.flash-deal-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(255, 107, 0, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+    animation: rotate-glow 10s linear infinite;
+}
+
+@keyframes rotate-glow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.flash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.zap-badge {
+    background: linear-gradient(135deg, #ff6b00, #ff9d00);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+.timer-badge {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ff6b00;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255, 107, 0, 0.2);
+}
+
+.flash-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.flash-content p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.flash-content strong {
+    color: #ff6b00;
+}
+
+.flash-footer {
+    margin-top: 20px;
+}
+
+.btn-claim {
+    width: 100%;
+    background: linear-gradient(135deg, #ff6b00, #e65100);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);
+}
+
+.btn-claim:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(255, 107, 0, 0.3);
+}
+
+.progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.progress-fill {
+    height: 100%;
+    background: #ff6b00;
+    transition: width 1s linear;
+}
+
+/* Entrance Animation */
+.flash-deal-animate-slide-up {
+    animation: flash-deal-slide-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes flash-deal-slide-up {
+    0% { transform: translate(-50%, 100px); opacity: 0; }
+    100% { transform: translate(-50%, 0); opacity: 1; }
+}

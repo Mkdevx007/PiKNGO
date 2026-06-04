@@ -78,6 +78,39 @@
     align-items: center;
     gap: 0.5rem;
     border: 1px solid rgba(239, 68, 68, 0.15);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+}
+
+.status-orbit {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.elite-status-dot {
+    width: 6px;
+    height: 6px;
+    background: #ef4444;
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 0 8px #ef4444;
+}
+
+.orbit-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 50%;
+    animation: orbit 2s linear infinite;
+}
+
+@keyframes orbit {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
 }
 
 .pulse-dot {
@@ -111,6 +144,37 @@
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 24px;
     backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.card-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.scan-line {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to bottom, 
+        transparent, 
+        rgba(255, 107, 0, 0.05), 
+        transparent
+    );
+    animation: scan 4s linear infinite;
+}
+
+@keyframes scan {
+    0% { top: -100%; }
+    100% { top: 200%; }
 }
 
 .metric-card::after {
@@ -561,11 +625,3 @@
     to { transform: rotate(360deg); }
 }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-slide-up {
-    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-}

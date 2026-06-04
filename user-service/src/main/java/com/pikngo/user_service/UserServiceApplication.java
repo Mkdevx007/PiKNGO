@@ -28,10 +28,8 @@ public class UserServiceApplication {
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         dotenv.entries().forEach(entry -> {
-            if (System.getProperty(entry.getKey()) == null && System.getenv(entry.getKey()) == null) {
-                System.setProperty(entry.getKey(), entry.getValue());
-                log.debug("Loaded: {}", entry.getKey());
-            }
+            System.setProperty(entry.getKey(), entry.getValue());
+            log.info("Loaded from .env: {}", entry.getKey());
         });
 
         log.info("Starting UserServiceApplication...");

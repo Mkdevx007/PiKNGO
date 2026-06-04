@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { restaurantApi } from '../services/api';
+import { aiApi, restaurantApi } from '../services/api';
 import FoodCard from '../components/FoodCard/FoodCard';
 import MapView from '../components/MapView/MapView';
-import { MapPin, Navigation, Search, LayoutGrid, Compass, SearchX, Star } from 'lucide-react';
+import { MapPin, Navigation, Search, LayoutGrid, Compass, SearchX, Star, Brain, Sparkles, Zap } from 'lucide-react';
 import axios from 'axios';
 import { CardSkeleton } from '../components/Common/Skeleton';
-import { CITY_COORDS, reverseGeocode } from '../utils/geoUtils';
+import { useCart } from '../context/CartContext';
+import { CITY_COORDS, reverseGeocode, calculateDistance } from '../utils/geoUtils';
+import FlashDealOverlay from '../components/FlashDeal/FlashDealOverlay';
+import DriveModeOverlay from '../components/DriveMode/DriveModeOverlay';
+import { Mic, MicOff, Zap as ZapIcon } from 'lucide-react';
+import useWakeWord from '../hooks/useWakeWord';
 import './Dashboard.css';
 
 const Dashboard = () => {
+    const { addToCart } = useCart();
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [locationStatus, setLocationStatus] = useState('Checking location...');
@@ -24,12 +30,39 @@ const Dashboard = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
     const [isSimulating, setIsSimulating] = useState(false);
     const [simulatedLocation, setSimulatedLocation] = useState(null);
+    const [recommendations, setRecommendations] = useState([]);
+    const [recsLoading, setRecsLoading] = useState(false);
+    const [activeFlashDeal, setActiveFlashDeal] = useState(null);
+    const [shownFlashDeals, setShownFlashDeals] = useState(new Set());
+    const [showDriveMode, setShowDriveMode] = useState(false);
+    const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
+        return localStorage.getItem('wakeWordEnabled') === 'true';
+    });
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth <= 1024);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Keyboard shortcut: Ctrl+M to toggle Drive Mode
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'm') {
+                e.preventDefault();
+                setShowDriveMode(prev => !prev);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    // Voice wake word: say "Drive Mode" or "Hey PikNGo" to activate
+    useWakeWord({
+        onWake: () => setShowDriveMode(true),
+        isActive: showDriveMode,
+        enabled: isVoiceEnabled,
+    });
 
     const cities = Object.keys(CITY_COORDS).map(city => city.charAt(0).toUpperCase() + city.slice(1));
 
@@ -88,7 +121,11 @@ const Dashboard = () => {
                 setLocationStatus('Location access denied. Showing all restaurants.');
                 fetchAllRestaurants();
             },
-            { timeout: 5000, enableHighAccuracy: true }
+            { 
+                timeout: 3000, 
+                enableHighAccuracy: false, // Instant resolution via IP/Cell Towers rather than slow hardware GPS
+                maximumAge: 60000          // Use cached location from last 60s for immediate response
+            }
         );
     };
 
@@ -107,7 +144,20 @@ const Dashboard = () => {
         } else {
             fetchAllRestaurants();
         }
+        fetchRecommendations();
     }, []);
+
+    const fetchRecommendations = async () => {
+        setRecsLoading(true);
+        try {
+            const res = await aiApi.getRecommendations();
+            setRecommendations(Array.isArray(res) ? res : []);
+        } catch (err) {
+            console.error("Failed to fetch AI recommendations", err);
+        } finally {
+            setRecsLoading(false);
+        }
+    };
 
     const fetchAllRestaurants = async () => {
         setLoading(true);
@@ -146,6 +196,18 @@ const Dashboard = () => {
     };
 
     const getCoords = async (query) => {
+        if (!query) return null;
+        const normalizedQuery = query.toLowerCase().trim();
+        
+        // Instant memory cache lookup for popular cities
+        if (CITY_COORDS[normalizedQuery]) {
+            console.log(`[PikNGo Cache] Instant resolution for: ${normalizedQuery}`);
+            return { 
+                lat: CITY_COORDS[normalizedQuery].lat, 
+                lon: CITY_COORDS[normalizedQuery].lon 
+            };
+        }
+
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
             const data = response.data;
@@ -165,8 +227,11 @@ const Dashboard = () => {
 
         setLoading(true);
         try {
-            const srcCoord = await getCoords(searchQuery.source);
-            const destCoord = await getCoords(searchQuery.destination);
+            // Run Origin and Destination lookups in parallel (cuts Nominatim network wait time in half!)
+            const [srcCoord, destCoord] = await Promise.all([
+                getCoords(searchQuery.source),
+                getCoords(searchQuery.destination)
+            ]);
 
             if (!srcCoord || !destCoord) {
                 setLocationStatus("Could not find locations.");
@@ -244,6 +309,27 @@ const Dashboard = () => {
             setLocationStatus("Simulation terminated.");
         }
     };
+
+    // Geofencing Check for Flash Deals
+    useEffect(() => {
+        if (!coords && !simulatedLocation) return;
+        if (activeFlashDeal) return;
+
+        const currentPos = simulatedLocation || coords;
+        const lat = currentPos.latitude || currentPos.lat;
+        const lon = currentPos.longitude || currentPos.lon;
+
+        const nearbyFlashRest = restaurants.find(res => {
+            if (shownFlashDeals.has(res.id)) return false;
+            const dist = calculateDistance(lat, lon, res.latitude, res.longitude);
+            return dist !== null && dist <= 2.0; // 2km threshold
+        });
+
+        if (nearbyFlashRest) {
+            setActiveFlashDeal(nearbyFlashRest);
+            setShownFlashDeals(prev => new Set([...prev, nearbyFlashRest.id]));
+        }
+    }, [coords, simulatedLocation, restaurants, activeFlashDeal, shownFlashDeals]);
 
     return (
         <div className="dashboard-page auth-page-global-bg">
@@ -379,7 +465,67 @@ const Dashboard = () => {
                         <div className="hud-corner top-right"></div>
                         <div className="hud-corner bottom-left"></div>
                         <div className="hud-corner bottom-right"></div>
+                        
                         <div className="restaurant-grid-container scroll-pro">
+                            {/* Neural Recommendations Engine UI */}
+                            {recommendations.length > 0 && (
+                                <section className="neural-recs-section animate-slide-up">
+                                    <div className="neural-header">
+                                        <div className="ai-badge glass-modern">
+                                            <Brain size={14} className="brain-pulse" />
+                                            <span>NEURAL ENGINE ACTIVE</span>
+                                        </div>
+                                        <div className="neural-title">
+                                            <h3>Recommended <span className="gradient-text">For You</span></h3>
+                                            <p>AI-driven selections based on your highway journey</p>
+                                        </div>
+                                        <Sparkles size={20} className="sparkle-anim" />
+                                    </div>
+                                    <div className="recs-horizontal-scroll">
+                                        {recommendations.map((item, idx) => (
+                                            <div key={item.menuItemId} className="rec-card-mini glass-modern hover-glow">
+                                                <div className="rec-img-wrapper">
+                                                    <img src={item.imageUrl || fallbackImages[idx % fallbackImages.length]} alt={item.name} />
+                                                    <div className="rec-category-tag">{item.category}</div>
+                                                </div>
+                                                <div className="rec-info">
+                                                    <div className="rec-name-row">
+                                                        <h4>{item.name}</h4>
+                                                        <div className="rec-veg-indicator">
+                                                            <div className={`veg-dot ${item.isVeg ? 'veg' : 'non-veg'}`}></div>
+                                                        </div>
+                                                    </div>
+                                                    <p className="rec-res">{item.restaurantName}</p>
+                                                    <div className="rec-footer">
+                                                        <span className="rec-price">₹{item.price}</span>
+                                                        <div className="rec-rating">
+                                                            <Star size={10} fill="var(--accent-orange)" />
+                                                            <span>{item.rating}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    className="rec-add-btn"
+                                                    onClick={() => {
+                                                        const normalizedItem = {
+                                                            id: item.menuItemId || item.id,
+                                                            name: item.name,
+                                                            price: item.price,
+                                                            image: item.imageUrl,
+                                                            category: item.category
+                                                        };
+                                                        addToCart(normalizedItem, item.restaurantId || 'unknown', item.restaurantName);
+                                                    }}
+                                                >
+                                                    <Zap size={14} />
+                                                    <span>QUICK ADD</span>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
                             {routeFallbackWarning && !loading && (
                                 <div className="glass-modern" style={{margin: '0 0 1rem 0', padding: '1rem 1.5rem', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#fcd34d'}}>
                                     <MapPin size={20} />
@@ -467,6 +613,28 @@ const Dashboard = () => {
                         </>
                     )}
                 </button>
+            )}
+
+
+            {/* Overlays */}
+            {activeFlashDeal && (
+                <FlashDealOverlay 
+                    restaurant={activeFlashDeal}
+                    onClose={() => setActiveFlashDeal(null)}
+                    onAction={(id) => {
+                        console.log("Claiming deal for", id);
+                        setActiveFlashDeal(null);
+                        // Navigate to restaurant menu or show toast
+                    }}
+                />
+            )}
+
+            {showDriveMode && (
+                <DriveModeOverlay 
+                    onClose={() => setShowDriveMode(false)}
+                    onSearch={getLocation}
+                    orderStatus="Your order from Royal Dhaba is being prepared. ETA: 12 minutes."
+                />
             )}
         </div>
     );

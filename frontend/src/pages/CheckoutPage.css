@@ -17,6 +17,14 @@
     z-index: 10;
 }
 
+.header-title-centered {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+}
+
 .checkout-container {
     width: 92%;
     max-width: 1200px;
@@ -77,6 +85,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     top: -10px; /* Aligned with larger header h1 */
+    margin-left: auto; /* Push to the right since title is absolute */
 }
 
 .terminal-close-btn:hover {
@@ -113,8 +122,11 @@
 }
 
 .terminal-sidebar {
-    flex: 0 0 340px;
-    width: 340px;
+    flex: 0 0 380px;
+    width: 380px;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 .section-title-hud {
@@ -127,6 +139,26 @@
     letter-spacing: 2px;
     margin-bottom: 1.2rem;
 }
+
+.section-header-hud {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1.8rem;
+}
+
+.section-header-hud h3 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+
+.section-header-hud .accent-icon {
+    color: var(--accent-orange);
+}
+
 
 /* Terminal Toggle (Service Type) */
 .terminal-toggle-hub {
@@ -178,12 +210,12 @@
 }
 
 .vault-method-hub {
-    flex-direction: row;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
 }
 
-.address-node, .vault-node {
+.address-node {
     display: flex;
     align-items: center;
     gap: 1.5rem;
@@ -191,6 +223,27 @@
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.vault-node {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.vault-node:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;
 }
 
 .node-indicator {
@@ -204,6 +257,7 @@
 .address-node.active, .vault-node.active {
     border-color: var(--accent-orange);
     background: rgba(255, 126, 0, 0.05);
+    color: white;
 }
 
 .address-node.active .node-indicator::after {
@@ -248,31 +302,41 @@
 .tech-input-row { display: flex; gap: 1.5rem; }
 
 .tech-input-group label {
-    font-size: 0.65rem;
-    font-weight: 950;
-    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.68rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.5); /* Brighter contrast label */
     letter-spacing: 2px;
 }
 
 .tech-input-group input {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Sleek, visible border */
     padding: 1rem;
     border-radius: 14px;
     color: white;
     font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 1.5px;
     outline: none;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.tech-input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.45) !important; /* Premium, fully readable placeholder */
+    opacity: 1;
 }
 
 .tech-input-group input:focus {
     border-color: var(--accent-orange);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.25); /* Premium neon HUD glow */
 }
 
 /* Sidebar & Invoice HUD */
 .terminal-invoice {
-    padding: 2.2rem;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .invoice-header {
@@ -363,7 +427,7 @@
 
 .invoice-calculus {
     background: rgba(0, 0, 0, 0.2);
-    padding: 1.5rem;
+    padding: 1.2rem;
     border-radius: 20px;
     display: flex;
     flex-direction: column;
@@ -386,7 +450,99 @@
     margin: 0.5rem 0;
 }
 
+/* Promo Code Section */
+.promo-section {
+    margin: 1rem 0;
+}
+
+.promo-input-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.promo-input {
+    flex: 1;
+    min-width: 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.promo-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.promo-input:focus {
+    border-color: var(--accent-orange);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.promo-apply-btn {
+    padding: 0 1.2rem;
+    background: rgba(255, 107, 0, 0.1);
+    border: 1px solid rgba(255, 107, 0, 0.3);
+    border-radius: 12px;
+    color: var(--accent-orange);
+    font-weight: 900;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.promo-apply-btn:hover:not(:disabled) {
+    background: rgba(255, 107, 0, 0.2);
+    border-color: var(--accent-orange);
+    color: white;
+}
+
+.promo-apply-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.promo-applied-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    color: #10b981;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.promo-applied-badge button {
+    background: transparent;
+    border: none;
+    color: #10b981;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0 0.5rem;
+}
+
+.promo-applied-badge button:hover {
+    color: white;
+}
+
+.discount-row .discount-val {
+    color: #10b981;
+}
+
 .calc-row.grand-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
     color: white;
     font-size: 1.1rem;
     font-weight: 900;
@@ -790,34 +946,88 @@
     .qr-code-wrapper svg { width: 150px !important; height: 150px !important; }
 }
 
-.terminal-footer-exit {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    justify-content: center;
+/* UPI payment arena styles */
+.upi-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
 }
 
-.exit-btn-elite {
+.upi-app-btn {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.8rem;
-    padding: 0.8rem 1.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    color: rgba(255, 255, 255, 0.3);
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.9rem 0.5rem;
+    border-radius: 14px;
     font-weight: 800;
     font-size: 0.7rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.5px;
+}
+
+.upi-icon-img {
+    height: 32px;
+    width: 32px;
+    object-fit: contain;
+    border-radius: 8px;
+    filter: brightness(1) contrast(1.1);
     transition: all 0.3s ease;
+    background: rgba(255,255,255,0.08);
+    padding: 3px;
 }
 
-.exit-btn-elite:hover {
-    background: rgba(255, 255, 255, 0.08);
+.upi-app-btn:hover .upi-icon-img {
+    filter: brightness(1) contrast(1.2) drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+}
+
+.upi-app-btn.active .upi-icon-img {
+    filter: brightness(1) contrast(1.3) drop-shadow(0 0 8px rgba(255, 107, 0, 0.3));
+}
+
+.upi-app-btn:hover {
     color: white;
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
-.exit-btn-elite svg {
-    opacity: 0.5;
+.upi-app-btn.active {
+    color: white;
+    background: rgba(255, 107, 0, 0.1);
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 10px rgba(255, 107, 0, 0.2);
+}
+
+.upi-app-btn .app-icon {
+    font-size: 1rem;
+}
+
+.upi-suffix-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.2rem;
+}
+
+.suffix-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suffix-btn:hover {
+    color: var(--accent-orange);
+    border-color: rgba(255, 107, 0, 0.3);
+    background: rgba(255, 107, 0, 0.05);
 }

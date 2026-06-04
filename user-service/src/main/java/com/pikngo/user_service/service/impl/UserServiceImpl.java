@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
                 .city(request.getCity())
                 .state(request.getState())
                 .pincode(request.getPincode())
-                .role(User.UserRole.USER)
+                .role(request.getRole() != null ? request.getRole() : User.UserRole.USER)
                 .isActive(true)
                 .isDeleted(false)
                 .build();
@@ -82,8 +82,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public User getUserByPhoneNumber(String phoneNumber) {
-        return userRepository.findByPhoneNumber(phoneNumber)
+        User user = userRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new UserNotFoundException("User not found with phone: " + phoneNumber));
+        if (user.getAddresses() != null) {
+            user.getAddresses().size(); // Force initialization of lazy collection
+        }
+        return user;
     }
 
     @Override

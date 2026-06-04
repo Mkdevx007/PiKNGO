@@ -52,18 +52,21 @@ function AppContent({ isLoggedIn, userName, userRole, profileImageUrl, setProfil
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isPartnerRoute = location.pathname.startsWith('/partner');
+  const isRiderRoute = location.pathname.startsWith('/rider');
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
-  const shouldHideGlobalComponents = isAdminRoute || isPartnerRoute || isAuthRoute;
+  const shouldHideGlobalComponents = isAdminRoute || isPartnerRoute || isRiderRoute || isAuthRoute;
 
   return (
     <div className="app">
-      <Navbar
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-        userRole={userRole}
-        profileImageUrl={profileImageUrl}
-        onLogout={handleLogout}
-      />
+      {!shouldHideGlobalComponents && (
+        <Navbar
+          isLoggedIn={isLoggedIn}
+          userName={userName}
+          userRole={userRole}
+          profileImageUrl={profileImageUrl}
+          onLogout={handleLogout}
+        />
+      )}
       <main>
         <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -120,6 +123,8 @@ function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem('userRole') || 'USER');
   const [profileImageUrl, setProfileImageUrl] = useState('');
   const [authLoading, setAuthLoading] = useState(true);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   // Handle Login State
   const handleLogin = async (data) => {
@@ -194,8 +199,24 @@ function App() {
       }
     };
     checkAuth();
-     
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBanner(true);
+    });
   }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setShowInstallBanner(false);
+      }
+    }
+  };
 
   if (authLoading) {
     return (
@@ -223,6 +244,21 @@ function App() {
               handleLogin={handleLogin}
               handleLogout={handleLogout}
             />
+            {showInstallBanner && (
+              <div className="pwa-install-banner animate-slide-up">
+                <div className="pwa-info">
+                  <div className="pwa-icon-mini">P</div>
+                  <div className="pwa-text">
+                    <strong>Install PikNGo Premium</strong>
+                    <span>Add to home screen for elite experience</span>
+                  </div>
+                </div>
+                <div className="pwa-actions">
+                  <button onClick={() => setShowInstallBanner(false)} className="btn-close">Not Now</button>
+                  <button onClick={handleInstallClick} className="btn-install">Install</button>
+                </div>
+              </div>
+            )}
           </Router>
         </CartProvider>
       </ThemeProvider>

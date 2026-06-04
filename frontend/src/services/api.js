@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
-    baseURL: API_BASE_URL || 'http://localhost:8081/api/v1',
+    baseURL: API_BASE_URL || 'http://localhost:8080/api/v1',
     withCredentials: true,
 });
 
@@ -117,6 +117,15 @@ export const paymentApi = {
 
 export const promotionApi = {
     validate: (code) => api.get(`/promotions/validate?code=${code}`),
+};
+
+export const aiApi = {
+    chat: (prompt) => api.post('/admin/ai/chat', { prompt }),
+    getRecommendations: () => api.get('/ai/recommendations'),
+};
+
+export const sosApi = {
+    triggerSos: (latitude, longitude) => api.post('/sos/trigger', { latitude, longitude }),
 };
 
 export default api;

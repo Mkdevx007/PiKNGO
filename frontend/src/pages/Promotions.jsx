@@ -271,10 +271,10 @@ const Promotions = () => {
                                         </div>
                                         <div className="input-field">
                                             <label>Active Status</label>
-                                            <div className="checkbox-wrapper" style={{ marginTop: '0.8rem' }}>
+                                            <label className="checkbox-wrapper">
                                                 <input type="checkbox" name="active" checked={formData.active} onChange={handleInputChange} />
                                                 <span>Enable Campaign</span>
-                                            </div>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>

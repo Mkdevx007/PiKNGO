@@ -5,8 +5,8 @@ import './Reviews.css';
 const ReviewList = ({ reviews }) => {
     if (!reviews || reviews.length === 0) {
         return (
-            <div className="empty-reviews glass animate-fade-in">
-                <p className="rest-tag-elite text-center py-10 opacity-60">No community transmissions recorded yet. Be the first to share your experience.</p>
+            <div className="no-reviews-elite" style={{ padding: '2.5rem 0', textAlign: 'center' }}>
+                <p className="rest-tag-elite" style={{ opacity: 0.6 }}>No community transmissions recorded yet. Be the first to share your experience.</p>
             </div>
         );
     }

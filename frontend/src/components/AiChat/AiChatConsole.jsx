@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Brain, Send, X, Bot, User, Sparkles, Loader2, MessageSquare } from 'lucide-react';
-import { adminAnalyticsApi } from '../../services/api';
+import { aiApi } from '../../services/api';
 import './AiChatConsole.css';
 
 const AiChatConsole = () => {
@@ -29,24 +29,13 @@ const AiChatConsole = () => {
         setLoading(true);
 
         try {
-            // We'll add this to adminAnalyticsApi or create a new service
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1'}/admin/ai/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ prompt: userMessage }),
-            });
-            
-            const data = await response.json();
-            if (data.success) {
-                setMessages(prev => [...prev, { role: 'assistant', content: data.data }]);
-            } else {
-                setMessages(prev => [...prev, { role: 'assistant', content: "I encountered an error: " + data.message }]);
-            }
+            const data = await aiApi.chat(userMessage);
+            // Since our api.js interceptor returns response.data.data directly
+            setMessages(prev => [...prev, { role: 'assistant', content: data }]);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting to my neural network." }]);
+            console.error("AI Chat Error:", error);
+            const errorMessage = error.message || "I encountered an error connecting to my neural network.";
+            setMessages(prev => [...prev, { role: 'assistant', content: "Error: " + errorMessage }]);
         } finally {
             setLoading(false);
         }

@@ -23,13 +23,18 @@ public class OrderResponseDTO {
     private String riderName;
     private String promoCode;
     private java.math.BigDecimal discountAmount;
+    private Double restaurantLatitude;
+    private Double restaurantLongitude;
+    private Double deliveryLatitude;
+    private Double deliveryLongitude;
 
     public OrderResponseDTO() {}
 
     public OrderResponseDTO(UUID id, UUID userId, String userName, UUID restaurantId, String restaurantName,
                              BigDecimal totalAmount, String status, String deliveryAddress, String paymentMethod,
                              boolean isSelfPickup, LocalDateTime createdTs, List<OrderItemResponseDTO> items, Long pointsEarned,
-                             UUID riderId, String riderName, String promoCode, java.math.BigDecimal discountAmount) {
+                             UUID riderId, String riderName, String promoCode, java.math.BigDecimal discountAmount,
+                             Double restaurantLatitude, Double restaurantLongitude, Double deliveryLatitude, Double deliveryLongitude) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
@@ -47,6 +52,10 @@ public class OrderResponseDTO {
         this.riderName = riderName;
         this.promoCode = promoCode;
         this.discountAmount = discountAmount;
+        this.restaurantLatitude = restaurantLatitude;
+        this.restaurantLongitude = restaurantLongitude;
+        this.deliveryLatitude = deliveryLatitude;
+        this.deliveryLongitude = deliveryLongitude;
     }
 
     public static class OrderResponseDTOBuilder {
@@ -67,6 +76,10 @@ public class OrderResponseDTO {
         private String riderName;
         private String promoCode;
         private java.math.BigDecimal discountAmount;
+        private Double restaurantLatitude;
+        private Double restaurantLongitude;
+        private Double deliveryLatitude;
+        private Double deliveryLongitude;
 
         public OrderResponseDTOBuilder id(UUID id) { this.id = id; return this; }
         public OrderResponseDTOBuilder userId(UUID userId) { this.userId = userId; return this; }
@@ -85,9 +98,13 @@ public class OrderResponseDTO {
         public OrderResponseDTOBuilder riderName(String riderName) { this.riderName = riderName; return this; }
         public OrderResponseDTOBuilder promoCode(String promoCode) { this.promoCode = promoCode; return this; }
         public OrderResponseDTOBuilder discountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; return this; }
+        public OrderResponseDTOBuilder restaurantLatitude(Double lat) { this.restaurantLatitude = lat; return this; }
+        public OrderResponseDTOBuilder restaurantLongitude(Double lng) { this.restaurantLongitude = lng; return this; }
+        public OrderResponseDTOBuilder deliveryLatitude(Double lat) { this.deliveryLatitude = lat; return this; }
+        public OrderResponseDTOBuilder deliveryLongitude(Double lng) { this.deliveryLongitude = lng; return this; }
 
         public OrderResponseDTO build() {
-            return new OrderResponseDTO(id, userId, userName, restaurantId, restaurantName, totalAmount, status, deliveryAddress, paymentMethod, isSelfPickup, createdTs, items, pointsEarned, riderId, riderName, promoCode, discountAmount);
+            return new OrderResponseDTO(id, userId, userName, restaurantId, restaurantName, totalAmount, status, deliveryAddress, paymentMethod, isSelfPickup, createdTs, items, pointsEarned, riderId, riderName, promoCode, discountAmount, restaurantLatitude, restaurantLongitude, deliveryLatitude, deliveryLongitude);
         }
     }
 
@@ -178,4 +195,12 @@ public class OrderResponseDTO {
     public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
     public java.math.BigDecimal getDiscountAmount() { return discountAmount; }
     public void setDiscountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; }
+    public Double getRestaurantLatitude() { return restaurantLatitude; }
+    public void setRestaurantLatitude(Double restaurantLatitude) { this.restaurantLatitude = restaurantLatitude; }
+    public Double getRestaurantLongitude() { return restaurantLongitude; }
+    public void setRestaurantLongitude(Double restaurantLongitude) { this.restaurantLongitude = restaurantLongitude; }
+    public Double getDeliveryLatitude() { return deliveryLatitude; }
+    public void setDeliveryLatitude(Double deliveryLatitude) { this.deliveryLatitude = deliveryLatitude; }
+    public Double getDeliveryLongitude() { return deliveryLongitude; }
+    public void setDeliveryLongitude(Double deliveryLongitude) { this.deliveryLongitude = deliveryLongitude; }
 }

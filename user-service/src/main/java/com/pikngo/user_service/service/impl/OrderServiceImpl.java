@@ -218,18 +218,22 @@ public class OrderServiceImpl implements OrderService {
                    .userName(order.getUser().getFirstName() + " " + order.getUser().getLastName());
         }
 
+        builder.promoCode(order.getPromoCode())
+               .discountAmount(order.getDiscountAmount())
+               .deliveryLatitude(order.getDeliveryLatitude())
+               .deliveryLongitude(order.getDeliveryLongitude());
+
         if (order.getRestaurant() != null) {
             builder.restaurantId(order.getRestaurant().getId())
-                   .restaurantName(order.getRestaurant().getRestaurantName());
+                   .restaurantName(order.getRestaurant().getRestaurantName())
+                   .restaurantLatitude(order.getRestaurant().getLatitude())
+                   .restaurantLongitude(order.getRestaurant().getLongitude());
         }
 
         if (order.getRider() != null) {
             builder.riderId(order.getRider().getId())
                    .riderName(order.getRider().getFirstName() + " " + order.getRider().getLastName());
         }
-
-        builder.promoCode(order.getPromoCode())
-               .discountAmount(order.getDiscountAmount());
 
         if (order.getItems() != null) {
             builder.items(order.getItems().stream().map(item -> {

@@ -33,6 +33,9 @@ const CheckoutPage = () => {
     const [cardDetails, setCardDetails] = useState({
         number: '', expiry: '', cvc: '', name: ''
     });
+    const [upiApp, setUpiApp] = useState('');
+    const [upiId, setUpiId] = useState('');
+    const [isVerifyingUPI, setIsVerifyingUPI] = useState(false);
 
     useEffect(() => {
         fetchAddresses();
@@ -90,6 +93,24 @@ const CheckoutPage = () => {
 
         if (paymentMethod === 'cash') {
             await finalizeOrder();
+            return;
+        }
+
+        if (paymentMethod === 'upi') {
+            if (!upiId.trim()) {
+                showToast("Please enter your UPI ID.", "error");
+                return;
+            }
+            if (!upiId.includes('@')) {
+                showToast("Please enter a valid UPI ID (e.g. username@bank).", "error");
+                return;
+            }
+            
+            setIsVerifyingUPI(true);
+            setTimeout(() => {
+                setIsVerifyingUPI(false);
+                finalizeOrder();
+            }, 3500);
             return;
         }
 
@@ -180,6 +201,17 @@ const CheckoutPage = () => {
             setIsVerifyingQR(false);
             finalizeOrder();
         }, 3200);
+    };
+
+    const handleSuffixClick = (suffix) => {
+        let base = upiId.split('@')[0];
+        if (!base) base = 'username';
+        setUpiId(base + suffix);
+    };
+
+    const handleAppSuffix = (defaultSuffix) => {
+        let base = upiId.split('@')[0];
+        setUpiId((base || '') + defaultSuffix);
     };
 
     const finalizeOrder = async () => {
@@ -324,14 +356,22 @@ const CheckoutPage = () => {
                     </div>
                 </div>
             )}
+
+            {isVerifyingUPI && (
+                <div className="processing-terminal-overlay verifying-upi">
+                    <div className="terminal-loader-hub">
+                        <div className="loader-ring-elite pulse"></div>
+                        <div className="loader-info">
+                            <h3>UPI Request Sent</h3>
+                            <p>Please open your UPI app to approve the payment request for <strong>₹{finalTotal}</strong> sent to <strong>{upiId}</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             <div className="checkout-container">
                 <header className="terminal-header elite-entrance">
-                    <button className="terminal-back-btn glass-pill" onClick={() => navigate(-1)}>
-                        <ChevronLeft size={18} />
-                        <span>CANCEL</span>
-                    </button>
-                    <div className="h-group">
+                    <div className="h-group header-title-centered">
                         <h1>Terminal <span className="gradient-text">Checkout</span></h1>
                         <div className="security-status"><ShieldCheck size={14} /> 256-BIT ENCRYPTED</div>
                     </div>
@@ -477,6 +517,84 @@ const CheckoutPage = () => {
                                 </div>
                             )}
 
+                            {paymentMethod === 'upi' && (
+                                <div className="vault-input-arena upi-input-arena animate-fade-in">
+                                    <div className="upi-apps-grid">
+                                        <button 
+                                            className={`upi-app-btn glass-pill ${upiApp === 'gpay' ? 'active' : ''}`}
+                                            onClick={() => { setUpiApp('gpay'); handleAppSuffix('@okaxis'); }}
+                                            type="button"
+                                        >
+                                            <img 
+                                                src="/gpay.svg" 
+                                                alt="GPay Logo" 
+                                                className="upi-icon-img" 
+                                            />
+                                            <span>GPay</span>
+                                        </button>
+                                        <button 
+                                            className={`upi-app-btn glass-pill ${upiApp === 'phonepe' ? 'active' : ''}`}
+                                            onClick={() => { setUpiApp('phonepe'); handleAppSuffix('@ybl'); }}
+                                            type="button"
+                                        >
+                                            <img 
+                                                src="/phonepe.svg" 
+                                                alt="PhonePe Logo" 
+                                                className="upi-icon-img" 
+                                            />
+                                            <span>PhonePe</span>
+                                        </button>
+                                        <button 
+                                            className={`upi-app-btn glass-pill ${upiApp === 'paytm' ? 'active' : ''}`}
+                                            onClick={() => { setUpiApp('paytm'); handleAppSuffix('@paytm'); }}
+                                            type="button"
+                                        >
+                                            <img 
+                                                src="/paytm.svg" 
+                                                alt="Paytm Logo" 
+                                                className="upi-icon-img" 
+                                            />
+                                            <span>Paytm</span>
+                                        </button>
+                                        <button 
+                                            className={`upi-app-btn glass-pill ${upiApp === 'bhim' ? 'active' : ''}`}
+                                            onClick={() => { setUpiApp('bhim'); handleAppSuffix('@upi'); }}
+                                            type="button"
+                                        >
+                                            <img 
+                                                src="/bhim.svg" 
+                                                alt="BHIM Logo" 
+                                                className="upi-icon-img" 
+                                            />
+                                            <span>BHIM</span>
+                                        </button>
+                                    </div>
+
+                                    <div className="tech-input-group">
+                                        <label>ENTER UPI ID (VPA)</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="username@bank" 
+                                            value={upiId}
+                                            onChange={(e) => setUpiId(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="upi-suffix-suggestions">
+                                        {['@okaxis', '@ybl', '@paytm', '@apl', '@okicici'].map((suffix) => (
+                                            <button 
+                                                key={suffix}
+                                                className="suffix-btn glass-pill"
+                                                onClick={() => handleSuffixClick(suffix)}
+                                                type="button"
+                                            >
+                                                {suffix}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {paymentMethod === 'upi_qr' && (
                                 <div className="qr-terminal-arena animate-fade-in">
                                     <div className="qr-terminal-card glass-modern">
@@ -598,7 +716,7 @@ const CheckoutPage = () => {
 
                                 <div className="calc-divider"></div>
                                 <div className="calc-row grand-total">
-                                    <span>Total Transmission</span>
+                                    <span>Total</span>
                                     <span className="total-val">₹{finalTotal}</span>
                                 </div>
                             </div>
@@ -624,13 +742,6 @@ const CheckoutPage = () => {
                             <div className="terminal-trust-footer">
                                 <div className="trust-node"><ShieldCheck size={12} /> SECURE VAULT</div>
                                 <div className="trust-node"><ShieldCheck size={12} /> PCI COMPLIANT</div>
-                            </div>
-
-                            <div className="terminal-footer-exit">
-                                <button className="exit-btn-elite glass-pill" onClick={() => navigate('/')}>
-                                    <X size={14} />
-                                    <span>EXIT TERMINAL & RETURN</span>
-                                </button>
                             </div>
                         </section>
                     </aside>

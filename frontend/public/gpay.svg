@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <circle cx="24" cy="24" r="24" fill="#fff"/>
+  <text x="50%" y="34" font-size="13" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle" fill="#4285F4">G</text>
+  <text x="50%" y="34" font-size="13" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle" fill="none" stroke="#34A853" stroke-width="0"/>
+  <!-- Google Pay G logo simplified -->
+  <path d="M24 14c-5.52 0-10 4.48-10 10s4.48 10 10 10c5.52 0 10-4.48 10-10S29.52 14 24 14zm-1 15v-4h-4v-2h4v-4h2v4h4v2h-4v4h-2z" fill="none"/>
+  <!-- GPay colored G -->
+  <text x="24" y="30" font-size="18" font-family="'Google Sans',Arial,sans-serif" font-weight="700" text-anchor="middle" dominant-baseline="middle">
+    <tspan fill="#4285F4">G</tspan>
+  </text>
+  <text x="24" y="38" font-size="7" font-family="Arial,sans-serif" font-weight="bold" text-anchor="middle" fill="#3c4043">Pay</text>
+</svg>

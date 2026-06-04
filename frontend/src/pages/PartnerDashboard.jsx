@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { 
     LayoutDashboard, Utensils, ShoppingBag, 
     Settings, Star, Clock, MapPin, 
-    Power, Activity, TrendingUp, DollarSign
+    Power, Activity, TrendingUp, IndianRupee
 } from 'lucide-react';
 import { restaurantApi, orderApi } from '../services/api';
 import './PartnerDashboard.css';
 import { useToast } from '../context/ToastContext';
 import { CardSkeleton } from '../components/Common/Skeleton';
 import ManageMenu from './ManageMenu'; // Reuse for now
+import PartnerSettings from './PartnerSettings';
+import PartnerWallet from './PartnerWallet';
 
 const PartnerDashboard = () => {
     const { showToast } = useToast();
@@ -128,16 +130,32 @@ const PartnerDashboard = () => {
                     <button className={activeTab === 'orders' ? 'active' : ''} onClick={() => setActiveTab('orders')}>
                         <ShoppingBag size={18} /> Orders
                     </button>
+                    <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
+                        <Clock size={18} /> History
+                    </button>
+                    <button className={activeTab === 'wallet' ? 'active' : ''} onClick={() => setActiveTab('wallet')}>
+                        <IndianRupee size={18} /> Wallet
+                    </button>
                     <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>
                         <Settings size={18} /> Settings
                     </button>
                 </nav>
 
-                <div className="sidebar-footer">
+                <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div className={`status-switch ${restaurant.isActive ? 'online' : 'offline'}`} onClick={handleToggleStatus}>
                         <Power size={14} />
                         <span>{restaurant.isActive ? 'ONLINE' : 'OFFLINE'}</span>
                     </div>
+                    <button className="status-switch" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }} onClick={async () => {
+                        try { await import('../services/api').then(m => m.authApi.logout()); } catch (err) {}
+                        localStorage.removeItem('phone');
+                        localStorage.removeItem('userId');
+                        localStorage.removeItem('userRole');
+                        window.location.href = '/login';
+                    }}>
+                        <Power size={14} />
+                        <span>LOGOUT</span>
+                    </button>
                 </div>
             </aside>
 
@@ -164,7 +182,7 @@ const PartnerDashboard = () => {
                                 <div className="stat-label">Total Orders</div>
                             </div>
                             <div className="stat-card glass-modern">
-                                <DollarSign size={24} className="text-green" />
+                                <IndianRupee size={24} className="text-green" />
                                 <div className="stat-val">₹{stats.revenue.toLocaleString()}</div>
                                 <div className="stat-label">Total Revenue</div>
                             </div>
@@ -212,23 +230,25 @@ const PartnerDashboard = () => {
                     </div>
                 )}
 
-                {activeTab === 'orders' && (
-                    <div className="orders-section glass-modern animate-slide-up">
+                {activeTab === 'orders' && (() => {
+                    const activeOrders = orders.filter(o => !['DELIVERED', 'CANCELLED'].includes(o.status));
+                    return (
+                    <div className="menu-management-section animate-slide-up">
                         <div className="section-header">
-                            <h3>Active Transmissions</h3>
+                            <h2>Active Transmissions</h2>
                             <button className="btn-icon-glass sm" onClick={fetchOrders} disabled={ordersLoading}>
                                 <Activity size={14} className={ordersLoading ? 'animate-spin' : ''} />
                             </button>
                         </div>
                         
                         <div className="orders-list">
-                            {orders.length === 0 ? (
+                            {activeOrders.length === 0 ? (
                                 <div className="empty-orders">
                                     <ShoppingBag size={40} opacity={0.2} />
                                     <p>No active orders in the network.</p>
                                 </div>
                             ) : (
-                                orders.map(order => (
+                                activeOrders.map(order => (
                                     <div key={order.id} className="partner-order-card glass-modern">
                                         <div className="order-main">
                                             <div className="order-id">#{order.id.substring(0, 8).toUpperCase()}</div>
@@ -267,6 +287,60 @@ const PartnerDashboard = () => {
                             )}
                         </div>
                     </div>
+                    );
+                })}
+
+                {activeTab === 'history' && (() => {
+                    const pastOrders = orders.filter(o => ['DELIVERED', 'CANCELLED'].includes(o.status));
+                    return (
+                    <div className="menu-management-section animate-slide-up">
+                        <div className="section-header">
+                            <h2>Order History</h2>
+                            <button className="btn-icon-glass sm" onClick={fetchOrders} disabled={ordersLoading}>
+                                <Activity size={14} className={ordersLoading ? 'animate-spin' : ''} />
+                            </button>
+                        </div>
+                        
+                        <div className="orders-list">
+                            {pastOrders.length === 0 ? (
+                                <div className="empty-orders">
+                                    <Clock size={40} opacity={0.2} />
+                                    <p>No past orders found.</p>
+                                </div>
+                            ) : (
+                                pastOrders.map(order => (
+                                    <div key={order.id} className="partner-order-card glass-modern" style={{ opacity: 0.8 }}>
+                                        <div className="order-main">
+                                            <div className="order-id">#{order.id.substring(0, 8).toUpperCase()}</div>
+                                            <div className="order-user-name">{order.userName}</div>
+                                            <div className="order-items-list">
+                                                {order.items.map(item => (
+                                                    <span key={item.id} className="item-pill">
+                                                        {item.quantity}x {item.itemName}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="order-meta">
+                                            <div className="order-total">₹{order.totalAmount}</div>
+                                            <div className={`order-status-badge ${order.status.toLowerCase()}`}>
+                                                {order.status}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                    );
+                })}
+
+                {activeTab === 'wallet' && (
+                    <PartnerWallet stats={stats} />
+                )}
+
+                {activeTab === 'settings' && (
+                    <PartnerSettings restaurant={restaurant} onUpdate={setRestaurant} />
                 )}
             </main>
         </div>

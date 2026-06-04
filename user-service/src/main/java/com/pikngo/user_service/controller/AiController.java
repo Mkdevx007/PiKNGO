@@ -33,4 +33,13 @@ public class AiController {
         
         return ResponseEntity.ok(ApiResponse.success("AI Thinking Complete", response));
     }
+
+    @GetMapping("/test-connectivity")
+    public ResponseEntity<ApiResponse<String>> testConnectivity() {
+        String testResponse = aiService.getAiResponse("Hello, are you online?", new DashboardStatsDTO());
+        if (testResponse.contains("Error") || testResponse.contains("failed")) {
+            return ResponseEntity.status(500).body(ApiResponse.error("AI Connection Failed: " + testResponse));
+        }
+        return ResponseEntity.ok(ApiResponse.success("AI is Online!", testResponse));
+    }
 }

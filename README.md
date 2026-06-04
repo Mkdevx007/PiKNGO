@@ -130,9 +130,9 @@ npm run dev
 ---
 
 ## 🗺️ Roadmap
-- [ ] **Phase 5**: Full AI-based food recommendation engine.
-- [ ] **Phase 6**: Real-time order tracking with MapBox integration.
-- [ ] **Phase 7**: Mobile App (PWA) transformation.
+- [x] **Phase 5**: Full AI-based food recommendation engine.
+- [x] **Phase 6**: Real-time order tracking with MapBox integration.
+- [x] **Phase 7**: Mobile App (PWA) transformation.
 
 ---
 <div align="center">

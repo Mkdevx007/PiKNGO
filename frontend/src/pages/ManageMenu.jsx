@@ -137,7 +137,7 @@ const ManageMenu = ({ partnerMode = false, restaurantId: propRestaurantId }) => 
     };
 
     return (
-        <div className="manage-page manage-menu-page animate-fade-in">
+        <div className={`manage-page manage-menu-page ${partnerMode ? 'partner-mode' : ''} animate-fade-in`}>
             <div className="container">
                 <header className="manage-header elite-header-card">
                     <div className="header-left">

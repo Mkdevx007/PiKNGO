@@ -321,9 +321,9 @@ const GlobalOrders = () => {
                                         {selectedOrders.includes(order.id) && <Check size={12} />}
                                     </div>
                                 </div>
-                                <div className="flex flex-col">
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
                                     <span className="order-id-badge">#{order?.id?.substring(0, 8) || 'ORDER'}</span>
-                                    <span className="text-[10px] opacity-40 mt-1 font-bold">CLICK FOR INSIGHTS</span>
+                                    <span style={{ fontSize: '10px', opacity: 0.4, fontWeight: 'bold' }}>CLICK FOR INSIGHTS</span>
                                 </div>
                                 <select 
                                     className={`status-dropdown ${order?.status?.toLowerCase() || 'pending'}`}
@@ -341,8 +341,8 @@ const GlobalOrders = () => {
                             </div>
                             
                             <div className="order-card-body">
-                                <div className="participant-info">
-                                    <div className="participant">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <div className="participant-item">
                                         <Store size={14} /> 
                                         <strong>{order.restaurantName}</strong>
                                         <button 
@@ -355,28 +355,38 @@ const GlobalOrders = () => {
                                             View Menu
                                         </button>
                                     </div>
-                                    <div className="participant"><User size={14} /> <span>{order.userName}</span></div>
+                                    <div className="participant-item"><User size={14} /> <span>{order.userName}</span></div>
                                 </div>
 
-                                {order.deliveryAddress && !order.isSelfPickup && (
-                                    <div className="delivery-row">
-                                        <MapPin size={12} />
-                                        <p>{order.deliveryAddress}</p>
+                                {order.deliveryAddress && !order.isSelfPickup ? (
+                                    <div className="delivery-location-row" style={{ marginTop: '0.5rem' }}>
+                                        <MapPin size={14} style={{ color: '#ff6b00' }} />
+                                        <p style={{ margin: 0, lineHeight: '1.4' }}>{order.deliveryAddress}</p>
+                                    </div>
+                                ) : (
+                                    <div className="delivery-location-row" style={{ marginTop: '0.5rem' }}>
+                                        <MapPin size={14} style={{ color: '#ff6b00' }} />
+                                        <p style={{ margin: 0, fontWeight: 'bold' }}>SELF PICKUP</p>
                                     </div>
                                 )}
 
-                                <div className="order-items-mini">
+                                <div className="order-items-minimal">
                                     {order.items && order.items.map((it, idx) => (
-                                        <div key={idx} className="mini-item">
-                                            <span>{it.quantity}x {it.itemName}</span>
-                                            <span>₹{it.price * it.quantity}</span>
+                                        <div key={idx} className="order-item-line">
+                                            <span style={{ display: 'flex', gap: '8px' }}>
+                                                <span className="qty">{it.quantity}x</span>
+                                                <span className="name">{it.itemName}</span>
+                                            </span>
+                                            <span className="price">₹{it.price * it.quantity}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             <div className="order-card-footer">
-                                <span className="total-label">Total</span>
+                                <div>
+                                    <span className="total-label">Total</span>
+                                </div>
                                 <span className="total-value">₹{order.totalAmount}</span>
                             </div>
                         </div>

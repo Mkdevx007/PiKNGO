@@ -109,7 +109,9 @@ const AdminDashboard = () => {
                     )}
                 </div>
             </div>
-            <div className="card-decoration"></div>
+            <div className="card-decoration">
+                <div className="scan-line"></div>
+            </div>
         </div>
     );
 
@@ -127,8 +129,11 @@ const AdminDashboard = () => {
                         <span>{loading ? 'RE-SYNC' : 'REFRESH INTEL'}</span>
                     </button>
                     <div className="live-pill">
-                        <span className="elite-status-dot active"></span>
-                        LIVE STREAM
+                        <div className="status-orbit">
+                            <span className="elite-status-dot active"></span>
+                            <div className="orbit-ring"></div>
+                        </div>
+                        LIVE NETWORK SYNC
                     </div>
                 </div>
             </header>

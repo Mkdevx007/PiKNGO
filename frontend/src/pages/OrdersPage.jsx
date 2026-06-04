@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { orderApi } from '../services/api';
 import { ShoppingBag, Clock, CheckCircle, Package, Timer, MapPin, Activity, Utensils, Search } from 'lucide-react';
 import OrderDetailsModal from '../components/OrderDetailsModal/OrderDetailsModal';
+import OrderChat from '../components/OrderChat/OrderChat';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { authApi } from '../services/api';
@@ -286,7 +287,7 @@ const OrdersPage = () => {
 
             {isReviewModalOpen && (
                 <ReviewForm 
-                    restaurantId={orderToReview?.restaurantId} // Wait, I need to check if Order entity has restaurantId
+                    restaurantId={orderToReview?.restaurantId}
                     orderId={orderToReview?.id}
                     onClose={() => setIsReviewModalOpen(false)}
                     onSuccess={() => {
@@ -294,6 +295,14 @@ const OrdersPage = () => {
                     }}
                 />
             )}
+
+            {/* Real-time Order Chat */}
+            <OrderChat 
+                orders={orders}
+                currentUserId={localStorage.getItem('userId')}
+                currentUserName={localStorage.getItem('phone')}
+                currentUserRole="USER"
+            />
         </div>
     );
 };

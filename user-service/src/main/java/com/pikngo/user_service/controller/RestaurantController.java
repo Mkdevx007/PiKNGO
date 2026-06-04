@@ -50,8 +50,8 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Restaurant>> updateRestaurant(@PathVariable UUID id, @Valid @RequestBody RestaurantRequestDTO dto) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'RESTAURANT_OWNER')")
+    public ResponseEntity<ApiResponse<RestaurantResponseDTO>> updateRestaurant(@PathVariable UUID id, @Valid @RequestBody RestaurantRequestDTO dto) {
         log.info("REST request to update restaurant: {}", id);
         Restaurant restaurant = Restaurant.builder()
                 .restaurantName(dto.getRestaurantName())
@@ -65,7 +65,8 @@ public class RestaurantController {
                 .imageUrl(dto.getImageUrl())
                 .ownerId(dto.getOwnerId())
                 .build();
-        return ResponseEntity.ok(ApiResponse.success("Restaurant updated successfully", restaurantService.updateRestaurant(id, restaurant)));
+        Restaurant updated = restaurantService.updateRestaurant(id, restaurant);
+        return ResponseEntity.ok(ApiResponse.success("Restaurant updated successfully", restaurantService.getRestaurantById(updated.getId())));
     }
 
     @GetMapping("/nearby")
