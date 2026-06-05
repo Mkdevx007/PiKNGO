@@ -7,13 +7,11 @@ import './RiderMap.css';
 const geocodeAddress = async (query) => {
     if (!query || query === 'SELF_PICKUP') return null;
     try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
-            { headers: { 'Accept-Language': 'en' } }
-        );
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
+        const response = await fetch(`${baseUrl}/geocode?query=${encodeURIComponent(query)}`);
         const data = await response.json();
-        if (data?.length > 0) {
-            return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        if (data?.latitude != null && data?.longitude != null) {
+            return [parseFloat(data.latitude), parseFloat(data.longitude)];
         }
     } catch (err) {
         console.error('Geocoding failed:', err);

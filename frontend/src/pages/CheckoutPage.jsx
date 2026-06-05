@@ -217,15 +217,15 @@ const CheckoutPage = () => {
     const geocodeAddress = async (addressText) => {
         if (!addressText) return null;
         try {
+            const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api/v1';
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressText)}&limit=1`,
-                { headers: { 'Accept-Language': 'en' } }
+                `${baseUrl}/geocode?query=${encodeURIComponent(addressText)}`
             );
             const data = await response.json();
-            if (data?.length > 0) {
+            if (data?.latitude != null && data?.longitude != null) {
                 return {
-                    latitude: parseFloat(data[0].lat),
-                    longitude: parseFloat(data[0].lon)
+                    latitude: parseFloat(data.latitude),
+                    longitude: parseFloat(data.longitude)
                 };
             }
         } catch (err) {

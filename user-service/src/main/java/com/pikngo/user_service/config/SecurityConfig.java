@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/api/v1/users/forgot-password",
                                 "/api/v1/users/reset-password",
                                 "/api/v1/auth/google",
+                                "/api/v1/geocode",
                                 "/api/v1/users/all/**",
                                 "/api/v1/users/profile/photo/**",
                                 "/api/v1/payment/**",
