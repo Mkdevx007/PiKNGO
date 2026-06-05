@@ -214,14 +214,49 @@ const CheckoutPage = () => {
         setUpiId((base || '') + defaultSuffix);
     };
 
+    const geocodeAddress = async (addressText) => {
+        if (!addressText) return null;
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressText)}&limit=1`,
+                { headers: { 'Accept-Language': 'en' } }
+            );
+            const data = await response.json();
+            if (data?.length > 0) {
+                return {
+                    latitude: parseFloat(data[0].lat),
+                    longitude: parseFloat(data[0].lon)
+                };
+            }
+        } catch (err) {
+            console.error('Failed to geocode delivery address:', err);
+        }
+        return null;
+    };
+
     const finalizeOrder = async () => {
         setIsProcessing(true);
         const restaurantId = cartItems[0]?.restaurantId;
+        const deliveryAddressText = serviceType === 'pickup'
+            ? "SELF_PICKUP"
+            : `${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}`;
+
+        let deliveryLatitude = null;
+        let deliveryLongitude = null;
+        if (serviceType === 'delivery' && selectedAddress) {
+            const coords = await geocodeAddress(deliveryAddressText);
+            if (coords) {
+                deliveryLatitude = coords.latitude;
+                deliveryLongitude = coords.longitude;
+            }
+        }
         
         const orderRequest = {
             restaurantId: restaurantId,
             totalAmount: finalTotal,
-            deliveryAddress: serviceType === 'pickup' ? "SELF_PICKUP" : `${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}`,
+            deliveryAddress: deliveryAddressText,
+            deliveryLatitude,
+            deliveryLongitude,
             isSelfPickup: serviceType === 'pickup',
             paymentMethod: paymentMethod,
             promoCode: appliedPromo ? appliedPromo.code : null,

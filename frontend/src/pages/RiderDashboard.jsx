@@ -313,6 +313,8 @@ const RiderDashboard = () => {
                                         riderPos={currentPos ? [currentPos.latitude, currentPos.longitude] : null}
                                         storePos={(order.restaurantLatitude && order.restaurantLongitude) ? [order.restaurantLatitude, order.restaurantLongitude] : null}
                                         userPos={(order.deliveryLatitude && order.deliveryLongitude) ? [order.deliveryLatitude, order.deliveryLongitude] : null}
+                                        storeAddress={order.restaurantName}
+                                        userAddress={order.deliveryAddress}
                                     />
 
                                     <div className="order-header">

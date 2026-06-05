@@ -13,6 +13,8 @@ public class OrderRequestDTO {
     private java.math.BigDecimal discountAmount;
     private String paymentMethod;
     private List<OrderItemRequestDTO> items;
+    private Double deliveryLatitude;
+    private Double deliveryLongitude;
 
     public OrderRequestDTO() {}
 
@@ -46,4 +48,8 @@ public class OrderRequestDTO {
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     public List<OrderItemRequestDTO> getItems() { return items; }
     public void setItems(List<OrderItemRequestDTO> items) { this.items = items; }
+    public Double getDeliveryLatitude() { return deliveryLatitude; }
+    public void setDeliveryLatitude(Double deliveryLatitude) { this.deliveryLatitude = deliveryLatitude; }
+    public Double getDeliveryLongitude() { return deliveryLongitude; }
+    public void setDeliveryLongitude(Double deliveryLongitude) { this.deliveryLongitude = deliveryLongitude; }
 }

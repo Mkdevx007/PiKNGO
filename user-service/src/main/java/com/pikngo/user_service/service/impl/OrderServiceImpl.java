@@ -60,6 +60,8 @@ public class OrderServiceImpl implements OrderService {
                 .restaurant(restaurant)
                 .totalAmount(request.getTotalAmount())
                 .deliveryAddress(request.getDeliveryAddress())
+                .deliveryLatitude(request.getDeliveryLatitude())
+                .deliveryLongitude(request.getDeliveryLongitude())
                 .isSelfPickup(request.isSelfPickup())
                 .paymentMethod(request.getPaymentMethod())
                 .promoCode(request.getPromoCode())
